@@ -27,12 +27,13 @@ def get_google_sheets_data():
         st.write("Loaded columns:", df.columns.tolist())
         st.write("First few rows:", df.head())
 
-        # Select only columns 3-12 as mentioned by user
+        # Select only first 12 columns and name them appropriately
         if len(df.columns) >= 12:
-            df = df.iloc[:, 2:12]  # Python is 0-based, so 2:12 gives us columns 3-12
+            df = df.iloc[:, :12]  # Get first 12 columns
 
-            # Give meaningful names to columns based on chess data
+            # Give meaningful names to columns
             column_names = [
+                'Performance Rating', 'New Rating',  # First two columns
                 'Date', 'White', 'Black', 'Result', 
                 'WhiteElo', 'BlackElo', 'TimeControl',
                 'Opening', 'Moves', 'PGN'

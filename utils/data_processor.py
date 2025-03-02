@@ -14,7 +14,11 @@ def process_chess_data(df):
         df['Rating'] = df.apply(lambda row: row['WhiteElo'] if row['White'] == 'Me' else row['BlackElo'], axis=1)
         df['Rating'] = pd.to_numeric(df['Rating'], errors='coerce')
 
-        # Convert moves to numeric
+        # Process tournament ratings (keeping NaN values for between-tournament periods)
+        df['Performance Rating'] = pd.to_numeric(df['Performance Rating'], errors='coerce')
+        df['New Rating'] = pd.to_numeric(df['New Rating'], errors='coerce')
+
+        # Convert moves to numeric, handling potential format variations
         df['Moves'] = df['Moves'].str.extract('(\d+)').astype(float)
 
         # Map chess results to standard format
@@ -25,16 +29,11 @@ def process_chess_data(df):
         })
 
         # Keep only the columns we need for visualization
-        processed_df = df[['Date', 'Rating', 'Moves', 'Result', 'Opening']].copy()
-
-        # Debug information
-        #st.write("Processed data sample:", processed_df.head()) # Commented out as st is not defined in this context
-        #st.write("Processed columns:", processed_df.columns.tolist()) # Commented out as st is not defined in this context
+        processed_df = df[['Date', 'Rating', 'Moves', 'Result', 'Opening', 'Performance Rating', 'New Rating']].copy()
 
         return processed_df
 
     except Exception as e:
-        #st.error(f"Error in process_chess_data: {str(e)}") # Commented out as st is not defined in this context
         return None
 
 def calculate_statistics(df):
@@ -49,7 +48,8 @@ def calculate_statistics(df):
             'max_rating': 0,
             'min_rating': 0,
             'avg_moves': 0,
-            'win_rate': 0
+            'win_rate': 0,
+            'tournament_performance': 0
         }
 
     stats = {
@@ -60,7 +60,8 @@ def calculate_statistics(df):
         'avg_rating': df['Rating'].mean(),
         'max_rating': df['Rating'].max(),
         'min_rating': df['Rating'].min(),
-        'avg_moves': df['Moves'].mean()
+        'avg_moves': df['Moves'].mean(),
+        'tournament_performance': df['Performance Rating'].mean()  # Average tournament performance
     }
 
     # Calculate win rate
