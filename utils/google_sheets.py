@@ -23,6 +23,10 @@ def get_google_sheets_data():
             st.error('No data found in the Google Sheet')
             return None
 
+        # Debug: Print column names
+        st.write("Loaded columns:", df.columns.tolist())
+        st.write("First few rows:", df.head())
+
         return df
 
     except requests.exceptions.RequestException as e:
