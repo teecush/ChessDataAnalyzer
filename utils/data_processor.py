@@ -6,53 +6,36 @@ def process_chess_data(df):
     if df is None:
         return None
 
-    # Debug: Print column names
-    #st.write("Available columns:", df.columns.tolist()) # Commented out as st is not defined in this context
+    try:
+        # Convert date column
+        df['Date'] = pd.to_datetime(df['Date'])
 
-    # Convert date column (assuming it might be named differently)
-    date_column = next((col for col in df.columns if 'date' in col.lower()), None)
-    if date_column:
-        df[date_column] = pd.to_datetime(df[date_column])
-        # Rename to standardized column name
-        df = df.rename(columns={date_column: 'Date'})
-    else:
-        #st.error("Date column not found in the data") # Commented out as st is not defined in this context
-        return None
+        # Determine player's rating based on color
+        df['Rating'] = df.apply(lambda row: row['WhiteElo'] if row['White'] == 'Me' else row['BlackElo'], axis=1)
+        df['Rating'] = pd.to_numeric(df['Rating'], errors='coerce')
 
-    # Convert rating to numeric (handle potential column name variations)
-    rating_column = next((col for col in df.columns if 'rating' in col.lower() or 'elo' in col.lower()), None)
-    if rating_column:
-        df[rating_column] = pd.to_numeric(df[rating_column], errors='coerce')
-        df = df.rename(columns={rating_column: 'Rating'})
+        # Convert moves to numeric
+        df['Moves'] = df['Moves'].str.extract('(\d+)').astype(float)
 
-    # Calculate game duration in moves
-    moves_column = next((col for col in df.columns if 'move' in col.lower()), None)
-    if moves_column:
-        df[moves_column] = pd.to_numeric(df[moves_column], errors='coerce')
-        df = df.rename(columns={moves_column: 'Moves'})
-
-    # Map result values (handle potential variations)
-    result_column = next((col for col in df.columns if 'result' in col.lower()), None)
-    if result_column:
-        df[result_column] = df[result_column].map({
-            '1-0': 'Win', 
-            '0-1': 'Loss', 
-            '1/2-1/2': 'Draw',
-            'win': 'Win',
-            'loss': 'Loss',
-            'draw': 'Draw'
+        # Map chess results to standard format
+        df['Result'] = df['Result'].map({
+            '1-0': 'Win' if df['White'].eq('Me').any() else 'Loss',
+            '0-1': 'Loss' if df['White'].eq('Me').any() else 'Win',
+            '1/2-1/2': 'Draw'
         })
-        df = df.rename(columns={result_column: 'Result'})
 
-    # Keep only processed columns
-    required_columns = ['Date', 'Rating', 'Moves', 'Result']
-    missing_columns = [col for col in required_columns if col not in df.columns]
+        # Keep only the columns we need for visualization
+        processed_df = df[['Date', 'Rating', 'Moves', 'Result', 'Opening']].copy()
 
-    if missing_columns:
-        #st.error(f"Missing required columns: {', '.join(missing_columns)}") # Commented out as st is not defined in this context
+        # Debug information
+        #st.write("Processed data sample:", processed_df.head()) # Commented out as st is not defined in this context
+        #st.write("Processed columns:", processed_df.columns.tolist()) # Commented out as st is not defined in this context
+
+        return processed_df
+
+    except Exception as e:
+        #st.error(f"Error in process_chess_data: {str(e)}") # Commented out as st is not defined in this context
         return None
-
-    return df
 
 def calculate_statistics(df):
     """Calculate various chess statistics"""
@@ -87,8 +70,7 @@ def calculate_statistics(df):
 
 def get_opening_stats(df):
     """Calculate opening statistics"""
-    opening_column = next((col for col in df.columns if 'opening' in col.lower()), None)
-    if opening_column:
-        opening_stats = df[opening_column].value_counts().head(10)
+    if 'Opening' in df.columns:
+        opening_stats = df['Opening'].value_counts().head(10)
         return opening_stats
     return pd.Series()

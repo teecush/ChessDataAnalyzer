@@ -27,6 +27,22 @@ def get_google_sheets_data():
         st.write("Loaded columns:", df.columns.tolist())
         st.write("First few rows:", df.head())
 
+        # Select only columns 3-12 as mentioned by user
+        if len(df.columns) >= 12:
+            df = df.iloc[:, 2:12]  # Python is 0-based, so 2:12 gives us columns 3-12
+
+            # Give meaningful names to columns based on chess data
+            column_names = [
+                'Date', 'White', 'Black', 'Result', 
+                'WhiteElo', 'BlackElo', 'TimeControl',
+                'Opening', 'Moves', 'PGN'
+            ]
+            df.columns = column_names
+
+            # Debug: Print processed columns
+            st.write("Processed columns:", df.columns.tolist())
+            st.write("Processed first few rows:", df.head())
+
         return df
 
     except requests.exceptions.RequestException as e:
