@@ -3,14 +3,14 @@ import plotly.graph_objects as go
 
 def create_rating_progression(df):
     """Create rating progression chart"""
-    # Debug: Print column names and sample data
-    print("Available columns:", df.columns.tolist())
-    print("First few rows of data:", df.head())
+    # Filter out rows where New Rating is NaN for the chart
+    rating_df = df[df['New Rating'].notna()].copy()
 
-    fig = px.line(df, x='Date', y='New Rating',
+    fig = px.line(rating_df, x='Date', y='New Rating',
                   title='Rating Progression Over Time',
                   labels={'New Rating': 'ELO Rating', 'Date': 'Game Date'},
                   line_shape='spline')
+
     fig.update_layout(
         template='plotly_white',
         hovermode='x unified'

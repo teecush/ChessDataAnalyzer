@@ -28,11 +28,9 @@ def process_chess_data(df):
         df['#'] = pd.to_numeric(df['#'], errors='coerce')
         df['#'] = df['#'].fillna(0).astype(int) + 1  # Convert to int and add 1 to start from 1
 
-        # Process tournament ratings (keeping NaN values for between-tournament periods)
+        # Process numeric columns, keeping NaN values for missing data
         df['Performance Rating'] = pd.to_numeric(df['Performance Rating'], errors='coerce')
         df['New Rating'] = pd.to_numeric(df['New Rating'], errors='coerce')
-
-        # Process other numeric columns
         df['Game Rating'] = pd.to_numeric(df['Game Rating'], errors='coerce')
         df['Opponent ELO'] = pd.to_numeric(df['Opponent ELO'], errors='coerce')
         df['Accuracy %'] = pd.to_numeric(df['Accuracy %'], errors='coerce')
@@ -63,18 +61,18 @@ def calculate_statistics(df):
         return {
             'total_games': 0,
             'avg_rating': 0,
-            'max_rating': 0,
-            'min_rating': 0,
             'tournament_performance': 0
         }
 
     stats = {
         'total_games': len(df),
-        'avg_rating': df['New Rating'].mean(),
-        'max_rating': df['New Rating'].max(),
-        'min_rating': df['New Rating'].min(),
-        'tournament_performance': df['Performance Rating'].mean()  # Average tournament performance
+        'avg_rating': df['New Rating'].mean() if not df['New Rating'].isna().all() else 0,
+        'tournament_performance': df['Performance Rating'].mean() if not df['Performance Rating'].isna().all() else 0
     }
+
+    # Round numeric values
+    stats['avg_rating'] = round(stats['avg_rating'], 0)
+    stats['tournament_performance'] = round(stats['tournament_performance'], 0)
 
     return stats
 
