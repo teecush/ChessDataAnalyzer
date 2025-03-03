@@ -16,16 +16,16 @@ def get_google_sheets_data():
         response = requests.get(URL)
         response.raise_for_status()  # Raise an exception for bad status codes
 
-        # Convert to DataFrame using io.StringIO
-        df = pd.read_csv(io.StringIO(response.text))
+        # Read CSV with specific row settings
+        # Skip first 2 rows, use row 3 (index 2) as header, start data from row 4
+        df = pd.read_csv(io.StringIO(response.text), skiprows=2, header=0)
 
         if df.empty:
             st.error('No data found in the Google Sheet')
             return None
 
-        # Select and rename columns as specified
+        # Select columns 0-5 and 7-11 (skipping column 6)
         if len(df.columns) >= 12:
-            # Select columns 0-5 and 7-11 (skipping column 6)
             df = pd.concat([df.iloc[:, :6], df.iloc[:, 7:12]], axis=1)
 
             # Give meaningful names to columns
@@ -36,7 +36,6 @@ def get_google_sheets_data():
                 'Opening'  # Column 11
             ]
             df.columns = column_names
-
 
         return df
 
