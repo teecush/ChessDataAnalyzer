@@ -24,6 +24,10 @@ def process_chess_data(df):
             print("Sample date values:", df['Date'].head())
             return None
 
+        # Filter out rows without dates (future/unplayed games)
+        df = df[df['Date'].notna()].copy()
+        print(f"Games with valid dates: {len(df)}")
+
         # Convert game number to numeric, ensure it starts from 1
         df['#'] = pd.to_numeric(df['#'], errors='coerce')
         df['#'] = df['#'].fillna(0).astype(int) + 1  # Convert to int and add 1 to start from 1
