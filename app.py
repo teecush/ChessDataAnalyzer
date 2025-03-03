@@ -3,7 +3,8 @@ import pandas as pd
 from utils.google_sheets import get_google_sheets_data
 from utils.data_processor import process_chess_data, calculate_statistics
 from utils.ml_analysis import generate_performance_insights
-from components.charts import create_rating_progression
+from components.charts import (create_rating_progression, create_win_loss_pie,
+                             create_performance_charts)
 from components.filters import create_filters, apply_filters
 
 # Page configuration
@@ -63,13 +64,38 @@ def main():
         with col1:
             st.metric("Total Games", stats['total_games'])
         with col2:
-            st.metric("Average Rating", f"{stats['avg_rating']:.0f}")
+            st.metric("Current Rating", f"{stats['current_rating']:.0f}")
         with col3:
-            st.metric("Tournament Performance", f"{stats['tournament_performance']:.0f}")
+            st.metric("Win Percentage", f"{stats['win_percentage']:.1f}%")
 
-    # Create charts for games with ratings
-    st.subheader("Rating Progression")
-    st.plotly_chart(create_rating_progression(filtered_df), use_container_width=True)
+    # Create performance metric charts
+    st.subheader("Performance Metrics")
+    performance_charts = create_performance_charts(filtered_df)
+
+    # Display charts in tabs
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+        "Rating Progression", "Game Results", "Accuracy & ACL",
+        "Game Rating", "Performance Rating"
+    ])
+
+    with tab1:
+        st.plotly_chart(create_rating_progression(filtered_df), use_container_width=True)
+
+    with tab2:
+        st.plotly_chart(create_win_loss_pie(filtered_df), use_container_width=True)
+
+    with tab3:
+        col1, col2 = st.columns(2)
+        with col1:
+            st.plotly_chart(performance_charts['accuracy'], use_container_width=True)
+        with col2:
+            st.plotly_chart(performance_charts['acl'], use_container_width=True)
+
+    with tab4:
+        st.plotly_chart(performance_charts['game_rating'], use_container_width=True)
+
+    with tab5:
+        st.plotly_chart(performance_charts['performance_rating'], use_container_width=True)
 
     # ML-based Analysis Section
     st.subheader("AI Performance Analysis")

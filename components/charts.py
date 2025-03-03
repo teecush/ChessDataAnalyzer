@@ -17,16 +17,71 @@ def create_rating_progression(df):
     )
     return fig
 
-def create_win_loss_pie(stats):
+def create_win_loss_pie(df):
     """Create win/loss distribution pie chart"""
+    # Count results
+    result_counts = df['Result'].value_counts()
+    wins = result_counts.get('Win', 0)
+    losses = result_counts.get('Loss', 0)
+    draws = result_counts.get('Draw', 0)
+
     labels = ['Wins', 'Losses', 'Draws']
-    values = [stats['wins'], stats['losses'], stats['draws']]
+    values = [wins, losses, draws]
 
     fig = go.Figure(data=[go.Pie(labels=labels, values=values,
                                 hole=.3,
                                 marker_colors=['#4CAF50', '#f44336', '#2196F3'])])
     fig.update_layout(title='Game Results Distribution')
     return fig
+
+def create_metric_over_time(df, metric_col, title, y_label):
+    """Create bar chart for metrics over time"""
+    # Filter out rows where metric is NaN
+    metric_df = df[df[metric_col].notna()].copy()
+
+    fig = go.Figure(data=[
+        go.Bar(
+            x=metric_df['Date'],
+            y=metric_df[metric_col],
+            marker_color='#4CAF50'
+        )
+    ])
+
+    fig.update_layout(
+        title=title,
+        xaxis_title='Game Date',
+        yaxis_title=y_label,
+        template='plotly_white',
+        showlegend=False,
+        hovermode='x unified'
+    )
+    return fig
+
+def create_performance_charts(df):
+    """Create all performance metric charts"""
+    charts = {
+        'acl': create_metric_over_time(
+            df, 'Average Centipawn Loss (ACL)',
+            'Average Centipawn Loss Over Time',
+            'ACL'
+        ),
+        'accuracy': create_metric_over_time(
+            df, 'Accuracy %',
+            'Accuracy % Over Time',
+            'Accuracy %'
+        ),
+        'game_rating': create_metric_over_time(
+            df, 'Game Rating',
+            'Game Rating Over Time',
+            'Game ELO'
+        ),
+        'performance_rating': create_metric_over_time(
+            df, 'Performance Rating',
+            'Performance Rating Over Time',
+            'Performance Rating'
+        )
+    }
+    return charts
 
 def create_opening_bar(opening_stats):
     """Create opening statistics bar chart"""

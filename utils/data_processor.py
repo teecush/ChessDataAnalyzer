@@ -64,19 +64,27 @@ def calculate_statistics(df):
     if df is None:
         return {
             'total_games': 0,
-            'avg_rating': 0,
-            'tournament_performance': 0
+            'current_rating': 0,
+            'win_percentage': 0
         }
 
-    stats = {
-        'total_games': len(df),
-        'avg_rating': df['New Rating'].mean() if not df['New Rating'].isna().all() else 0,
-        'tournament_performance': df['Performance Rating'].mean() if not df['Performance Rating'].isna().all() else 0
-    }
+    total_games = len(df)
 
-    # Round numeric values
-    stats['avg_rating'] = round(stats['avg_rating'], 0)
-    stats['tournament_performance'] = round(stats['tournament_performance'], 0)
+    # Calculate current rating (most recent non-null rating)
+    current_rating = df.loc[df['New Rating'].notna(), 'New Rating'].iloc[-1] if not df['New Rating'].isna().all() else 0
+
+    # Calculate win percentage
+    if total_games > 0:
+        wins = len(df[df['Result'] == 'Win'])
+        win_percentage = (wins / total_games) * 100
+    else:
+        win_percentage = 0
+
+    stats = {
+        'total_games': total_games,
+        'current_rating': round(current_rating, 0),
+        'win_percentage': round(win_percentage, 1)
+    }
 
     return stats
 
