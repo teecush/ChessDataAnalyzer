@@ -3,9 +3,13 @@ import plotly.graph_objects as go
 
 def create_rating_progression(df):
     """Create rating progression chart"""
-    fig = px.line(df, x='Date', y='Rating',
+    # Debug: Print column names and sample data
+    print("Available columns:", df.columns.tolist())
+    print("First few rows of data:", df.head())
+
+    fig = px.line(df, x='Date', y='New Rating',
                   title='Rating Progression Over Time',
-                  labels={'Rating': 'ELO Rating', 'Date': 'Game Date'},
+                  labels={'New Rating': 'ELO Rating', 'Date': 'Game Date'},
                   line_shape='spline')
     fig.update_layout(
         template='plotly_white',
@@ -26,11 +30,21 @@ def create_win_loss_pie(stats):
 
 def create_opening_bar(opening_stats):
     """Create opening statistics bar chart"""
-    fig = px.bar(x=opening_stats.index, y=opening_stats.values,
-                 title='Most Played Openings',
-                 labels={'x': 'Opening', 'y': 'Number of Games'})
-    fig.update_layout(
-        xaxis_tickangle=-45,
-        template='plotly_white'
-    )
-    return fig
+    if not opening_stats.empty:
+        fig = go.Figure(data=[
+            go.Bar(
+                x=opening_stats.index,
+                y=opening_stats.values,
+                marker_color='#4CAF50'
+            )
+        ])
+        fig.update_layout(
+            title='Most Played Openings',
+            xaxis_tickangle=-45,
+            template='plotly_white',
+            showlegend=False
+        )
+        return fig
+    else:
+        # Return empty figure if no opening stats
+        return go.Figure()
