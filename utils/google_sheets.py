@@ -32,14 +32,16 @@ def get_google_sheets_data():
         st.write("Raw columns:", df.columns.tolist())
         st.write("First few rows before processing:", df.head())
 
-        # Select only columns we need and rename them
-        if len(df.columns) >= 4: #only need 4 columns
-            df = df.iloc[:, :4] #select the first 4 columns
+        # Select and rename columns as specified
+        if len(df.columns) >= 12:
+            # Keep first 12 columns
+            df = df.iloc[:, :12]
 
             # Give meaningful names to columns
             column_names = [
-                'Performance Rating', 'New Rating', '#',  # First three columns
-                'Date' # Column 3
+                'Performance Rating', 'New Rating', '#', 'Date',  # First four columns
+                'White', 'Black', 'Result', 'Event',  # Columns 4-7
+                'WhiteElo', 'BlackElo', 'TimeControl', 'Opening'  # Columns 8-11
             ]
             df.columns = column_names
 
