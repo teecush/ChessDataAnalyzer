@@ -10,7 +10,8 @@ def get_google_sheets_data():
     try:
         # Google Sheets published to the web URL format
         SHEET_ID = "1Z1zFDzVF0_zxEuH3AwBNy8or2SYmpulRnKn2OYvSo5Q"
-        URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv"
+        # Use Query Language to get all data
+        URL = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&gid=0"
 
         # Fetch the CSV data
         response = requests.get(URL)
@@ -33,6 +34,12 @@ def get_google_sheets_data():
             # Keep first 12 columns
             df = df.iloc[:, :12]
 
+            # Skip the first row (row 0) which contains duplicate titles
+            df = df.iloc[1:]
+
+            # Reset index after dropping the row
+            df = df.reset_index(drop=True)
+
             # Give meaningful names to columns exactly as provided
             column_names = [
                 'Performance Rating', 'New Rating', '#', 'Date',  # First four columns
@@ -45,6 +52,7 @@ def get_google_sheets_data():
             st.write("Processed data shape:", df.shape)
             st.write("Processed columns:", df.columns.tolist())
             st.write("First few rows of processed data:", df.head())
+            st.write("Total number of rows after processing:", len(df))
 
         return df
 

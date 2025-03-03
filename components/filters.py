@@ -30,4 +30,4 @@ def apply_filters(df, filters):
         (df['Date'].dt.date <= filters['date_range'][1]) &
         (df['New Rating'].between(filters['rating_range'][0], filters['rating_range'][1]))
     )
-    return df[mask]
+    return df[mask].copy()  # Return a copy to avoid SettingWithCopyWarning

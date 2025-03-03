@@ -7,16 +7,19 @@ def process_chess_data(df):
         return None
 
     try:
+        # Debug starting point
+        print("Starting data processing, initial shape:", df.shape)
+
         # Convert date column
         df['Date'] = pd.to_datetime(df['Date'])
-
-        # Process tournament ratings (keeping NaN values for between-tournament periods)
-        df['Performance Rating'] = pd.to_numeric(df['Performance Rating'], errors='coerce')
-        df['New Rating'] = pd.to_numeric(df['New Rating'], errors='coerce')
 
         # Convert game number to numeric, ensure it starts from 1
         df['#'] = pd.to_numeric(df['#'], errors='coerce')
         df['#'] = df['#'].fillna(0).astype(int) + 1  # Convert to int and add 1 to start from 1
+
+        # Process tournament ratings (keeping NaN values for between-tournament periods)
+        df['Performance Rating'] = pd.to_numeric(df['Performance Rating'], errors='coerce')
+        df['New Rating'] = pd.to_numeric(df['New Rating'], errors='coerce')
 
         # Process other numeric columns
         df['Game Rating'] = pd.to_numeric(df['Game Rating'], errors='coerce')
@@ -26,8 +29,8 @@ def process_chess_data(df):
 
         # Keep only the columns we need for visualization
         processed_df = df[['Date', '#', 'Performance Rating', 'New Rating', 
-                          'Side', 'Result', 'Game Rating', 'Opponent ELO',
-                          'Accuracy %', 'Average Centipawn Loss (ACL)']].copy()
+                          'Side', 'Result', 'sparkline data', 'Average Centipawn Loss (ACL)',
+                          'Accuracy %', 'Game Rating', 'Opponent Name', 'Opponent ELO']].copy()
 
         # Debug information
         print("Processed data shape:", processed_df.shape)
