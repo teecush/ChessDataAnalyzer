@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from utils.google_sheets import get_google_sheets_data
 from utils.data_processor import process_chess_data, calculate_statistics
+from utils.ml_analysis import generate_performance_insights
 from components.charts import create_rating_progression
 from components.filters import create_filters, apply_filters
 
@@ -69,6 +70,22 @@ def main():
     # Create charts for games with ratings
     st.subheader("Rating Progression")
     st.plotly_chart(create_rating_progression(filtered_df), use_container_width=True)
+
+    # ML-based Analysis Section
+    st.subheader("AI Performance Analysis")
+    if len(filtered_df) >= 5:  # Only show ML analysis if we have enough games
+        with st.spinner("Generating AI insights..."):
+            insights = generate_performance_insights(filtered_df)
+
+            # Display text insights
+            for insight in insights['text_insights']:
+                st.info(insight)
+
+            # Display performance clusters
+            st.write("Performance Clusters Analysis")
+            st.dataframe(insights['performance_clusters'], use_container_width=True)
+    else:
+        st.warning("Need at least 5 games for AI analysis")
 
     # Display raw data table with pagination
     st.subheader("Game History")
