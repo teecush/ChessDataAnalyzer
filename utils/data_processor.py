@@ -17,20 +17,16 @@ def process_chess_data(df):
         # Convert game number to numeric
         df['#'] = pd.to_numeric(df['#'], errors='coerce')
 
-        # Process ELO ratings
-        df['WhiteElo'] = pd.to_numeric(df['WhiteElo'], errors='coerce')
-        df['BlackElo'] = pd.to_numeric(df['BlackElo'], errors='coerce')
-
-        # Determine player's rating based on color
-        df['Rating'] = df.apply(
-            lambda row: row['WhiteElo'] if row['White'] == 'Me' else row['BlackElo'],
-            axis=1
-        )
+        # Process other numeric columns
+        df['Game Rating'] = pd.to_numeric(df['Game Rating'], errors='coerce')
+        df['Opponent ELO'] = pd.to_numeric(df['Opponent ELO'], errors='coerce')
+        df['Accuracy %'] = pd.to_numeric(df['Accuracy %'], errors='coerce')
+        df['Average Centipawn Loss (ACL)'] = pd.to_numeric(df['Average Centipawn Loss (ACL)'], errors='coerce')
 
         # Keep only the columns we need for visualization
         processed_df = df[['Date', '#', 'Performance Rating', 'New Rating', 
-                          'White', 'Black', 'Result', 'Event',
-                          'WhiteElo', 'BlackElo', 'TimeControl', 'Opening']].copy()
+                          'Side', 'Result', 'Game Rating', 'Opponent ELO',
+                          'Accuracy %', 'Average Centipawn Loss (ACL)']].copy()
 
         # Debug information
         print("Processed data shape:", processed_df.shape)
@@ -65,7 +61,5 @@ def calculate_statistics(df):
     return stats
 
 def get_opening_stats(df):
-    """Calculate opening statistics"""
-    if 'Opening' in df.columns:
-        return df['Opening'].value_counts().head(10)
+    """No longer used - returning empty series"""
     return pd.Series()

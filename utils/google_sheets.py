@@ -40,8 +40,8 @@ def get_google_sheets_data():
             # Give meaningful names to columns exactly as provided
             column_names = [
                 'Performance Rating', 'New Rating', '#', 'Date',  # First four columns (unchanged)
-                'White', 'Black', 'Result', 'Event',  # User-specified columns 4-7
-                'WhiteElo', 'BlackElo', 'TimeControl', 'Opening'  # User-specified columns 8-11
+                'Side', 'Result', 'sparkline data', 'Average Centipawn Loss (ACL)',  # User-specified columns 4-7
+                'Accuracy %', 'Game Rating', 'Opponent Name', 'Opponent ELO'  # User-specified columns 8-11
             ]
             df.columns = column_names
 
