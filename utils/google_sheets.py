@@ -16,9 +16,12 @@ def get_google_sheets_data():
         response = requests.get(URL)
         response.raise_for_status()  # Raise an exception for bad status codes
 
+        # Debug: Print raw response
+        st.write("Raw response received")
+
         # Read CSV with specific row settings
-        # Skip first 2 rows, use row 3 (index 2) as header, start data from row 4
-        df = pd.read_csv(io.StringIO(response.text), skiprows=2, header=2)
+        # Skip first row which is hidden, row 2 shows averages, row 3 has titles
+        df = pd.read_csv(io.StringIO(response.text), skiprows=[0, 1], header=0)
 
         if df.empty:
             st.error('No data found in the Google Sheet')
@@ -26,10 +29,12 @@ def get_google_sheets_data():
 
         # Debug: Print raw data information
         st.write("Raw data shape:", df.shape)
-        st.write("First few rows:", df.head())
+        st.write("Raw columns:", df.columns.tolist())
+        st.write("First few rows before processing:", df.head())
 
-        # Select columns 0-5 and 7-11 (skipping column 6)
+        # Select only columns we need and rename them
         if len(df.columns) >= 12:
+            # Keep columns 0-5 and 7-11 (skipping column 6)
             df = pd.concat([df.iloc[:, :6], df.iloc[:, 7:12]], axis=1)
 
             # Give meaningful names to columns
@@ -41,9 +46,9 @@ def get_google_sheets_data():
             ]
             df.columns = column_names
 
-            # Debug: Print processed columns
+            # Debug: Print processed data
             st.write("Processed columns:", df.columns.tolist())
-            st.write("Processed first few rows:", df.head())
+            st.write("First few rows of processed data:", df.head())
 
         return df
 

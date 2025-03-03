@@ -17,23 +17,42 @@ def process_chess_data(df):
         # Convert game number to numeric
         df['#'] = pd.to_numeric(df['#'], errors='coerce')
 
-        # Determine player's rating based on color
-        df['Rating'] = df.apply(lambda row: row['WhiteElo'] if row['White'] == 'Me' else row['BlackElo'], axis=1)
-        df['Rating'] = pd.to_numeric(df['Rating'], errors='coerce')
+        # Process WhiteElo and BlackElo
+        df['WhiteElo'] = pd.to_numeric(df['WhiteElo'], errors='coerce')
+        df['BlackElo'] = pd.to_numeric(df['BlackElo'], errors='coerce')
 
-        # Map chess results to standard format
-        df['Result'] = df['Result'].map({
-            '1-0': 'Win' if df['White'].eq('Me').any() else 'Loss',
-            '0-1': 'Loss' if df['White'].eq('Me').any() else 'Win',
-            '1/2-1/2': 'Draw'
-        })
+        # Create Result mapping
+        result_mapping = {
+            '1-0': lambda row: 'Win' if row['White'] == 'Me' else 'Loss',
+            '0-1': lambda row: 'Loss' if row['White'] == 'Me' else 'Win',
+            '1/2-1/2': lambda row: 'Draw'
+        }
+
+        # Map results based on player color
+        df['Result'] = df.apply(
+            lambda row: result_mapping.get(row['Result'], lambda x: 'Unknown')(row),
+            axis=1
+        )
+
+        # Determine player's rating based on color
+        df['Rating'] = df.apply(
+            lambda row: row['WhiteElo'] if row['White'] == 'Me' else row['BlackElo'],
+            axis=1
+        )
 
         # Keep only the columns we need for visualization
         processed_df = df[['Date', 'Rating', '#', 'Result', 'Opening', 'Performance Rating', 'New Rating']].copy()
 
+        # Debug information
+        print("Processed data shape:", processed_df.shape)
+        print("Sample of processed data:", processed_df.head())
+        print("Unique results:", processed_df['Result'].unique())
+        print("Rating range:", processed_df['Rating'].min(), "-", processed_df['Rating'].max())
+
         return processed_df
 
     except Exception as e:
+        print(f"Error in process_chess_data: {str(e)}")
         return None
 
 def calculate_statistics(df):
