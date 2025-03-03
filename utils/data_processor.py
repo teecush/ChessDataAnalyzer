@@ -10,16 +10,16 @@ def process_chess_data(df):
         # Convert date column
         df['Date'] = pd.to_datetime(df['Date'])
 
-        # Determine player's rating based on color
-        df['Rating'] = df.apply(lambda row: row['WhiteElo'] if row['White'] == 'Me' else row['BlackElo'], axis=1)
-        df['Rating'] = pd.to_numeric(df['Rating'], errors='coerce')
-
         # Process tournament ratings (keeping NaN values for between-tournament periods)
         df['Performance Rating'] = pd.to_numeric(df['Performance Rating'], errors='coerce')
         df['New Rating'] = pd.to_numeric(df['New Rating'], errors='coerce')
 
-        # Convert moves to numeric, handling potential format variations
-        df['Moves'] = df['Moves'].str.extract('(\d+)').astype(float)
+        # Determine player's rating based on color
+        df['Rating'] = df.apply(lambda row: row['WhiteElo'] if row['White'] == 'Me' else row['BlackElo'], axis=1)
+        df['Rating'] = pd.to_numeric(df['Rating'], errors='coerce')
+
+        # Convert game number to numeric
+        df['#'] = pd.to_numeric(df['#'], errors='coerce')
 
         # Map chess results to standard format
         df['Result'] = df['Result'].map({
@@ -29,7 +29,7 @@ def process_chess_data(df):
         })
 
         # Keep only the columns we need for visualization
-        processed_df = df[['Date', 'Rating', 'Moves', 'Result', 'Opening', 'Performance Rating', 'New Rating']].copy()
+        processed_df = df[['Date', 'Rating', '#', 'Result', 'Opening', 'Performance Rating', 'New Rating']].copy()
 
         return processed_df
 
@@ -47,7 +47,6 @@ def calculate_statistics(df):
             'avg_rating': 0,
             'max_rating': 0,
             'min_rating': 0,
-            'avg_moves': 0,
             'win_rate': 0,
             'tournament_performance': 0
         }
@@ -60,7 +59,6 @@ def calculate_statistics(df):
         'avg_rating': df['Rating'].mean(),
         'max_rating': df['Rating'].max(),
         'min_rating': df['Rating'].min(),
-        'avg_moves': df['Moves'].mean(),
         'tournament_performance': df['Performance Rating'].mean()  # Average tournament performance
     }
 

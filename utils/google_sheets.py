@@ -27,16 +27,17 @@ def get_google_sheets_data():
         st.write("Loaded columns:", df.columns.tolist())
         st.write("First few rows:", df.head())
 
-        # Select only first 12 columns and name them appropriately
+        # Select and rename columns as specified
         if len(df.columns) >= 12:
-            df = df.iloc[:, :12]  # Get first 12 columns
+            # Select columns 0-5 and 7-11 (skipping column 6)
+            df = pd.concat([df.iloc[:, :6], df.iloc[:, 7:12]], axis=1)
 
             # Give meaningful names to columns
             column_names = [
-                'Performance Rating', 'New Rating',  # First two columns
+                'Performance Rating', 'New Rating', '#',  # First three columns
                 'Date', 'White', 'Black', 'Result', 
                 'WhiteElo', 'BlackElo', 'TimeControl',
-                'Opening', 'Moves', 'PGN'
+                'Opening'
             ]
             df.columns = column_names
 
