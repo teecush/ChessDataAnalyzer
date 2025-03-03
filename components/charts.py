@@ -6,20 +6,47 @@ def create_rating_progression(df):
     # Filter out rows where New Rating is NaN for the chart
     rating_df = df[df['New Rating'].notna()].copy()
 
-    fig = px.line(rating_df, x='Date', y='New Rating',
-                  title='Rating Progression Over Time',
-                  labels={'New Rating': 'ELO Rating', 'Date': 'Game Date'},
-                  line_shape='spline',
-                  trendline="lowess",  # Add smoothed trendline
-                  trendline_color_override="#FF4B4B")
+    # Create base figure
+    fig = go.Figure()
+
+    # Add main line
+    fig.add_trace(go.Scatter(
+        x=rating_df['Date'],
+        y=rating_df['New Rating'],
+        mode='lines+markers',
+        name='Rating',
+        line=dict(color='#4CAF50', shape='spline'),
+        marker=dict(size=4)
+    ))
+
+    # Add trendline using moving average
+    window = max(3, len(rating_df) // 10)  # Dynamic window size based on data length
+    rating_df['MA'] = rating_df['New Rating'].rolling(window=window, center=True).mean()
+
+    fig.add_trace(go.Scatter(
+        x=rating_df['Date'],
+        y=rating_df['MA'],
+        mode='lines',
+        name='Trend',
+        line=dict(color='#FF4B4B', width=2, dash='dash'),
+        showlegend=True
+    ))
 
     fig.update_layout(
+        title='Rating Progression Over Time',
         template='plotly_white',
         hovermode='x unified',
         height=300,  # Reduced height for mobile
         margin=dict(l=10, r=10, t=30, b=10),  # Compact margins
         xaxis_title=None,  # Remove axis titles for cleaner mobile view
-        yaxis_title=None
+        yaxis_title=None,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
     )
     return fig
 
