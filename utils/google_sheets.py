@@ -37,6 +37,11 @@ def get_google_sheets_data():
             ]
             df.columns = column_names
 
+            # Debug: Print raw data information
+            st.write("Raw data shape:", df.shape)
+            st.write("Column names:", df.columns.tolist())
+            st.write("First few rows:", df.head())
+
         return df
 
     except requests.exceptions.RequestException as e:
@@ -47,4 +52,5 @@ def get_google_sheets_data():
         return None
     except Exception as e:
         st.error(f"Error processing the chess data: {str(e)}")
+        st.write("Error details:", str(e))  # Additional error details
         return None
