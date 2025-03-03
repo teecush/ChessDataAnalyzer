@@ -14,8 +14,9 @@ def process_chess_data(df):
         df['Performance Rating'] = pd.to_numeric(df['Performance Rating'], errors='coerce')
         df['New Rating'] = pd.to_numeric(df['New Rating'], errors='coerce')
 
-        # Convert game number to numeric
+        # Convert game number to numeric, ensure it starts from 1
         df['#'] = pd.to_numeric(df['#'], errors='coerce')
+        df['#'] = df['#'].fillna(0).astype(int) + 1  # Convert to int and add 1 to start from 1
 
         # Process other numeric columns
         df['Game Rating'] = pd.to_numeric(df['Game Rating'], errors='coerce')
@@ -32,6 +33,8 @@ def process_chess_data(df):
         print("Processed data shape:", processed_df.shape)
         print("Sample of processed data:", processed_df.head())
         print("Rating range:", processed_df['Performance Rating'].min(), "-", processed_df['Performance Rating'].max())
+        print("Total number of games:", len(processed_df))
+        print("Game numbers range:", processed_df['#'].min(), "-", processed_df['#'].max())
 
         return processed_df
 

@@ -16,19 +16,15 @@ def get_google_sheets_data():
         response = requests.get(URL)
         response.raise_for_status()  # Raise an exception for bad status codes
 
-        # Debug: Print raw response
-        st.write("Raw response received")
+        # Debug: Print raw response content
+        st.write("Raw CSV content first 500 chars:", response.text[:500])
+        st.write("Total content length:", len(response.text))
 
-        # Read CSV with specific row settings
-        # Skip first row which is hidden, row 2 shows averages, row 3 has titles
-        df = pd.read_csv(io.StringIO(response.text), skiprows=[0, 1], header=0)
-
-        if df.empty:
-            st.error('No data found in the Google Sheet')
-            return None
+        # Read CSV with minimal preprocessing
+        df = pd.read_csv(io.StringIO(response.text), header=0)
 
         # Debug: Print raw data information
-        st.write("Raw data shape:", df.shape)
+        st.write("Initial data shape:", df.shape)
         st.write("Raw columns:", df.columns.tolist())
         st.write("First few rows before processing:", df.head())
 
@@ -39,13 +35,14 @@ def get_google_sheets_data():
 
             # Give meaningful names to columns exactly as provided
             column_names = [
-                'Performance Rating', 'New Rating', '#', 'Date',  # First four columns (unchanged)
+                'Performance Rating', 'New Rating', '#', 'Date',  # First four columns
                 'Side', 'Result', 'sparkline data', 'Average Centipawn Loss (ACL)',  # User-specified columns 4-7
                 'Accuracy %', 'Game Rating', 'Opponent Name', 'Opponent ELO'  # User-specified columns 8-11
             ]
             df.columns = column_names
 
             # Debug: Print processed data
+            st.write("Processed data shape:", df.shape)
             st.write("Processed columns:", df.columns.tolist())
             st.write("First few rows of processed data:", df.head())
 
