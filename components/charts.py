@@ -19,11 +19,11 @@ def create_rating_progression(df):
 
 def create_win_loss_pie(df):
     """Create win/loss distribution pie chart"""
-    # Count results
-    result_counts = df['Result'].value_counts()
-    wins = result_counts.get('Win', 0)
-    losses = result_counts.get('Loss', 0)
-    draws = result_counts.get('Draw', 0)
+    # Count results with case-insensitive matching
+    result_counts = df['Result'].str.lower().value_counts()
+    wins = result_counts.get('win', 0)
+    losses = result_counts.get('loss', 0)
+    draws = result_counts.get('draw', 0)
 
     labels = ['Wins', 'Losses', 'Draws']
     values = [wins, losses, draws]
@@ -31,7 +31,10 @@ def create_win_loss_pie(df):
     fig = go.Figure(data=[go.Pie(labels=labels, values=values,
                                 hole=.3,
                                 marker_colors=['#4CAF50', '#f44336', '#2196F3'])])
-    fig.update_layout(title='Game Results Distribution')
+    fig.update_layout(
+        title='Game Results Distribution',
+        template='plotly_white'
+    )
     return fig
 
 def create_metric_over_time(df, metric_col, title, y_label):

@@ -73,9 +73,9 @@ def main():
     performance_charts = create_performance_charts(filtered_df)
 
     # Display charts in tabs
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "Rating Progression", "Game Results", "Accuracy & ACL",
-        "Game Rating", "Performance Rating"
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        "Rating Progression", "Game Results", "Game Rating", 
+        "Performance Rating", "Accuracy", "ACL"
     ])
 
     with tab1:
@@ -85,17 +85,16 @@ def main():
         st.plotly_chart(create_win_loss_pie(filtered_df), use_container_width=True)
 
     with tab3:
-        col1, col2 = st.columns(2)
-        with col1:
-            st.plotly_chart(performance_charts['accuracy'], use_container_width=True)
-        with col2:
-            st.plotly_chart(performance_charts['acl'], use_container_width=True)
-
-    with tab4:
         st.plotly_chart(performance_charts['game_rating'], use_container_width=True)
 
-    with tab5:
+    with tab4:
         st.plotly_chart(performance_charts['performance_rating'], use_container_width=True)
+
+    with tab5:
+        st.plotly_chart(performance_charts['accuracy'], use_container_width=True)
+
+    with tab6:
+        st.plotly_chart(performance_charts['acl'], use_container_width=True)
 
     # ML-based Analysis Section
     st.subheader("AI Performance Analysis")

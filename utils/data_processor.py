@@ -75,7 +75,7 @@ def calculate_statistics(df):
 
     # Calculate win percentage
     if total_games > 0:
-        wins = len(df[df['Result'] == 'Win'])
+        wins = len(df[df['Result'].str.lower() == 'win'])  # Case-insensitive comparison
         win_percentage = (wins / total_games) * 100
     else:
         win_percentage = 0
