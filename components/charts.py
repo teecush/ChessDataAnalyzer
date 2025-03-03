@@ -9,7 +9,9 @@ def create_rating_progression(df):
     fig = px.line(rating_df, x='Date', y='New Rating',
                   title='Rating Progression Over Time',
                   labels={'New Rating': 'ELO Rating', 'Date': 'Game Date'},
-                  line_shape='spline')
+                  line_shape='spline',
+                  trendline="lowess",  # Add smoothed trendline
+                  trendline_color_override="#FF4B4B")
 
     fig.update_layout(
         template='plotly_white',
@@ -56,20 +58,43 @@ def create_metric_over_time(df, metric_col, title, y_label):
     # Filter out rows where metric is NaN
     metric_df = df[df[metric_col].notna()].copy()
 
-    fig = go.Figure(data=[
-        go.Scatter(
-            x=metric_df['Date'],
-            y=metric_df[metric_col],
-            mode='lines+markers',
-            line=dict(color='#4CAF50', shape='spline'),
-            marker=dict(size=4)  # Smaller markers for mobile
-        )
-    ])
+    # Create base line plot
+    fig = go.Figure()
+
+    # Add main line
+    fig.add_trace(go.Scatter(
+        x=metric_df['Date'],
+        y=metric_df[metric_col],
+        mode='lines+markers',
+        name='Actual',
+        line=dict(color='#4CAF50', shape='spline'),
+        marker=dict(size=4)  # Smaller markers for mobile
+    ))
+
+    # Add trendline using moving average
+    window = max(3, len(metric_df) // 10)  # Dynamic window size based on data length
+    metric_df['MA'] = metric_df[metric_col].rolling(window=window, center=True).mean()
+
+    fig.add_trace(go.Scatter(
+        x=metric_df['Date'],
+        y=metric_df['MA'],
+        mode='lines',
+        name='Trend',
+        line=dict(color='#FF4B4B', width=2, dash='dash'),
+        showlegend=True
+    ))
 
     fig.update_layout(
         title=title,
         template='plotly_white',
-        showlegend=False,
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
         hovermode='x unified',
         height=300,  # Reduced height for mobile
         margin=dict(l=10, r=10, t=30, b=10),  # Compact margins
