@@ -1,5 +1,6 @@
 import plotly.express as px
 import plotly.graph_objects as go
+import numpy as np
 
 def create_rating_progression(df):
     """Create rating progression chart"""
@@ -19,18 +20,20 @@ def create_rating_progression(df):
         marker=dict(size=4)
     ))
 
-    # Add trendline using moving average
-    window = max(3, len(rating_df) // 10)  # Dynamic window size based on data length
-    rating_df['MA'] = rating_df['New Rating'].rolling(window=window, center=True).mean()
+    # Add linear trendline
+    if len(rating_df) > 1:
+        x_numeric = np.arange(len(rating_df))
+        z = np.polyfit(x_numeric, rating_df['New Rating'], 1)
+        p = np.poly1d(z)
 
-    fig.add_trace(go.Scatter(
-        x=rating_df['Date'],
-        y=rating_df['MA'],
-        mode='lines',
-        name='Trend',
-        line=dict(color='#FF4B4B', width=2, dash='dash'),
-        showlegend=True
-    ))
+        fig.add_trace(go.Scatter(
+            x=rating_df['Date'],
+            y=p(x_numeric),
+            mode='lines',
+            name='Trend',
+            line=dict(color='#FF4B4B', width=2, dash='dash'),
+            showlegend=True
+        ))
 
     fig.update_layout(
         title='Rating Progression Over Time',
@@ -98,18 +101,20 @@ def create_metric_over_time(df, metric_col, title, y_label):
         marker=dict(size=4)  # Smaller markers for mobile
     ))
 
-    # Add trendline using moving average
-    window = max(3, len(metric_df) // 10)  # Dynamic window size based on data length
-    metric_df['MA'] = metric_df[metric_col].rolling(window=window, center=True).mean()
+    # Add linear trendline
+    if len(metric_df) > 1:
+        x_numeric = np.arange(len(metric_df))
+        z = np.polyfit(x_numeric, metric_df[metric_col], 1)
+        p = np.poly1d(z)
 
-    fig.add_trace(go.Scatter(
-        x=metric_df['Date'],
-        y=metric_df['MA'],
-        mode='lines',
-        name='Trend',
-        line=dict(color='#FF4B4B', width=2, dash='dash'),
-        showlegend=True
-    ))
+        fig.add_trace(go.Scatter(
+            x=metric_df['Date'],
+            y=p(x_numeric),
+            mode='lines',
+            name='Trend',
+            line=dict(color='#FF4B4B', width=2, dash='dash'),
+            showlegend=True
+        ))
 
     fig.update_layout(
         title=title,
