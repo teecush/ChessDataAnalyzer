@@ -37,11 +37,11 @@ def get_google_sheets_data():
             # Keep first 12 columns
             df = df.iloc[:, :12]
 
-            # Give meaningful names to columns
+            # Give meaningful names to columns exactly as provided
             column_names = [
-                'Performance Rating', 'New Rating', '#', 'Date',  # First four columns
-                'White', 'Black', 'Result', 'Event',  # Columns 4-7
-                'WhiteElo', 'BlackElo', 'TimeControl', 'Opening'  # Columns 8-11
+                'Performance Rating', 'New Rating', '#', 'Date',  # First four columns (unchanged)
+                'White', 'Black', 'Result', 'Event',  # User-specified columns 4-7
+                'WhiteElo', 'BlackElo', 'TimeControl', 'Opening'  # User-specified columns 8-11
             ]
             df.columns = column_names
 
