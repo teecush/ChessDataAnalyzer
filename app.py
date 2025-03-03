@@ -77,13 +77,48 @@ def main():
         with st.spinner("Generating AI insights..."):
             insights = generate_performance_insights(filtered_df)
 
-            # Display text insights
-            for insight in insights['text_insights']:
-                st.info(insight)
+            # Create tabs for different types of analysis
+            tab1, tab2, tab3 = st.tabs(["Quick Insights", "Performance Analysis", "Recommendations"])
 
-            # Display performance clusters
-            st.write("Performance Clusters Analysis")
-            st.dataframe(insights['performance_clusters'], use_container_width=True)
+            with tab1:
+                # Display text insights with emojis
+                for insight in insights['text_insights']:
+                    if insight.startswith(('📈', '📊', '🎯', '⚖️')):  # Progress insights
+                        st.info(insight)
+                    elif insight.startswith(('⚔️', '🧮', '🏰')):  # Strategic insights
+                        st.warning(insight)
+                    else:  # Recommendations
+                        st.success(insight)
+
+            with tab2:
+                # Display performance clusters with explanation
+                st.write("Performance Clusters Analysis")
+                st.dataframe(insights['performance_clusters'], use_container_width=True)
+                st.markdown("""
+                    **Understanding Your Performance Clusters:**
+                    - Higher accuracy and lower ACL (Average Centipawn Loss) indicate stronger play
+                    - Cluster size shows how consistent your performance is in each category
+                    - Use this analysis to identify your typical performance patterns
+                """)
+
+            with tab3:
+                st.markdown("### 🎯 Personalized Recommendations")
+                # Filter recommendations from text insights
+                recommendations = [
+                    insight for insight in insights['text_insights'] 
+                    if any(insight.startswith(emoji) for emoji in ['🎯', '⚔️', '🧮', '🏰', '🧘‍♂️', '⏰', '🌟'])
+                ]
+
+                for rec in recommendations:
+                    st.success(rec)
+
+                # Add action items
+                st.markdown("### 📝 Action Items")
+                st.markdown("""
+                1. Review your games in the cluster with the highest accuracy
+                2. Focus on the recommended areas for improvement
+                3. Track your progress over time using the rating progression chart
+                """)
     else:
         st.warning("Need at least 5 games for AI analysis")
 
