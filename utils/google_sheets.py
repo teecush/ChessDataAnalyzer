@@ -23,10 +23,6 @@ def get_google_sheets_data():
             st.error('No data found in the Google Sheet')
             return None
 
-        # Debug: Print column names
-        st.write("Loaded columns:", df.columns.tolist())
-        st.write("First few rows:", df.head())
-
         # Select and rename columns as specified
         if len(df.columns) >= 12:
             # Select columns 0-5 and 7-11 (skipping column 6)
@@ -35,15 +31,12 @@ def get_google_sheets_data():
             # Give meaningful names to columns
             column_names = [
                 'Performance Rating', 'New Rating', '#',  # First three columns
-                'Date', 'White', 'Black', 'Result', 
-                'WhiteElo', 'BlackElo', 'TimeControl',
-                'Opening'
+                'Date', 'White', 'Black',  # Columns 3-5
+                'Result', 'WhiteElo', 'BlackElo', 'TimeControl',  # Columns 7-10
+                'Opening'  # Column 11
             ]
             df.columns = column_names
 
-            # Debug: Print processed columns
-            st.write("Processed columns:", df.columns.tolist())
-            st.write("Processed first few rows:", df.head())
 
         return df
 
