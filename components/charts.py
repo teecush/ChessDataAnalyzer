@@ -35,15 +35,17 @@ def create_win_loss_pie(df):
     return fig
 
 def create_metric_over_time(df, metric_col, title, y_label):
-    """Create bar chart for metrics over time"""
+    """Create line chart for metrics over time"""
     # Filter out rows where metric is NaN
     metric_df = df[df[metric_col].notna()].copy()
 
     fig = go.Figure(data=[
-        go.Bar(
+        go.Scatter(
             x=metric_df['Date'],
             y=metric_df[metric_col],
-            marker_color='#4CAF50'
+            mode='lines+markers',
+            line=dict(color='#4CAF50', shape='spline'),
+            marker=dict(size=6)
         )
     ])
 
