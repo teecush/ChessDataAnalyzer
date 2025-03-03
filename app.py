@@ -42,9 +42,15 @@ def main():
         st.error("Failed to load chess data. Please check the connection and try again.")
         return
 
+    # Debug information about loaded data
+    st.sidebar.write("Total games loaded:", len(df))
+
     # Create filters
     filters = create_filters(df)
     filtered_df = apply_filters(df, filters)
+
+    # Debug information about filtered data
+    st.sidebar.write("Games after filtering:", len(filtered_df))
 
     # Calculate statistics
     stats = calculate_statistics(filtered_df)
@@ -61,6 +67,16 @@ def main():
     # Create charts
     st.subheader("Rating Progression")
     st.plotly_chart(create_rating_progression(filtered_df), use_container_width=True)
+
+    # Display raw data table with pagination
+    st.subheader("Game History")
+    page_size = 20
+    n_pages = len(filtered_df) // page_size + (1 if len(filtered_df) % page_size > 0 else 0)
+    if n_pages > 0:
+        page = st.number_input('Page', min_value=1, max_value=n_pages, value=1) - 1
+        start_idx = page * page_size
+        end_idx = min(start_idx + page_size, len(filtered_df))
+        st.dataframe(filtered_df.iloc[start_idx:end_idx], use_container_width=True)
 
 if __name__ == "__main__":
     main()
