@@ -14,12 +14,12 @@ def process_chess_data(df):
         df['Performance Rating'] = pd.to_numeric(df['Performance Rating'], errors='coerce')
         df['New Rating'] = pd.to_numeric(df['New Rating'], errors='coerce')
 
+        # Convert game number to numeric
+        df['#'] = pd.to_numeric(df['#'], errors='coerce')
+
         # Determine player's rating based on color
         df['Rating'] = df.apply(lambda row: row['WhiteElo'] if row['White'] == 'Me' else row['BlackElo'], axis=1)
         df['Rating'] = pd.to_numeric(df['Rating'], errors='coerce')
-
-        # Convert game number to numeric
-        df['#'] = pd.to_numeric(df['#'], errors='coerce')
 
         # Map chess results to standard format
         df['Result'] = df['Result'].map({

@@ -18,11 +18,15 @@ def get_google_sheets_data():
 
         # Read CSV with specific row settings
         # Skip first 2 rows, use row 3 (index 2) as header, start data from row 4
-        df = pd.read_csv(io.StringIO(response.text), skiprows=2, header=0)
+        df = pd.read_csv(io.StringIO(response.text), skiprows=2, header=2)
 
         if df.empty:
             st.error('No data found in the Google Sheet')
             return None
+
+        # Debug: Print raw data information
+        st.write("Raw data shape:", df.shape)
+        st.write("First few rows:", df.head())
 
         # Select columns 0-5 and 7-11 (skipping column 6)
         if len(df.columns) >= 12:
@@ -37,10 +41,9 @@ def get_google_sheets_data():
             ]
             df.columns = column_names
 
-            # Debug: Print raw data information
-            st.write("Raw data shape:", df.shape)
-            st.write("Column names:", df.columns.tolist())
-            st.write("First few rows:", df.head())
+            # Debug: Print processed columns
+            st.write("Processed columns:", df.columns.tolist())
+            st.write("Processed first few rows:", df.head())
 
         return df
 
