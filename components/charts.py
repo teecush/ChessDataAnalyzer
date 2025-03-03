@@ -13,7 +13,11 @@ def create_rating_progression(df):
 
     fig.update_layout(
         template='plotly_white',
-        hovermode='x unified'
+        hovermode='x unified',
+        height=300,  # Reduced height for mobile
+        margin=dict(l=10, r=10, t=30, b=10),  # Compact margins
+        xaxis_title=None,  # Remove axis titles for cleaner mobile view
+        yaxis_title=None
     )
     return fig
 
@@ -33,7 +37,17 @@ def create_win_loss_pie(df):
                                 marker_colors=['#4CAF50', '#f44336', '#2196F3'])])
     fig.update_layout(
         title='Game Results Distribution',
-        template='plotly_white'
+        template='plotly_white',
+        height=300,  # Reduced height for mobile
+        margin=dict(l=10, r=10, t=30, b=10),  # Compact margins
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        )
     )
     return fig
 
@@ -48,17 +62,19 @@ def create_metric_over_time(df, metric_col, title, y_label):
             y=metric_df[metric_col],
             mode='lines+markers',
             line=dict(color='#4CAF50', shape='spline'),
-            marker=dict(size=6)
+            marker=dict(size=4)  # Smaller markers for mobile
         )
     ])
 
     fig.update_layout(
         title=title,
-        xaxis_title='Game Date',
-        yaxis_title=y_label,
         template='plotly_white',
         showlegend=False,
-        hovermode='x unified'
+        hovermode='x unified',
+        height=300,  # Reduced height for mobile
+        margin=dict(l=10, r=10, t=30, b=10),  # Compact margins
+        xaxis_title=None,  # Remove axis titles for cleaner mobile view
+        yaxis_title=None
     )
     return fig
 
@@ -102,7 +118,9 @@ def create_opening_bar(opening_stats):
             title='Most Played Openings',
             xaxis_tickangle=-45,
             template='plotly_white',
-            showlegend=False
+            showlegend=False,
+            height=300,  # Reduced height for mobile
+            margin=dict(l=10, r=10, t=30, b=10) # Compact margins
         )
         return fig
     else:

@@ -4,32 +4,74 @@
 }
 
 .main {
-    padding: 1rem;
+    padding: 0.5rem;
 }
 
 .stat-card {
     background-color: #f8f9fa;
     border-radius: 8px;
-    padding: 1.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .chess-header {
     background: linear-gradient(90deg, #2c3e50 0%, #3498db 100%);
     color: white;
-    padding: 1rem;
+    padding: 0.8rem;
     border-radius: 8px;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.chess-header h1 {
+    font-size: calc(1.2rem + 1vw);
+    margin: 0;
+    padding: 0;
+}
+
+.chess-header p {
+    font-size: calc(0.8rem + 0.5vw);
+    margin: 0.5rem 0 0 0;
 }
 
 .metric-value {
-    font-size: 2rem;
+    font-size: calc(1.2rem + 1vw);
     font-weight: bold;
     color: #2c3e50;
 }
 
 .metric-label {
-    font-size: 0.9rem;
+    font-size: calc(0.7rem + 0.3vw);
     color: #7f8c8d;
     text-transform: uppercase;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 768px) {
+    .main {
+        padding: 0.3rem;
+    }
+
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 1px;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        padding: 0.5rem;
+        font-size: 0.8rem;
+    }
+
+    /* Adjust chart containers for mobile */
+    .element-container {
+        padding: 0.2rem;
+    }
+
+    /* Make metrics more compact on mobile */
+    [data-testid="stMetricValue"] {
+        font-size: 1.2rem !important;
+    }
+
+    [data-testid="stMetricLabel"] {
+        font-size: 0.8rem !important;
+    }
 }
