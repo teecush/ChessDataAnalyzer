@@ -17,52 +17,42 @@ def get_google_sheets_data():
         response = requests.get(URL)
         response.raise_for_status()  # Raise an exception for bad status codes
 
-        # Debug: Print raw response content
-        st.write("Raw CSV content first 500 chars:", response.text[:500])
-        st.write("Total content length:", len(response.text))
+        # Read CSV data with all columns as string type
+        df = pd.read_csv(io.StringIO(response.text), dtype=str)
 
-        # Read CSV with minimal preprocessing
-        df = pd.read_csv(io.StringIO(response.text), header=0)
+        # Debug information before processing
+        st.sidebar.write("Raw data rows:", len(df))
 
-        # Debug: Print raw data information
-        st.write("Initial data shape:", df.shape)
-        st.write("Raw columns:", df.columns.tolist())
-        st.write("First few rows before processing:", df.head())
-
-        # Select and rename columns as specified
         if len(df.columns) >= 12:
             # Keep first 12 columns
             df = df.iloc[:, :12]
 
-            # Skip the first row (row 0) which contains duplicate titles
-            df = df.iloc[1:]
-
-            # Reset index after dropping the row
-            df = df.reset_index(drop=True)
-
-            # Give meaningful names to columns exactly as provided
-            column_names = [
-                'Performance Rating', 'New Rating', '#', 'Date',  # First four columns
-                'Side', 'Result', 'sparkline data', 'Average Centipawn Loss (ACL)',  # User-specified columns 4-7
-                'Accuracy %', 'Game Rating', 'Opponent Name', 'Opponent ELO'  # User-specified columns 8-11
+            # Check if first row contains headers
+            expected_headers = [
+                'Performance Rating', 'New Rating', '#', 'Date',
+                'Side', 'Result', 'sparkline data', 'Average Centipawn Loss (ACL)',
+                'Accuracy %', 'Game Rating', 'Opponent Name', 'Opponent ELO'
             ]
-            df.columns = column_names
 
-            # Debug: Print processed data
-            st.write("Processed data shape:", df.shape)
-            st.write("Processed columns:", df.columns.tolist())
-            st.write("First few rows of processed data:", df.head())
-            st.write("Total number of rows after processing:", len(df))
+            # Skip first row only if it matches headers, using string comparison
+            if all(str(df.iloc[0][i]).strip().lower() == str(expected_headers[i]).strip().lower() 
+                  for i in range(len(expected_headers))):
+                df = df.iloc[1:]
+                df = df.reset_index(drop=True)
 
-        return df
+            # Set column names
+            df.columns = expected_headers
+
+            # Debug information after processing
+            st.sidebar.write("Processed data rows:", len(df))
+            st.sidebar.write("Column types:", df.dtypes.to_dict())
+
+            return df
 
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching data from Google Sheets: {str(e)}")
         return None
-    except pd.errors.EmptyDataError:
-        st.error("The Google Sheet appears to be empty")
-        return None
     except Exception as e:
         st.error(f"Error processing the chess data: {str(e)}")
-        st.write("Error details:", str(e))  # Additional error details
+        st.write("Error details:", str(e))
         return None
