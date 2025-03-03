@@ -44,6 +44,7 @@ def main():
 
     # Debug information about loaded data
     st.sidebar.write("Total games loaded:", len(df))
+    st.sidebar.write("Games with ratings:", df['New Rating'].notna().sum())
 
     # Create filters
     filters = create_filters(df)
@@ -55,16 +56,17 @@ def main():
     # Calculate statistics
     stats = calculate_statistics(filtered_df)
 
-    # Display metrics
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Total Games", stats['total_games'])
-    with col2:
-        st.metric("Average Rating", f"{stats['avg_rating']:.0f}")
-    with col3:
-        st.metric("Tournament Performance", f"{stats['tournament_performance']:.0f}")
+    # Display metrics in expander
+    with st.expander("Tournament Statistics", expanded=True):
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Total Games", stats['total_games'])
+        with col2:
+            st.metric("Average Rating", f"{stats['avg_rating']:.0f}")
+        with col3:
+            st.metric("Tournament Performance", f"{stats['tournament_performance']:.0f}")
 
-    # Create charts
+    # Create charts for games with ratings
     st.subheader("Rating Progression")
     st.plotly_chart(create_rating_progression(filtered_df), use_container_width=True)
 
