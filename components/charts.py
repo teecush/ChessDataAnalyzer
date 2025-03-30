@@ -40,7 +40,7 @@ def create_rating_progression(df):
         template='plotly_white',
         hovermode='x unified',
         height=300,  # Reduced height for mobile
-        margin=dict(l=10, r=10, t=30, b=10),  # Compact margins
+        margin=dict(l=10, r=10, t=60, b=10),  # Increased top margin to prevent toolbar overlap
         xaxis_title=None,  # Remove axis titles for cleaner mobile view
         yaxis_title=None,
         legend=dict(
@@ -72,7 +72,7 @@ def create_win_loss_pie(df):
         title='Game Results Distribution',
         template='plotly_white',
         height=300,  # Reduced height for mobile
-        margin=dict(l=10, r=10, t=30, b=10),  # Compact margins
+        margin=dict(l=10, r=10, t=60, b=10),  # Increased top margin to prevent toolbar overlap
         showlegend=True,
         legend=dict(
             orientation="h",
@@ -130,7 +130,7 @@ def create_metric_over_time(df, metric_col, title, y_label):
         ),
         hovermode='x unified',
         height=300,  # Reduced height for mobile
-        margin=dict(l=10, r=10, t=30, b=10),  # Compact margins
+        margin=dict(l=10, r=10, t=60, b=10),  # Increased top margin to prevent toolbar overlap
         xaxis_title=None,  # Remove axis titles for cleaner mobile view
         yaxis_title=None
     )
@@ -178,7 +178,7 @@ def create_opening_bar(opening_stats):
             template='plotly_white',
             showlegend=False,
             height=300,  # Reduced height for mobile
-            margin=dict(l=10, r=10, t=30, b=10) # Compact margins
+            margin=dict(l=10, r=10, t=60, b=10) # Increased top margin to prevent toolbar overlap
         )
         return fig
     else:
