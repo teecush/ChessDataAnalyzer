@@ -64,16 +64,16 @@ def create_win_loss_pie(df):
     
     total = sum([wins, losses, draws])
     
-    # Calculate percentages
-    win_pct = (wins / total * 100) if total > 0 else 0
-    loss_pct = (losses / total * 100) if total > 0 else 0
-    draw_pct = (draws / total * 100) if total > 0 else 0
-
     labels = ['Wins', 'Losses', 'Draws']
     values = [wins, losses, draws]
     
-    # Create outside text labels with count values
-    outside_labels = [f'Wins: {wins}', f'Losses: {losses}', f'Draws: {draws}']
+    # Calculate percentages
+    win_pct = round((wins / total * 100), 1) if total > 0 else 0
+    loss_pct = round((losses / total * 100), 1) if total > 0 else 0
+    draw_pct = round((draws / total * 100), 1) if total > 0 else 0
+    
+    # Create outside text labels with count values and percentages
+    outside_labels = [f'Wins: {wins} ({win_pct}%)', f'Losses: {losses} ({loss_pct}%)', f'Draws: {draws} ({draw_pct}%)']
 
     fig = go.Figure(data=[go.Pie(
         labels=labels, 
