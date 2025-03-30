@@ -72,11 +72,8 @@ def create_win_loss_pie(df):
     loss_pct = round((losses / total * 100), 1) if total > 0 else 0
     draw_pct = round((draws / total * 100), 1) if total > 0 else 0
     
-    # Create outside percentage-only labels (larger bold font for better visibility)
-    outside_labels = [f'<b>Wins: {win_pct}%</b>', f'<b>Losses: {loss_pct}%</b>', f'<b>Draws: {draw_pct}%</b>']
-    
-    # Create inside count-only texts
-    inside_counts = [str(wins), str(losses), str(draws)]
+    # Create percentage-only labels (larger bold font for better visibility)
+    percentage_labels = [f'<b>{win_pct}%</b>', f'<b>{loss_pct}%</b>', f'<b>{draw_pct}%</b>']
 
     fig = go.Figure(data=[go.Pie(
         labels=labels, 
@@ -120,19 +117,19 @@ def create_win_loss_pie(df):
     # Add the count labels as annotations instead of textposition='outside'
     annotations = []
     
-    # Add center annotation for total
+    # Add center annotation for total (larger and bolder)
     annotations.append(
         dict(
             x=0.5,
             y=0.5,
-            text=f'Total: {total}',
+            text=f'<b>{total}</b>',
             showarrow=False,
-            font=dict(size=14, color='black', family='Arial, sans-serif')
+            font=dict(size=16, color='black', family='Arial, sans-serif')
         )
     )
     
-    # Add count labels as annotations
-    for i, label in enumerate(outside_labels):
+    # Add percentage labels as annotations beside each slice
+    for i, label in enumerate(percentage_labels):
         value = values[i]
         if value > 0:  # Only add annotation if the value is positive
             # Get the angle at the middle of the slice
@@ -140,8 +137,8 @@ def create_win_loss_pie(df):
                 2 * 3.14159 * (sum(values[:i])/sum(values) + value/sum(values)/2)
             )
             
-            # Calculate x,y position at edge of pie + offset
-            r = 1.3  # radius further outside pie for better visibility
+            # Calculate x,y position just outside the pie edge
+            r = 0.85  # Closer to the pie for better visibility
             x = 0.5 + r * np.cos(angle)
             y = 0.5 + r * np.sin(angle)
             
