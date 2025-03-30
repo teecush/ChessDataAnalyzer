@@ -260,13 +260,13 @@ def create_opening_explorer(df):
             
         selected_opening = st.selectbox(
             "Select specific opening:",
-            options=specific_openings,
-            index=0,
+            options=["All"] + specific_openings,
+            index=0,  # Default to "All"
             key="specific_opening_select"
         )
         
         # Process the selection to find games
-        analyze_opening(df, opening_df, selected_opening)
+        analyze_opening(df, opening_df, selected_opening, selected_main)
     
     with browse_tab:
         # Organize openings by ECO code if available, otherwise by first letter
@@ -334,25 +334,52 @@ def create_opening_explorer(df):
                 if selected_cat_opening != "All":
                     st.markdown(f"### Analysis for {selected_cat_opening}")
                     analyze_opening(df, opening_df, selected_cat_opening)
+                else:
+                    # Show all games in the category
+                    analyze_opening(df, opening_df, "All", selected_category)
         else:
             st.info("No category information available for openings.")
             
-def analyze_opening(df, opening_df, selected_opening):
+def analyze_opening(df, opening_df, selected_opening, selected_main=None):
     """Analyze a specific opening and show detailed information"""
     if not selected_opening:
         return
     
-    # Get games with this opening
-    opening_rows = df[df['PGN'].apply(
-        lambda x: re.search(rf'\[Opening\s+"{re.escape(selected_opening)}"\]', x) is not None if pd.notna(x) else False
-    )]
-    
-    if len(opening_rows) == 0:
-        st.info(f"No games found with the opening: {selected_opening}")
-        return
-    
-    # Show opening statistics
-    games_with_opening = opening_df[opening_df['OpeningFull'] == selected_opening]
+    # If "All" is selected, show analysis for all games in the selected main opening
+    if selected_opening == "All":
+        if selected_main and selected_main != "All":
+            # Show all games for the selected main opening
+            opening_rows = df[df['PGN'].apply(
+                lambda x: re.search(rf'\[Opening\s+"({re.escape(selected_main)}[^"]*?)"\]', x) is not None if pd.notna(x) else False
+            )]
+            
+            # Get all games for this main opening category
+            games_with_opening = opening_df[opening_df['OpeningMain'] == selected_main]
+            
+            # Display title for all games in this category
+            st.subheader(f"Analysis: All {selected_main} Openings")
+        else:
+            # Show all games (no filtering)
+            opening_rows = df.copy()
+            games_with_opening = opening_df.copy()
+            
+            # Display title for all games
+            st.subheader("Analysis: All Openings")
+    else:
+        # Get games with this specific opening
+        opening_rows = df[df['PGN'].apply(
+            lambda x: re.search(rf'\[Opening\s+"{re.escape(selected_opening)}"\]', x) is not None if pd.notna(x) else False
+        )]
+        
+        if len(opening_rows) == 0:
+            st.info(f"No games found with the opening: {selected_opening}")
+            return
+        
+        # Show opening statistics
+        games_with_opening = opening_df[opening_df['OpeningFull'] == selected_opening]
+        
+        # Display title for this specific opening
+        st.subheader(f"Analysis: {selected_opening}")
     
     # Calculate statistics for this opening
     total_games = len(games_with_opening)
@@ -360,9 +387,6 @@ def analyze_opening(df, opening_df, selected_opening):
     losses = (games_with_opening['Result'] == 'loss').sum()
     draws = (games_with_opening['Result'] == 'draw').sum()
     win_pct = round(wins / total_games * 100, 1) if total_games > 0 else 0
-    
-    # Display metrics for the opening
-    st.subheader(f"Analysis: {selected_opening}")
     
     col1, col2, col3, col4 = st.columns(4)
     with col1:
@@ -407,7 +431,13 @@ def analyze_opening(df, opening_df, selected_opening):
     
     # Show game list
     if len(filtered_rows) > 0:
-        st.subheader(f"Games with {selected_opening}")
+        if selected_opening == "All":
+            if selected_main and selected_main != "All":
+                st.subheader(f"Games with {selected_main} Openings")
+            else:
+                st.subheader("All Games")
+        else:
+            st.subheader(f"Games with {selected_opening}")
         
         # Format the date to show only the date part (no time)
         display_df = filtered_rows.copy()
@@ -491,4 +521,10 @@ def analyze_opening(df, opening_df, selected_opening):
             else:
                 st.warning("PGN data not available for this game.")
     else:
-        st.info(f"No games found with {selected_opening} as {side_filter}.")
+        if selected_opening == "All":
+            if selected_main and selected_main != "All":
+                st.info(f"No games found with {selected_main} openings as {side_filter}.")
+            else:
+                st.info(f"No games found with {side_filter} side filter.")
+        else:
+            st.info(f"No games found with {selected_opening} as {side_filter}.")
