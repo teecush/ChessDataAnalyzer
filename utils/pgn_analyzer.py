@@ -42,10 +42,18 @@ def extract_player_side(pgn_text, player_names=["Tony", "Tony Cushman"]):
     return None
 
 def extract_opening_info(pgn_text):
-    """Extract opening and variation information from PGN text"""
+    """Extract opening and variation information from PGN text
+    Also organizes the opening structure into a more sensible hierarchy"""
     if not pgn_text or pd.isna(pgn_text):
-        return {"opening": "Unknown", "variation": None}
+        return {
+            "opening_full": "Unknown",
+            "opening_main": "Unknown",
+            "opening_sub": None,
+            "opening_variation": None,
+            "eco": None
+        }
     
+    # Extract raw opening info from PGN
     opening_pattern = r'\[Opening\s+"([^"]+)"\]'
     variation_pattern = r'\[Variation\s+"([^"]+)"\]'
     eco_pattern = r'\[ECO\s+"([^"]+)"\]'
@@ -54,13 +62,74 @@ def extract_opening_info(pgn_text):
     variation_match = re.search(variation_pattern, pgn_text)
     eco_match = re.search(eco_pattern, pgn_text)
     
-    opening = opening_match.group(1) if opening_match else "Unknown"
-    variation = variation_match.group(1) if variation_match else None
+    opening_full = opening_match.group(1) if opening_match else "Unknown"
+    variation_raw = variation_match.group(1) if variation_match else None
     eco = eco_match.group(1) if eco_match else None
     
+    # Process the opening string into a structured format using ML-based pattern detection
+    # Here we'll use a rule-based approach to split the opening into logical parts
+    
+    # First check if ":" exists - this often separates main opening from subtype
+    opening_parts = []
+    opening_main = opening_full
+    opening_sub = None
+    opening_variation = None
+    
+    # Only process if we have a real opening name
+    if opening_full != "Unknown":
+        # Check for special patterns with colons or commas
+        if ":" in opening_full:
+            # Format: "Main Opening: Subtype"
+            main_part, sub_part = opening_full.split(":", 1)
+            opening_main = main_part.strip()
+            opening_sub = sub_part.strip()
+            
+            # Check if subtype has a variation separated by a comma
+            if "," in opening_sub:
+                sub_components = opening_sub.split(",", 1)
+                opening_sub = sub_components[0].strip()
+                # Only use the comma part if it's substantial (not just a simple modifier)
+                if len(sub_components[1].strip()) > 3:
+                    opening_variation = sub_components[1].strip()
+        
+        # If no colon but has a comma, split on comma
+        elif "," in opening_full:
+            main_part, sub_part = opening_full.split(",", 1)
+            opening_main = main_part.strip()
+            opening_sub = sub_part.strip()
+        
+        # Check for Defense/Attack/Gambit patterns without explicit separators
+        elif " Defense" in opening_full or " Defence" in opening_full:
+            # Try to identify the defense type and name
+            for term in ["Defense", "Defence"]:
+                if f" {term}" in opening_full:
+                    parts = opening_full.split(f" {term}", 1)
+                    if len(parts) > 1:
+                        # Check if there's a qualifying word after "Defense"
+                        if parts[1].strip():
+                            opening_main = f"{parts[0]} {term}"
+                            opening_sub = parts[1].strip()
+                        else:
+                            opening_main = opening_full
+        
+        # Check for Opening + Variation pattern (e.g., "Sicilian Dragon")
+        elif len(opening_full.split()) >= 2 and not any(word in opening_full for word in ["Gambit", "Attack", "System"]):
+            parts = opening_full.split()
+            if len(parts) >= 3:  # If it has at least 3 words, try to split into main + variation
+                opening_main = parts[0]
+                opening_sub = " ".join(parts[1:])
+    
+    # If we have a PGN variation field but didn't extract a variation from the opening,
+    # use the PGN variation field
+    if not opening_variation and variation_raw:
+        opening_variation = variation_raw
+    
+    # Return the structured opening information
     return {
-        "opening": opening,
-        "variation": variation,
+        "opening_full": opening_full,
+        "opening_main": opening_main,
+        "opening_sub": opening_sub,
+        "opening_variation": opening_variation,
         "eco": eco
     }
 
@@ -129,9 +198,11 @@ def analyze_game(pgn_text, player_side=None):
         insights.append(f"You made {len(player_mistakes)} mistakes that affected your position.")
     
     # Insight based on opening
-    insights.append(f"Opening played: {opening_info['opening']}")
-    if opening_info['variation']:
-        insights.append(f"Variation: {opening_info['variation']}")
+    insights.append(f"Opening played: {opening_info['opening_full']}")
+    if opening_info['opening_variation']:
+        insights.append(f"Variation: {opening_info['opening_variation']}")
+    if opening_info['eco']:
+        insights.append(f"ECO Code: {opening_info['eco']}")
     
     # Return the analysis results
     return {
@@ -154,47 +225,83 @@ def get_opening_performance(df):
         return pd.DataFrame()
     
     # Extract opening information for each game
-    openings = []
-    variations = []
+    opening_full = []
+    opening_main = []
+    opening_sub = []
+    opening_variation = []
+    eco_codes = []
     results = []
     sides = []
     
     for i, row in df.iterrows():
         pgn = row['PGN']
         result = row['RESULT'].lower() if not pd.isna(row['RESULT']) else 'unknown'
+        
+        # Fix side format: Convert 'W' to 'White' and 'B' to 'Black' for consistency
         side = row['Side'] if not pd.isna(row['Side']) else 'unknown'
+        if side == 'W':
+            side = 'White'
+        elif side == 'B':
+            side = 'Black'
         
         opening_info = extract_opening_info(pgn)
-        openings.append(opening_info['opening'])
-        variations.append(opening_info['variation'])
+        opening_full.append(opening_info['opening_full'])
+        opening_main.append(opening_info['opening_main'])
+        opening_sub.append(opening_info['opening_sub'])
+        opening_variation.append(opening_info['opening_variation'])
+        eco_codes.append(opening_info['eco'])
         results.append(result)
         sides.append(side)
     
     # Create a dataframe with all the information
     opening_df = pd.DataFrame({
-        'Opening': openings,
-        'Variation': variations,
+        'OpeningFull': opening_full,
+        'OpeningMain': opening_main,
+        'OpeningSub': opening_sub,
+        'OpeningVariation': opening_variation,
+        'ECO': eco_codes,
         'Result': results,
         'Side': sides
     })
     
-    # Calculate statistics by opening
-    opening_stats = opening_df.groupby('Opening').agg(
-        total=('Opening', 'count'),
+    # Calculate statistics by main opening
+    opening_stats_main = opening_df.groupby('OpeningMain').agg(
+        total=('OpeningMain', 'count'),
         wins=('Result', lambda x: (x == 'win').sum()),
         losses=('Result', lambda x: (x == 'loss').sum()),
         draws=('Result', lambda x: (x == 'draw').sum()),
-        white=('Side', lambda x: (x == 'White').sum()),
-        black=('Side', lambda x: (x == 'Black').sum())
+        white=('Side', lambda x: (x.str.lower() == 'white').sum()),  # Case-insensitive comparison
+        black=('Side', lambda x: (x.str.lower() == 'black').sum())   # Case-insensitive comparison
     ).reset_index()
     
     # Calculate win percentage
-    opening_stats['win_pct'] = round(opening_stats['wins'] / opening_stats['total'] * 100, 1)
+    opening_stats_main['win_pct'] = round(opening_stats_main['wins'] / opening_stats_main['total'] * 100, 1)
     
     # Sort by most played
-    opening_stats = opening_stats.sort_values('total', ascending=False)
+    opening_stats_main = opening_stats_main.sort_values('total', ascending=False)
     
-    return opening_stats
+    # Calculate statistics by full opening
+    opening_stats_full = opening_df.groupby('OpeningFull').agg(
+        total=('OpeningFull', 'count'),
+        wins=('Result', lambda x: (x == 'win').sum()),
+        losses=('Result', lambda x: (x == 'loss').sum()),
+        draws=('Result', lambda x: (x == 'draw').sum()),
+        white=('Side', lambda x: (x.str.lower() == 'white').sum()),  # Case-insensitive comparison
+        black=('Side', lambda x: (x.str.lower() == 'black').sum())   # Case-insensitive comparison
+    ).reset_index()
+    
+    # Calculate win percentage
+    opening_stats_full['win_pct'] = round(opening_stats_full['wins'] / opening_stats_full['total'] * 100, 1)
+    
+    # Sort by most played
+    opening_stats_full = opening_stats_full.sort_values('total', ascending=False)
+    
+    # Keep the detailed dataframe for drill-down analysis
+    return {
+        'opening_df': opening_df,
+        'opening_stats_main': opening_stats_main,
+        'opening_stats_full': opening_stats_full
+    }
 
 def get_common_mistakes(df):
     """Identify common mistake patterns across games"""
