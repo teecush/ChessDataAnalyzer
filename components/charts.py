@@ -64,116 +64,58 @@ def create_win_loss_pie(df):
     
     total = sum([wins, losses, draws])
     
-    labels = ['Wins', 'Losses', 'Draws']
-    values = [wins, losses, draws]
-    
     # Calculate percentages
     win_pct = round((wins / total * 100), 1) if total > 0 else 0
     loss_pct = round((losses / total * 100), 1) if total > 0 else 0
     draw_pct = round((draws / total * 100), 1) if total > 0 else 0
     
-    # Create percentage-only labels (larger bold font for better visibility)
-    percentage_labels = [f'<b>{win_pct}%</b>', f'<b>{loss_pct}%</b>', f'<b>{draw_pct}%</b>']
-
+    # Create custom labels with both count and percentage
+    custom_labels = [
+        f'Wins: {wins} ({win_pct}%)', 
+        f'Losses: {losses} ({loss_pct}%)', 
+        f'Draws: {draws} ({draw_pct}%)'
+    ]
+    
+    values = [wins, losses, draws]
+    colors = ['#4CAF50', '#f44336', '#2196F3']  # green, red, blue
+    
+    # Create a simpler pie chart with built-in labels
     fig = go.Figure(data=[go.Pie(
-        labels=labels, 
+        labels=custom_labels,
         values=values,
-        hole=.3,
-        marker_colors=['#4CAF50', '#f44336', '#2196F3'],
-        # Show count inside the pie
-        textinfo='value',
-        textposition='inside',
-        insidetextfont=dict(size=12, color='white'),
-        # Don't pull any slices so they're aligned properly
-        pull=[0, 0, 0],
-        # Don't use text attribute for outside labels (we'll use annotations instead)
-        text=None,
+        hole=0.4,  # Larger hole to make room for total count
+        marker_colors=colors,
+        textinfo='none',  # Don't show any text on the pie slices themselves
         hoverinfo='label+percent+value',
-        hovertemplate='%{label}<br>Count: %{value}<br>Percentage: %{percent}<extra></extra>',
-        # Set showlegend to False for the pie chart itself
-        showlegend=False
+        hovertemplate='%{label}<br>Percentage: %{percent}<extra></extra>',
+        showlegend=True,
+        sort=False  # Keep the original order
     )])
     
-    # Add traces for custom color legend only
-    fig.add_trace(go.Scatter(
-        x=[None], y=[None], 
-        mode='markers',
-        marker=dict(size=10, color='#4CAF50'),
-        showlegend=True, name='Wins'
-    ))
-    fig.add_trace(go.Scatter(
-        x=[None], y=[None], 
-        mode='markers',
-        marker=dict(size=10, color='#f44336'),
-        showlegend=True, name='Losses'
-    ))
-    fig.add_trace(go.Scatter(
-        x=[None], y=[None], 
-        mode='markers',
-        marker=dict(size=10, color='#2196F3'),
-        showlegend=True, name='Draws'
-    ))
-    
-    # Add the count labels as annotations instead of textposition='outside'
-    annotations = []
-    
-    # Add center annotation for total (larger and bolder)
-    annotations.append(
-        dict(
-            x=0.5,
-            y=0.5,
-            text=f'<b>{total}</b>',
-            showarrow=False,
-            font=dict(size=16, color='black', family='Arial, sans-serif')
-        )
+    # Add center annotation for total count
+    fig.add_annotation(
+        x=0.5, y=0.5,
+        text=f"<b>Total<br>{total}</b>",
+        font=dict(size=18, color='black', family='Arial'),
+        showarrow=False
     )
     
-    # Add percentage labels as annotations beside each slice
-    for i, label in enumerate(percentage_labels):
-        value = values[i]
-        if value > 0:  # Only add annotation if the value is positive
-            # Get the angle at the middle of the slice
-            angle = (2 * 3.14159 * (value/sum(values)) / 2) if i == 0 else (
-                2 * 3.14159 * (sum(values[:i])/sum(values) + value/sum(values)/2)
-            )
-            
-            # Calculate x,y position just outside the pie edge
-            r = 0.85  # Closer to the pie for better visibility
-            x = 0.5 + r * np.cos(angle)
-            y = 0.5 + r * np.sin(angle)
-            
-            # Add to annotations list
-            annotations.append(
-                dict(
-                    x=x,
-                    y=y,
-                    text=label,
-                    showarrow=False,
-                    font=dict(size=14)
-                )
-            )
-    
-    # Remove grid lines and axis ticks/labels
-    fig.update_xaxes(showgrid=False, zeroline=False, showticklabels=False)
-    fig.update_yaxes(showgrid=False, zeroline=False, showticklabels=False)
-    
+    # Clean up the chart
     fig.update_layout(
         title='Game Results Distribution',
         template='plotly_white',
-        height=350,  # Increased height to accommodate legend
-        margin=dict(l=50, r=50, t=60, b=50),  # Increased margins for outside labels
-        showlegend=True,  # Show legend for the pie chart colors
+        height=350,
+        margin=dict(l=30, r=30, t=60, b=30),
         legend=dict(
             orientation="v",
             yanchor="top",
-            y=1.0,  # Position at top right corner
+            y=1.0,
             xanchor="right",
             x=1.0
         ),
-        annotations=annotations,
-        # Remove axis labels 
-        xaxis={'visible': False, 'showticklabels': False},
-        yaxis={'visible': False, 'showticklabels': False}
+        # Hide axes completely
+        xaxis=dict(visible=False),
+        yaxis=dict(visible=False)
     )
     
     return fig
