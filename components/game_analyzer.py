@@ -42,8 +42,15 @@ def create_game_analyzer(df):
     selected_game = games_with_pgn[games_with_pgn['Game_Label'] == selected_game_label].iloc[0]
     pgn_text = selected_game['PGN']
     
-    # Analyze the game
-    analysis = analyze_game(pgn_text)
+    # Analyze the game - pass the side from the dataframe to accurately determine player side
+    player_side = selected_game['Side']
+    # Convert 'W' to 'White' and 'B' to 'Black'
+    if player_side == 'W':
+        player_side = 'White'
+    elif player_side == 'B':
+        player_side = 'Black'
+        
+    analysis = analyze_game(pgn_text, player_side)
     
     if 'error' in analysis:
         st.error(f"Error analyzing game: {analysis['error']}")
@@ -168,12 +175,20 @@ def create_game_analyzer(df):
             if i < len(moves):
                 board.push(moves[i])
         
+        # Display player name at top (Black)
+        black_player = analysis['basic_info']['black']
+        # Make player name bold if it's the user (Tony)
+        is_tony_black = 'tony' in black_player.lower()
+        black_display = f"**{black_player}**" if is_tony_black else black_player
+        st.markdown(f"<div style='text-align: center; margin-bottom: 10px;'>{black_display}</div>", unsafe_allow_html=True)
+        
         # Convert to SVG and display
         svg = chess.svg.board(
             board=board,
             size=400,
             lastmove=moves[selected_move-1] if selected_move > 0 else None,
-            check=board.king(board.turn) if board.is_check() else None
+            check=board.king(board.turn) if board.is_check() else None,
+            orientation=chess.BLACK if analysis['basic_info']['player_side'] == 'Black' else chess.WHITE
         )
         
         # Create navigation buttons (avoid duplicated keys by making them unique with game label)
@@ -194,6 +209,13 @@ def create_game_analyzer(df):
         
         # Display SVG
         st.image(svg, use_container_width=False)
+        
+        # Display player name at bottom (White)
+        white_player = analysis['basic_info']['white']
+        # Make player name bold if it's the user (Tony)
+        is_tony_white = 'tony' in white_player.lower()
+        white_display = f"**{white_player}**" if is_tony_white else white_player
+        st.markdown(f"<div style='text-align: center; margin-top: 10px;'>{white_display}</div>", unsafe_allow_html=True)
         
         # Add JavaScript for keyboard navigation with better selectors
         js_code = """

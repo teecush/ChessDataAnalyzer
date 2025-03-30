@@ -12,7 +12,27 @@ def extract_game_features(df):
     features['accuracy'] = pd.to_numeric(df['Accuracy %'], errors='coerce')
     features['game_rating'] = pd.to_numeric(df['Game Rating'], errors='coerce')
     features['opponent_elo'] = pd.to_numeric(df['Opp. ELO'], errors='coerce')
-
+    
+    # Add playing side as a binary feature (1 for White, 0 for Black)
+    features['played_white'] = df['Side'].apply(
+        lambda x: 1 if pd.notna(x) and x.upper() in ['W', 'WHITE'] else 0
+    )
+    
+    # Extract game length and phase features from PGN if available
+    if 'PGN' in df.columns:
+        import re
+        
+        # Extract move count as a rough estimate of game length
+        features['move_count'] = df['PGN'].apply(
+            lambda x: len(re.findall(r'\d+\.', x)) if pd.notna(x) else np.nan
+        )
+        
+        # Extract result (win, loss, draw) as a numerical feature
+        features['result_numeric'] = df['RESULT'].apply(
+            lambda x: 1 if pd.notna(x) and x.lower() == 'win' else 
+                     (0 if pd.notna(x) and x.lower() == 'loss' else 0.5)
+        )
+    
     # Fill missing values with mean
     features = features.fillna(features.mean())
     return features
@@ -45,7 +65,7 @@ def analyze_playing_strength(df):
     return pd.DataFrame(cluster_stats)
 
 def generate_performance_insights(df):
-    """Generate ML-based insights about player performance, now enhanced with PGN analysis"""
+    """Generate ML-based insights about player performance, now enhanced with PGN analysis and side-specific analysis"""
     features = extract_game_features(df)
 
     insights = {
@@ -71,6 +91,37 @@ def generate_performance_insights(df):
     else:
         text_insights.append("📊 Tony, your play shows high variance between games")
 
+    # Analyze performance by side (White vs Black)
+    if 'played_white' in features.columns:
+        white_games = features[features['played_white'] == 1]
+        black_games = features[features['played_white'] == 0]
+        
+        if len(white_games) >= 3 and len(black_games) >= 3:
+            # Compare average accuracy by side
+            white_accuracy = white_games['accuracy'].mean()
+            black_accuracy = black_games['accuracy'].mean()
+            
+            if white_accuracy > black_accuracy + 5:
+                text_insights.append("♟️ Tony, your accuracy is significantly better when playing White")
+            elif black_accuracy > white_accuracy + 5:
+                text_insights.append("♟️ Tony, your accuracy is significantly better when playing Black")
+            
+            # Compare win rates by side if result data is available
+            if 'result_numeric' in features.columns:
+                white_win_rate = white_games['result_numeric'].mean() * 100
+                black_win_rate = black_games['result_numeric'].mean() * 100
+                
+                if white_win_rate > black_win_rate + 10:
+                    text_insights.append(f"♔ Tony, your win rate is higher with White ({white_win_rate:.1f}%) compared to Black ({black_win_rate:.1f}%)")
+                elif black_win_rate > white_win_rate + 10:
+                    text_insights.append(f"♚ Tony, your win rate is higher with Black ({black_win_rate:.1f}%) compared to White ({white_win_rate:.1f}%)")
+                
+                # Provide specific advice based on side performance
+                if white_win_rate < 40 and len(white_games) >= 5:
+                    text_insights.append("🔍 Tony, focus on strengthening your White opening repertoire with more aggressive options")
+                if black_win_rate < 40 and len(black_games) >= 5:
+                    text_insights.append("🔍 Tony, consider studying solid Black defenses that suit your style")
+    
     # Add personalized recommendations
     text_insights.extend(insights['recommendations'])
     
@@ -84,24 +135,48 @@ def generate_performance_insights(df):
             mistake_patterns = get_common_mistakes(df)
             if mistake_patterns:
                 text_insights.extend([""] + ["🔍 " + pattern for pattern in mistake_patterns])
-                
-            # Add opening-based recommendations if we have enough data
-            # Count openings played at least twice
+            
+            # Analyze openings with side awareness
             from utils.pgn_analyzer import extract_opening_info
-            opening_counts = df['PGN'].apply(
-                lambda x: extract_opening_info(x)['opening_main'] if pd.notna(x) and x else None
-            ).value_counts()
             
-            common_openings = opening_counts[opening_counts >= 2].index.tolist()
+            # Create a list of (opening, side) pairs to analyze repertoire by color
+            opening_side_pairs = []
+            for i, row in df.iterrows():
+                if pd.notna(row['PGN']) and pd.notna(row['Side']):
+                    try:
+                        opening_info = extract_opening_info(row['PGN'])
+                        side = 'White' if row['Side'].upper() in ['W', 'WHITE'] else 'Black'
+                        opening_side_pairs.append((opening_info['opening_main'], side))
+                    except:
+                        continue
             
-            if common_openings:
-                # Get most common opening
-                most_common = common_openings[0]
-                text_insights.append(f"🏆 Tony, you have the most experience with the {most_common} opening")
+            # Convert to DataFrame for easier analysis
+            if opening_side_pairs:
+                import pandas as pd
+                openings_df = pd.DataFrame(opening_side_pairs, columns=['Opening', 'Side'])
+                
+                # Get most common openings by side
+                white_openings = openings_df[openings_df['Side'] == 'White']['Opening'].value_counts()
+                black_openings = openings_df[openings_df['Side'] == 'Black']['Opening'].value_counts()
+                
+                # Add insights about most played openings by side
+                if len(white_openings) > 0:
+                    most_common_white = white_openings.index[0]
+                    white_count = white_openings.iloc[0]
+                    if white_count >= 2:
+                        text_insights.append(f"♔ Tony, as White you most frequently play the {most_common_white} ({white_count} games)")
+                
+                if len(black_openings) > 0:
+                    most_common_black = black_openings.index[0]
+                    black_count = black_openings.iloc[0]
+                    if black_count >= 2:
+                        text_insights.append(f"♚ Tony, as Black you most frequently face the {most_common_black} ({black_count} games)")
                 
                 # Add advice about expanding repertoire if appropriate
-                if len(common_openings) <= 2 and len(df) >= 10:
-                    text_insights.append("🎭 Tony, consider expanding your opening repertoire to gain experience with different structures")
+                if len(white_openings) == 1 and len(df[df['Side'].isin(['W', 'White'])]) >= 5:
+                    text_insights.append("🎭 Tony, consider expanding your White opening repertoire for more variety")
+                if len(black_openings) == 1 and len(df[df['Side'].isin(['B', 'Black'])]) >= 5:
+                    text_insights.append("🎭 Tony, consider learning additional Black defenses to handle different White setups")
         except Exception as e:
             # If any errors occur with PGN analysis, don't break the main analysis
             print(f"Error in PGN-based ML analysis: {e}")
