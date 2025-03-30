@@ -190,6 +190,10 @@ def analyze_game(pgn_text, player_side=None):
     
     # Insight based on the number of mistakes
     player_mistakes = [m for m in mistakes if m["side"] == player_side]
+    opponent_side = "Black" if player_side == "White" else "White"
+    opponent_mistakes = [m for m in mistakes if m["side"] == opponent_side]
+    
+    # Analyze player's performance
     if len(player_mistakes) == 0:
         insights.append("You played a clean game with no obvious mistakes.")
     elif len(player_mistakes) <= 2:
@@ -197,11 +201,35 @@ def analyze_game(pgn_text, player_side=None):
     else:
         insights.append(f"You made {len(player_mistakes)} mistakes that affected your position.")
     
+    # Add comparison with opponent
+    if len(opponent_mistakes) > len(player_mistakes):
+        insights.append(f"Your opponent made more mistakes ({len(opponent_mistakes)}) than you did ({len(player_mistakes)}).")
+    elif len(opponent_mistakes) < len(player_mistakes):
+        insights.append(f"You made more mistakes ({len(player_mistakes)}) than your opponent ({len(opponent_mistakes)}).")
+    
+    # Add phase analysis
+    early_mistakes = [m for m in player_mistakes if m["move_number"] <= 10]
+    middle_mistakes = [m for m in player_mistakes if 10 < m["move_number"] <= 25]
+    late_mistakes = [m for m in player_mistakes if m["move_number"] > 25]
+    
+    if early_mistakes:
+        insights.append(f"Your early game had {len(early_mistakes)} mistake(s). Focus on opening preparation.")
+    if middle_mistakes:
+        insights.append(f"Your middle game had {len(middle_mistakes)} mistake(s). Work on tactical awareness.")
+    if late_mistakes:
+        insights.append(f"Your endgame had {len(late_mistakes)} mistake(s). Practice endgame techniques.")
+    
+    # Add game length analysis
+    if move_count > 60:
+        insights.append(f"This was a long game ({move_count//2} moves), suggesting good defensive play.")
+    elif move_count < 20:
+        insights.append(f"This was a short game ({move_count//2} moves), which may indicate tactical oversights.")
+    
     # Insight based on opening
     insights.append(f"Opening played: {opening_info['opening_full']}")
-    if opening_info['opening_variation']:
+    if opening_info.get('opening_variation'):
         insights.append(f"Variation: {opening_info['opening_variation']}")
-    if opening_info['eco']:
+    if opening_info.get('eco'):
         insights.append(f"ECO Code: {opening_info['eco']}")
     
     # Return the analysis results

@@ -58,10 +58,10 @@ def create_game_analyzer(df):
         st.metric("Result", result_text)
     
     # Display opening information
-    st.write(f"**Opening:** {analysis['opening_info']['opening']}")
-    if analysis['opening_info']['variation']:
-        st.write(f"**Variation:** {analysis['opening_info']['variation']}")
-    if analysis['opening_info']['eco']:
+    st.write(f"**Opening:** {analysis['opening_info']['opening_full']}")
+    if 'opening_variation' in analysis['opening_info'] and analysis['opening_info']['opening_variation']:
+        st.write(f"**Variation:** {analysis['opening_info']['opening_variation']}")
+    if 'eco' in analysis['opening_info'] and analysis['opening_info']['eco']:
         st.write(f"**ECO Code:** {analysis['opening_info']['eco']}")
     
     # Create tabs for different analysis views
