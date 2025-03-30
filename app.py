@@ -67,9 +67,9 @@ def main():
     performance_charts = create_performance_charts(filtered_df)
 
     # Display charts in tabs
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "Rating", "Results", "Game Rating", 
-        "Performance", "Accuracy", "ACL"
+    # Put Accuracy and ACL in separate tabs to give them more space
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "Rating", "Results", "Game Rating", "Performance Rating"
     ])
 
     with tab1:
@@ -83,11 +83,15 @@ def main():
 
     with tab4:
         st.plotly_chart(performance_charts['performance_rating'], use_container_width=True)
-
-    with tab5:
+    
+    # Add separate sections for Accuracy and ACL with full width for better visualization on mobile
+    st.subheader("Accuracy Metrics")
+    accuracy_tab, acl_tab = st.tabs(["Accuracy %", "Average Centipawn Loss"])
+    
+    with accuracy_tab:
         st.plotly_chart(performance_charts['accuracy'], use_container_width=True)
-
-    with tab6:
+    
+    with acl_tab:
         st.plotly_chart(performance_charts['acl'], use_container_width=True)
 
     # ML-based Analysis Section

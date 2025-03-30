@@ -41,8 +41,10 @@ def process_chess_data(df):
         df['Average Centipawn Loss (ACL)'] = pd.to_numeric(df['Average Centipawn Loss (ACL)'], errors='coerce')
 
         # Keep only the columns we need for visualization
+        # Add 'RESULT' column for the win-loss chart
+        df['RESULT'] = df['Result']  # Create a copy of Result column as RESULT
         processed_df = df[['Date', '#', 'Performance Rating', 'New Rating', 
-                          'Side', 'Result', 'sparkline data', 'Average Centipawn Loss (ACL)',
+                          'Side', 'Result', 'RESULT', 'sparkline data', 'Average Centipawn Loss (ACL)',
                           'Accuracy %', 'Game Rating', 'Opponent Name', 'Opponent ELO']].copy()
 
         # Debug information
@@ -75,7 +77,7 @@ def calculate_statistics(df):
 
     # Calculate win percentage
     if total_games > 0:
-        wins = len(df[df['Result'].str.lower() == 'win'])  # Case-insensitive comparison
+        wins = len(df[df['RESULT'].str.lower() == 'win'])  # Case-insensitive comparison
         win_percentage = (wins / total_games) * 100
     else:
         win_percentage = 0

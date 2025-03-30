@@ -74,4 +74,44 @@
     [data-testid="stMetricLabel"] {
         font-size: 0.8rem !important;
     }
+    
+    /* Improve the expanders on mobile */
+    .streamlit-expanderHeader {
+        font-size: 0.9rem !important;
+    }
+    
+    /* Make dataframes more mobile-friendly */
+    [data-testid="stDataFrame"] {
+        overflow-x: auto;
+    }
+    
+    /* Adjust header for better mobile layout */
+    .chess-header {
+        padding: 0.6rem;
+    }
+    
+    /* Ensure charts are visible without scrolling horizontally */
+    .js-plotly-plot {
+        max-width: 100%;
+    }
+    
+    /* Optimize for iPhone specifically */
+    @media only screen and (device-width: 375px), 
+           only screen and (device-width: 414px),
+           only screen and (device-width: 390px), 
+           only screen and (device-width: 428px) {
+        .main {
+            padding: 0.2rem;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            padding: 0.4rem;
+            font-size: 0.7rem;
+        }
+        
+        /* Further reduce chart height for iPhone */
+        .js-plotly-plot, .plotly {
+            height: 250px !important;
+        }
+    }
 }

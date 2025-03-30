@@ -56,7 +56,8 @@ def create_rating_progression(df):
 def create_win_loss_pie(df):
     """Create win/loss distribution pie chart"""
     # Count results with case-insensitive matching
-    result_counts = df['Result'].str.lower().value_counts()
+    # Use 'RESULT' column instead of 'Result'
+    result_counts = df['RESULT'].str.lower().value_counts()
     wins = result_counts.get('win', 0)
     losses = result_counts.get('loss', 0)
     draws = result_counts.get('draw', 0)
