@@ -174,10 +174,13 @@ def analyze_game(pgn_text, player_side=None):
         if re.search(r'cent[i]?pawn|c\.?p\.?|acl|loss', comment, re.IGNORECASE):
             is_mistake = True
         
+        # Determine which side just moved (White moves on even move counts starting from 0)
+        moving_side = "White" if move_count % 2 == 0 else "Black"
+        
         if is_mistake:
             mistakes.append({
                 "move_number": move_count // 2 + 1,
-                "side": "White" if board.turn == chess.BLACK else "Black",  # Side that just moved
+                "side": moving_side,  # Side that just moved
                 "move": san,
                 "comment": comment
             })
@@ -185,7 +188,7 @@ def analyze_game(pgn_text, player_side=None):
         # Add move to the list
         moves.append({
             "move_number": move_count // 2 + 1,
-            "side": "White" if board.turn == chess.BLACK else "Black",  # Side that just moved
+            "side": moving_side,  # Side that just moved
             "move": san,
             "comment": comment
         })

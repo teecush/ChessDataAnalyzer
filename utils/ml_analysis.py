@@ -142,7 +142,7 @@ def generate_performance_insights(df):
             # Create a list of (opening, side) pairs to analyze repertoire by color
             opening_side_pairs = []
             for i, row in df.iterrows():
-                if pd.notna(row['PGN']) and pd.notna(row['Side']):
+                if not pd.isna(row['PGN']) and not pd.isna(row['Side']):
                     try:
                         opening_info = extract_opening_info(row['PGN'])
                         side = 'White' if row['Side'].upper() in ['W', 'WHITE'] else 'Black'
@@ -152,7 +152,6 @@ def generate_performance_insights(df):
             
             # Convert to DataFrame for easier analysis
             if opening_side_pairs:
-                import pandas as pd
                 openings_df = pd.DataFrame(opening_side_pairs, columns=['Opening', 'Side'])
                 
                 # Get most common openings by side
