@@ -88,7 +88,7 @@ def main():
     
     # Accuracy metrics section
     st.subheader("Accuracy Metrics")
-    accuracy_tab, acl_tab = st.tabs(["Accuracy %", "Average Centipawn Loss (ACL)"])
+    accuracy_tab, acl_tab = st.tabs(["Accuracy %", "ACL"])
     
     with accuracy_tab:
         st.plotly_chart(performance_charts['accuracy'], use_container_width=True)
@@ -136,18 +136,34 @@ def main():
     else:
         st.info("Need at least 5 games for AI analysis")
 
-    # Display raw data table - show all games, reverse order, and hide # column
+    # Display raw data table - show all games, reverse order, and hide # column and sparkline data
     with st.expander("Game History", expanded=False):
         if len(filtered_df) > 0:
             # Create a copy of the dataframe to avoid modifying the original
             display_df = filtered_df.copy()
             
-            # Drop the # column since we don't need to show it
+            # Drop the # column and sparkline data column since we don't need to show them
+            columns_to_drop = []
             if '#' in display_df.columns:
-                display_df = display_df.drop(columns=['#'])
+                columns_to_drop.append('#')
+            if 'sparkline data' in display_df.columns:
+                columns_to_drop.append('sparkline data')
+            
+            if columns_to_drop:
+                display_df = display_df.drop(columns=columns_to_drop)
             
             # Sort by Date in descending order (most recent first)
             display_df = display_df.sort_values('Date', ascending=False)
+            
+            # Add opponent search functionality
+            st.subheader("Search by Opponent")
+            opponent_search = st.text_input("Enter opponent name to search", "")
+            
+            # Filter by opponent name if search is provided
+            if opponent_search:
+                # Case-insensitive search using .str.contains()
+                display_df = display_df[display_df['Opponent Name'].str.lower().str.contains(opponent_search.lower())]
+                st.write(f"Found {len(display_df)} games against opponents matching '{opponent_search}'")
             
             # Show all games at once
             st.dataframe(display_df, use_container_width=True)
