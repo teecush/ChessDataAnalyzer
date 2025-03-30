@@ -11,7 +11,7 @@ def extract_game_features(df):
     features['acl'] = pd.to_numeric(df['ACL'], errors='coerce')
     features['accuracy'] = pd.to_numeric(df['Accuracy %'], errors='coerce')
     features['game_rating'] = pd.to_numeric(df['Game Rating'], errors='coerce')
-    features['opponent_elo'] = pd.to_numeric(df['Opponent ELO'], errors='coerce')
+    features['opponent_elo'] = pd.to_numeric(df['Opp. ELO'], errors='coerce')
 
     # Fill missing values with mean
     features = features.fillna(features.mean())

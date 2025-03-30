@@ -32,7 +32,7 @@ st.markdown("""
     <div class='chess-links'>
         <a href="https://lichess.org/study/aatGfpd6/C8WS6Cy8" target="_blank">Lichess Study</a> | 
         <a href="https://www.chess.com/library/collections/tonyc-annex-chess-club-games-H8SCFdtS" target="_blank">Chess.com Library</a> | 
-        <a href="https://docs.google.com/spreadsheets/d/1Z1zFDzVF0_zxEuH3AwBNy8or2SYmpulRnKn2OYvSo5Q/edit?gid=0#gid=0" target="_blank">Chess Data Google Sheet</a> | 
+        <a href="https://docs.google.com/spreadsheets/d/1Z1zFDzVF0_zxEuH3AwBNy8or2SYmpulRnKn2OYvSo5Q/edit?gid=0#gid=0" target="_blank">Google Sheet</a> | 
         <a href="https://www.chess.ca/en/ratings/p/?id=184535" target="_blank">CFC Ranking</a>
     </div>
 """, unsafe_allow_html=True)
@@ -142,22 +142,37 @@ def main():
             # Create a copy of the dataframe to avoid modifying the original
             display_df = filtered_df.copy()
             
-            # Drop the # column and sparkline data column since we don't need to show them
+            # Drop the # column, sparkline data column, and RESULT column since we don't need to show them
             columns_to_drop = []
             if '#' in display_df.columns:
                 columns_to_drop.append('#')
             if 'sparkline data' in display_df.columns:
                 columns_to_drop.append('sparkline data')
+            if 'RESULT' in display_df.columns:
+                columns_to_drop.append('RESULT')
+            if 'Performance Rating' in display_df.columns:
+                columns_to_drop.append('Performance Rating')
+            if 'New Rating' in display_df.columns:
+                columns_to_drop.append('New Rating')
+            if 'Game Rating' in display_df.columns:
+                columns_to_drop.append('Game Rating')
             
             if columns_to_drop:
                 display_df = display_df.drop(columns=columns_to_drop)
             
+            # Format the date to show only the date part (no time)
+            display_df['Date'] = display_df['Date'].dt.date
+            
             # Sort by Date in descending order (most recent first)
             display_df = display_df.sort_values('Date', ascending=False)
             
-            # Add opponent search functionality with auto-update
+            # Reorder columns as requested: Date, Side, Result, ACL, Accuracy %, Opponent Name, Opp. ELO
+            column_order = ['Date', 'Side', 'Result', 'ACL', 'Accuracy %', 'Opponent Name', 'Opp. ELO']
+            display_df = display_df[column_order]
+            
+            # Add opponent search functionality
             st.subheader("Search by Opponent")
-            opponent_search = st.text_input("Enter opponent name to search (results update as you type)", "", key="opponent_search")
+            opponent_search = st.text_input("Enter opponent name to search", "", key="opponent_search")
             
             # Always filter by opponent name (even if empty string)
             # When empty, it will match all names (no filtering)
