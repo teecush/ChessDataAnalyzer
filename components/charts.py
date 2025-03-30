@@ -80,10 +80,8 @@ def create_win_loss_pie(df):
         values=values,
         hole=.3,
         marker_colors=['#4CAF50', '#f44336', '#2196F3'],
-        # Inside text will show percentages
-        textinfo='percent',
-        textposition='inside',
-        insidetextfont=dict(size=12, color='white'),
+        # Don't show text inside the pie
+        textinfo='none',
         # Don't pull any slices so they're aligned properly
         pull=[0, 0, 0],
         # Add count values outside the pie
