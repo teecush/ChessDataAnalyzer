@@ -61,25 +61,52 @@ def create_win_loss_pie(df):
     wins = result_counts.get('win', 0)
     losses = result_counts.get('loss', 0)
     draws = result_counts.get('draw', 0)
+    
+    total = sum([wins, losses, draws])
+    
+    # Calculate percentages
+    win_pct = (wins / total * 100) if total > 0 else 0
+    loss_pct = (losses / total * 100) if total > 0 else 0
+    draw_pct = (draws / total * 100) if total > 0 else 0
 
     labels = ['Wins', 'Losses', 'Draws']
     values = [wins, losses, draws]
     
-    # Create text labels with count values
-    text_labels = [f'Wins: {wins}', f'Losses: {losses}', f'Draws: {draws}']
+    # Create outside text labels with count values
+    outside_labels = [f'Wins: {wins}', f'Losses: {losses}', f'Draws: {draws}']
 
     fig = go.Figure(data=[go.Pie(
         labels=labels, 
         values=values,
         hole=.3,
         marker_colors=['#4CAF50', '#f44336', '#2196F3'],
-        text=text_labels,
-        textinfo='text',
-        textposition='outside',
-        outsidetextfont=dict(size=12),
-        pull=[0.03, 0.03, 0.03],  # Slightly pull slices for better text visibility
-        automargin=True
+        # Inside text will show percentages
+        textinfo='percent',
+        textposition='inside',
+        insidetextfont=dict(size=12, color='white'),
+        # Don't pull any slices so they're aligned properly
+        pull=[0, 0, 0],
+        # Add count values outside the pie
+        text=outside_labels,
+        texttemplate='%{text}',
+        textfont=dict(size=12),
+        hoverinfo='label+percent+value',
+        hovertemplate='%{label}<br>Count: %{value}<br>Percentage: %{percent}<extra></extra>'
     )])
+    
+    # Add the count labels as annotations instead of textposition='outside'
+    annotations = []
+    
+    # Add center annotation for total
+    annotations.append(
+        dict(
+            x=0.5,
+            y=0.5,
+            text=f'Total: {total}',
+            showarrow=False,
+            font=dict(size=12)
+        )
+    )
     
     fig.update_layout(
         title='Game Results Distribution',
@@ -87,16 +114,31 @@ def create_win_loss_pie(df):
         height=300,  # Reduced height for mobile
         margin=dict(l=20, r=20, t=60, b=20),  # Increased margins for text labels
         showlegend=False,  # Hide legend since we're using direct labels
-        annotations=[
-            dict(
-                x=0.5,
-                y=0.5,
-                text=f'Total: {sum(values)}',
-                showarrow=False,
-                font=dict(size=12)
-            )
-        ]
+        annotations=annotations
     )
+    
+    # Add count labels as separate annotations
+    for i, label in enumerate(outside_labels):
+        value = values[i]
+        if value > 0:  # Only add annotation if the value is positive
+            # Get the angle at the middle of the slice
+            angle = (2 * 3.14159 * (value/sum(values)) / 2) if i == 0 else (
+                2 * 3.14159 * (sum(values[:i])/sum(values) + value/sum(values)/2)
+            )
+            
+            # Calculate x,y position at edge of pie + offset
+            r = 1.1  # radius slightly outside pie
+            x = 0.5 + r * np.cos(angle)
+            y = 0.5 + r * np.sin(angle)
+            
+            fig.add_annotation(
+                x=x,
+                y=y,
+                text=label,
+                showarrow=False,
+                font=dict(size=10)
+            )
+    
     return fig
 
 def create_metric_over_time(df, metric_col, title, y_label):
