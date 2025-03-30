@@ -176,79 +176,96 @@ def create_game_analyzer(df):
             check=board.king(board.turn) if board.is_check() else None
         )
         
-        # Create navigation buttons in columns
+        # Create navigation buttons (avoid duplicated keys by making them unique with game label)
         prev_col, position_text_col, next_col = st.columns([1, 4, 1])
         
         with prev_col:
             if selected_move > 0:
-                if st.button("◀ Prev", key=f"prev_move_{selected_game_label}"):
-                    # This will be handled by JavaScript
-                    pass
+                st.button("◀ Prev", key=f"prev_move_{selected_game_label.replace(' ', '_')}", on_click=lambda: None)
         
         with position_text_col:
-            st.write(f"Position after move {selected_move//2 + (1 if selected_move % 2 else 0)}: {'Black' if selected_move % 2 else 'White'}")
+            move_number = selected_move//2 + (1 if selected_move % 2 else 0)
+            side = 'Black' if selected_move % 2 else 'White'
+            st.write(f"Position after move {move_number}: {side}")
             
         with next_col:
             if selected_move < move_count:
-                if st.button("Next ▶", key=f"next_move_{selected_game_label}"):
-                    # This will be handled by JavaScript
-                    pass
+                st.button("Next ▶", key=f"next_move_{selected_game_label.replace(' ', '_')}", on_click=lambda: None)
         
         # Display SVG
         st.image(svg, use_container_width=False)
         
-        # Add JavaScript for keyboard navigation
-        js_code = f"""
+        # Add JavaScript for keyboard navigation with better selectors
+        js_code = """
         <script>
-        // Function to handle key presses
-        document.addEventListener('keydown', function(event) {{
-            // Get the current slider value
+        // Function to wait for an element to exist
+        function waitForElement(selector, callback) {
+            if (document.querySelector(selector)) {
+                callback();
+            } else {
+                setTimeout(function() {
+                    waitForElement(selector, callback);
+                }, 100);
+            }
+        }
+
+        // Handle keyboard navigation
+        document.addEventListener('keydown', function(event) {
+            // Get the current slider
             const slider = document.querySelector('div[data-testid="stSlider"] input[type="range"]');
             if (!slider) return;
             
-            // Handle left arrow key
-            if (event.key === 'ArrowLeft' && {selected_move} > 0) {{
-                // Find and click the prev button
-                const prevButton = document.querySelector('button:contains("◀ Prev")');
-                if (prevButton) {{
-                    prevButton.click();
-                }} else {{
-                    // Directly set slider value
-                    slider.value = {selected_move - 1};
-                    slider.dispatchEvent(new Event('change', {{ bubbles: true }}));
-                }}
-            }}
+            const currentValue = parseInt(slider.value);
+            const min = parseInt(slider.min);
+            const max = parseInt(slider.max);
             
-            // Handle right arrow key
-            if (event.key === 'ArrowRight' && {selected_move} < {move_count}) {{
-                // Find and click the next button
-                const nextButton = document.querySelector('button:contains("Next ▶")');
-                if (nextButton) {{
-                    nextButton.click();
-                }} else {{
-                    // Directly set slider value
-                    slider.value = {selected_move + 1};
-                    slider.dispatchEvent(new Event('change', {{ bubbles: true }}));
-                }}
-            }}
-        }});
-        
-        // Add click handlers for the prev/next buttons
-        document.querySelector('button:contains("◀ Prev")').addEventListener('click', function() {{
-            const slider = document.querySelector('div[data-testid="stSlider"] input[type="range"]');
-            if (slider && {selected_move} > 0) {{
-                slider.value = {selected_move - 1};
-                slider.dispatchEvent(new Event('change', {{ bubbles: true }}));
-            }}
-        }});
-        
-        document.querySelector('button:contains("Next ▶")').addEventListener('click', function() {{
-            const slider = document.querySelector('div[data-testid="stSlider"] input[type="range"]');
-            if (slider && {selected_move} < {move_count}) {{
-                slider.value = {selected_move + 1};
-                slider.dispatchEvent(new Event('change', {{ bubbles: true }}));
-            }}
-        }});
+            // Handle left arrow key - move backward
+            if (event.key === 'ArrowLeft' && currentValue > min) {
+                // Set slider value directly
+                slider.value = currentValue - 1;
+                slider.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            
+            // Handle right arrow key - move forward
+            if (event.key === 'ArrowRight' && currentValue < max) {
+                // Set slider value directly
+                slider.value = currentValue + 1;
+                slider.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        });
+
+        // Add click handlers for the prev/next buttons once they're loaded
+        waitForElement('button[data-testid*="prev_move_"]', function() {
+            const prevButtons = document.querySelectorAll('button[data-testid*="prev_move_"]');
+            prevButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const slider = document.querySelector('div[data-testid="stSlider"] input[type="range"]');
+                    if (slider) {
+                        const currentValue = parseInt(slider.value);
+                        if (currentValue > parseInt(slider.min)) {
+                            slider.value = currentValue - 1;
+                            slider.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                });
+            });
+        });
+
+        waitForElement('button[data-testid*="next_move_"]', function() {
+            const nextButtons = document.querySelectorAll('button[data-testid*="next_move_"]');
+            nextButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const slider = document.querySelector('div[data-testid="stSlider"] input[type="range"]');
+                    if (slider) {
+                        const currentValue = parseInt(slider.value);
+                        if (currentValue < parseInt(slider.max)) {
+                            slider.value = currentValue + 1;
+                            slider.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                });
+            });
+        });
         </script>
         """
         

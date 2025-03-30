@@ -4,6 +4,9 @@ import chess.pgn
 import pandas as pd
 import re
 
+# Define the player names globally for consistency
+PLAYER_NAMES = ["Tony", "Tony Cushman"]
+
 def parse_pgn(pgn_text):
     """Parse PGN text and return a chess.pgn.Game object"""
     if not pgn_text or pd.isna(pgn_text):
@@ -193,19 +196,22 @@ def analyze_game(pgn_text, player_side=None):
     opponent_side = "Black" if player_side == "White" else "White"
     opponent_mistakes = [m for m in mistakes if m["side"] == opponent_side]
     
-    # Analyze player's performance
+    # Get opponent name
+    opponent_name = white if player_side == "Black" else black
+    
+    # Analyze player's performance with personalized insights for Tony
     if len(player_mistakes) == 0:
-        insights.append("You played a clean game with no obvious mistakes.")
+        insights.append("Tony, you played a clean game with no obvious mistakes!")
     elif len(player_mistakes) <= 2:
-        insights.append(f"You made {len(player_mistakes)} mistake(s), overall a good game.")
+        insights.append(f"Tony, you made {len(player_mistakes)} mistake(s), overall a good game.")
     else:
-        insights.append(f"You made {len(player_mistakes)} mistakes that affected your position.")
+        insights.append(f"Tony, you made {len(player_mistakes)} mistakes that affected your position.")
     
     # Add comparison with opponent
     if len(opponent_mistakes) > len(player_mistakes):
-        insights.append(f"Your opponent made more mistakes ({len(opponent_mistakes)}) than you did ({len(player_mistakes)}).")
+        insights.append(f"Your opponent made more mistakes ({len(opponent_mistakes)}) than you did ({len(player_mistakes)}), Tony.")
     elif len(opponent_mistakes) < len(player_mistakes):
-        insights.append(f"You made more mistakes ({len(player_mistakes)}) than your opponent ({len(opponent_mistakes)}).")
+        insights.append(f"Tony, you made more mistakes ({len(player_mistakes)}) than your opponent ({len(opponent_mistakes)}).")
     
     # Add phase analysis
     early_mistakes = [m for m in player_mistakes if m["move_number"] <= 10]
@@ -213,17 +219,17 @@ def analyze_game(pgn_text, player_side=None):
     late_mistakes = [m for m in player_mistakes if m["move_number"] > 25]
     
     if early_mistakes:
-        insights.append(f"Your early game had {len(early_mistakes)} mistake(s). Focus on opening preparation.")
+        insights.append(f"Tony, your early game had {len(early_mistakes)} mistake(s). Focus on opening preparation.")
     if middle_mistakes:
-        insights.append(f"Your middle game had {len(middle_mistakes)} mistake(s). Work on tactical awareness.")
+        insights.append(f"Tony, your middle game had {len(middle_mistakes)} mistake(s). Work on tactical awareness.")
     if late_mistakes:
-        insights.append(f"Your endgame had {len(late_mistakes)} mistake(s). Practice endgame techniques.")
+        insights.append(f"Tony, your endgame had {len(late_mistakes)} mistake(s). Practice endgame techniques.")
     
     # Add game length analysis
     if move_count > 60:
-        insights.append(f"This was a long game ({move_count//2} moves), suggesting good defensive play.")
+        insights.append(f"This was a long game ({move_count//2} moves), Tony. You showed good defensive skills.")
     elif move_count < 20:
-        insights.append(f"This was a short game ({move_count//2} moves), which may indicate tactical oversights.")
+        insights.append(f"This was a short game ({move_count//2} moves), Tony, which may indicate tactical oversights.")
     
     # Insight based on opening
     insights.append(f"Opening played: {opening_info['opening_full']}")
@@ -331,6 +337,16 @@ def get_opening_performance(df):
         'opening_stats_full': opening_stats_full
     }
 
+def is_player_name(name, player_names=None):
+    """Check if a name belongs to the player (Tony/Tony Cushman)"""
+    if player_names is None:
+        player_names = PLAYER_NAMES
+        
+    if not name or pd.isna(name):
+        return False
+        
+    return any(player.lower() in name.lower() for player in player_names)
+
 def get_common_mistakes(df):
     """Identify common mistake patterns across games"""
     if df is None or 'PGN' not in df.columns:
@@ -358,7 +374,7 @@ def get_common_mistakes(df):
     
     # Analyze patterns if we have enough mistakes
     if len(all_mistakes) < 3:
-        return ["Not enough game data to identify mistake patterns."]
+        return ["Not enough game data to identify mistake patterns for Tony."]
     
     # Count early game (moves 1-10), middle game (11-25), and endgame (26+) mistakes
     early_mistakes = sum(1 for m in all_mistakes if m['move_number'] <= 10)
@@ -370,10 +386,10 @@ def get_common_mistakes(df):
     # Identify where most mistakes happen
     most_mistakes = max(early_mistakes, middle_mistakes, endgame_mistakes)
     if most_mistakes == early_mistakes and early_mistakes > 0:
-        patterns.append("You tend to make more mistakes in the opening phase (moves 1-10).")
+        patterns.append("Tony, you tend to make more mistakes in the opening phase (moves 1-10).")
     elif most_mistakes == middle_mistakes and middle_mistakes > 0:
-        patterns.append("Your middle game (moves 11-25) shows the most room for improvement.")
+        patterns.append("Tony, your middle game (moves 11-25) shows the most room for improvement.")
     elif most_mistakes == endgame_mistakes and endgame_mistakes > 0:
-        patterns.append("Your endgame play (moves 26+) contains the most mistakes.")
+        patterns.append("Tony, your endgame play (moves 26+) contains the most mistakes.")
     
     return patterns

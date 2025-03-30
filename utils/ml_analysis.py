@@ -56,20 +56,20 @@ def generate_performance_insights(df):
         'recommendations': generate_recommendations(df, features)
     }
 
-    # Generate text insights
+    # Generate text insights personalized for Tony
     text_insights = []
     if insights['rating_progression'] > 0:
-        text_insights.append("📈 Your rating shows an improving trend")
+        text_insights.append("📈 Tony, your rating shows an improving trend")
     else:
-        text_insights.append("📊 Your rating has been stable or slightly declining")
+        text_insights.append("📊 Tony, your rating has been stable or slightly declining")
 
     consistency = insights['strength_consistency']
     if consistency < 10:
-        text_insights.append("🎯 Your play shows high consistency across games")
+        text_insights.append("🎯 Tony, your play shows high consistency across games")
     elif consistency < 20:
-        text_insights.append("⚖️ Your play shows moderate consistency")
+        text_insights.append("⚖️ Tony, your play shows moderate consistency")
     else:
-        text_insights.append("📊 Your play shows high variance between games")
+        text_insights.append("📊 Tony, your play shows high variance between games")
 
     # Add personalized recommendations
     text_insights.extend(insights['recommendations'])
@@ -89,7 +89,7 @@ def generate_performance_insights(df):
             # Count openings played at least twice
             from utils.pgn_analyzer import extract_opening_info
             opening_counts = df['PGN'].apply(
-                lambda x: extract_opening_info(x)['opening'] if pd.notna(x) and x else None
+                lambda x: extract_opening_info(x)['opening_main'] if pd.notna(x) and x else None
             ).value_counts()
             
             common_openings = opening_counts[opening_counts >= 2].index.tolist()
@@ -97,11 +97,11 @@ def generate_performance_insights(df):
             if common_openings:
                 # Get most common opening
                 most_common = common_openings[0]
-                text_insights.append(f"🏆 You have the most experience with the {most_common} opening")
+                text_insights.append(f"🏆 Tony, you have the most experience with the {most_common} opening")
                 
                 # Add advice about expanding repertoire if appropriate
                 if len(common_openings) <= 2 and len(df) >= 10:
-                    text_insights.append("🎭 Consider expanding your opening repertoire to gain experience with different structures")
+                    text_insights.append("🎭 Tony, consider expanding your opening repertoire to gain experience with different structures")
         except Exception as e:
             # If any errors occur with PGN analysis, don't break the main analysis
             print(f"Error in PGN-based ML analysis: {e}")
@@ -134,22 +134,22 @@ def generate_recommendations(df, features):
 
     recommendation_map = {
         'tactical_precision': [
-            "🎯 Focus on tactical puzzles to improve calculation accuracy",
-            "⚔️ Practice endgame positions to reduce mistakes in critical positions"
+            "🎯 Tony, focus on tactical puzzles to improve calculation accuracy",
+            "⚔️ Tony, practice endgame positions to reduce mistakes in critical positions"
         ],
         'strategic_planning': [
-            "🧮 Study positional chess principles to improve long-term planning",
-            "🏰 Review your games focusing on pawn structure decisions"
+            "🧮 Tony, study positional chess principles to improve long-term planning",
+            "🏰 Tony, review your games focusing on pawn structure decisions"
         ],
         'underperformance': [
-            "🧘‍♂️ Work on pre-game preparation to reduce opening mistakes",
-            "⏰ Practice time management with rapid games"
+            "🧘‍♂️ Tony, work on pre-game preparation to reduce opening mistakes",
+            "⏰ Tony, practice time management with rapid games"
         ]
     }
 
     # Add general recommendations if no specific weaknesses found
     if not weakness_areas:
-        recommendations.append("🌟 Your play is well-rounded. Consider studying advanced concepts to further improve")
+        recommendations.append("🌟 Tony, your play is well-rounded. Consider studying advanced concepts to further improve")
     else:
         for area in weakness_areas:
             recommendations.extend(recommendation_map.get(area, []))
