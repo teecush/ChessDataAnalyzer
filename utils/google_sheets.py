@@ -20,9 +20,6 @@ def get_google_sheets_data():
         # Read CSV data with all columns as string type
         df = pd.read_csv(io.StringIO(response.text), dtype=str)
 
-        # Debug information before processing
-        st.sidebar.write("Raw data rows:", len(df))
-
         # Check if the dataframe contains columns we need
         if len(df.columns) >= 13:  # Now checking for 13 columns including PGN
             # Check if first row contains headers (partial check)
@@ -67,9 +64,7 @@ def get_google_sheets_data():
                 df.columns = expected_core_headers
                 df['PGN'] = ''  # Add empty PGN column
 
-            # Debug information after processing
-            st.sidebar.write("Processed data rows:", len(df))
-            st.sidebar.write("Column types:", df.dtypes.to_dict())
+            # Remove debug information
 
             return df
 

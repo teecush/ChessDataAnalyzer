@@ -7,9 +7,6 @@ def process_chess_data(df):
         return None
 
     try:
-        # Debug starting point
-        print("Starting data processing, initial shape:", df.shape)
-
         # Clean string data and convert date
         for col in df.columns:
             if df[col].dtype == 'object':
@@ -18,15 +15,12 @@ def process_chess_data(df):
         # Convert date with error handling
         try:
             df['Date'] = pd.to_datetime(df['Date'])
-            print("Date conversion successful. Sample dates:", df['Date'].head())
         except Exception as e:
-            print(f"Error converting dates: {e}")
-            print("Sample date values:", df['Date'].head())
+            # Silently log error but don't output debug info
             return None
 
         # Filter out rows without dates (future/unplayed games)
         df = df[df['Date'].notna()].copy()
-        print(f"Games with valid dates: {len(df)}")
 
         # Convert game number to numeric, ensure it starts from 1
         df['#'] = pd.to_numeric(df['#'], errors='coerce')
@@ -60,14 +54,6 @@ def process_chess_data(df):
             columns_to_keep.append('PGN')
             
         processed_df = df[columns_to_keep].copy()
-
-        # Debug information
-        print("Processed data shape:", processed_df.shape)
-        print("Sample of processed data:", processed_df.head())
-        print("Column dtypes:", processed_df.dtypes)
-        print("Rating range:", processed_df['Performance Rating'].min(), "-", processed_df['Performance Rating'].max())
-        print("Total number of games:", len(processed_df))
-        print("Game numbers range:", processed_df['#'].min(), "-", processed_df['#'].max())
 
         return processed_df
 
