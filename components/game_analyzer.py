@@ -4,6 +4,7 @@ import plotly.graph_objects as go
 import chess
 import chess.svg
 from utils.pgn_analyzer import analyze_game, parse_pgn
+import streamlit.components.v1 as components
 
 def create_game_analyzer(df):
     """Create a game analyzer section for the dashboard"""
@@ -26,6 +27,9 @@ def create_game_analyzer(df):
         lambda row: f"{row['Date_Formatted']} - {row['Side']} vs {row['Opponent Name']} ({row['Result']})",
         axis=1
     )
+    
+    # Sort by date in descending order (most recent first)
+    games_with_pgn = games_with_pgn.sort_values('Date', ascending=False)
     
     selected_game_label = st.selectbox(
         "Select a game to analyze:",
@@ -172,6 +176,80 @@ def create_game_analyzer(df):
             check=board.king(board.turn) if board.is_check() else None
         )
         
+        # Create navigation buttons in columns
+        prev_col, position_text_col, next_col = st.columns([1, 4, 1])
+        
+        with prev_col:
+            if selected_move > 0:
+                if st.button("◀ Prev", key=f"prev_move_{selected_game_label}"):
+                    # This will be handled by JavaScript
+                    pass
+        
+        with position_text_col:
+            st.write(f"Position after move {selected_move//2 + (1 if selected_move % 2 else 0)}: {'Black' if selected_move % 2 else 'White'}")
+            
+        with next_col:
+            if selected_move < move_count:
+                if st.button("Next ▶", key=f"next_move_{selected_game_label}"):
+                    # This will be handled by JavaScript
+                    pass
+        
         # Display SVG
-        st.write(f"Position after move {selected_move//2 + (1 if selected_move % 2 else 0)}: {'Black' if selected_move % 2 else 'White'}")
-        st.image(svg, use_column_width=False)
+        st.image(svg, use_container_width=False)
+        
+        # Add JavaScript for keyboard navigation
+        js_code = f"""
+        <script>
+        // Function to handle key presses
+        document.addEventListener('keydown', function(event) {{
+            // Get the current slider value
+            const slider = document.querySelector('div[data-testid="stSlider"] input[type="range"]');
+            if (!slider) return;
+            
+            // Handle left arrow key
+            if (event.key === 'ArrowLeft' && {selected_move} > 0) {{
+                // Find and click the prev button
+                const prevButton = document.querySelector('button:contains("◀ Prev")');
+                if (prevButton) {{
+                    prevButton.click();
+                }} else {{
+                    // Directly set slider value
+                    slider.value = {selected_move - 1};
+                    slider.dispatchEvent(new Event('change', {{ bubbles: true }}));
+                }}
+            }}
+            
+            // Handle right arrow key
+            if (event.key === 'ArrowRight' && {selected_move} < {move_count}) {{
+                // Find and click the next button
+                const nextButton = document.querySelector('button:contains("Next ▶")');
+                if (nextButton) {{
+                    nextButton.click();
+                }} else {{
+                    // Directly set slider value
+                    slider.value = {selected_move + 1};
+                    slider.dispatchEvent(new Event('change', {{ bubbles: true }}));
+                }}
+            }}
+        }});
+        
+        // Add click handlers for the prev/next buttons
+        document.querySelector('button:contains("◀ Prev")').addEventListener('click', function() {{
+            const slider = document.querySelector('div[data-testid="stSlider"] input[type="range"]');
+            if (slider && {selected_move} > 0) {{
+                slider.value = {selected_move - 1};
+                slider.dispatchEvent(new Event('change', {{ bubbles: true }}));
+            }}
+        }});
+        
+        document.querySelector('button:contains("Next ▶")').addEventListener('click', function() {{
+            const slider = document.querySelector('div[data-testid="stSlider"] input[type="range"]');
+            if (slider && {selected_move} < {move_count}) {{
+                slider.value = {selected_move + 1};
+                slider.dispatchEvent(new Event('change', {{ bubbles: true }}));
+            }}
+        }});
+        </script>
+        """
+        
+        st.components.v1.html(js_code, height=0)
