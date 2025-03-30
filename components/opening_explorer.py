@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from utils.pgn_analyzer import get_opening_performance, analyze_game
 import re
+import time
 
 def create_opening_explorer(df):
     """Create an opening explorer section for the dashboard with hierarchical display"""
@@ -409,16 +410,24 @@ def analyze_opening(df, opening_df, selected_opening, selected_main=None):
         st.metric("As Black", black_games)
     
     # Add option to filter by side (include a unique timestamp-like element to avoid collisions)
-    # Create a unique key by combining opening name and its position in the dataframe
-    opening_idx = opening_df[opening_df['OpeningFull'] == selected_opening].index.min()
-    if pd.isna(opening_idx):
-        opening_idx = 0
-        
+    # Create a unique key that includes both the opening name and selected_main to avoid conflicts
+    if selected_opening == "All":
+        if selected_main and selected_main != "All":
+            key_str = f"side_filter_All_{selected_main.replace(' ', '_')}"
+        else:
+            key_str = "side_filter_All_global"
+    else:
+        # Get position in dataframe for additional uniqueness
+        opening_idx = opening_df[opening_df['OpeningFull'] == selected_opening].index.min()
+        if pd.isna(opening_idx):
+            opening_idx = 0
+        key_str = f"side_filter_{selected_opening.replace(' ', '_').replace(':', '').replace('.', '_')}_{opening_idx}"
+    
     side_filter = st.radio(
         "Filter by side:",
         options=["All", "White", "Black"],
         horizontal=True,
-        key=f"side_filter_{selected_opening.replace(' ', '_').replace(':', '').replace('.', '_')}_{opening_idx}"
+        key=key_str
     )
     
     # Apply side filter - ensure case-insensitive matching
@@ -460,11 +469,26 @@ def analyze_opening(df, opening_df, selected_opening, selected_main=None):
         opponents = display_df['Opponent Name'].tolist()
         game_options = [f"{date} vs {opp}" for date, opp in zip(game_dates, opponents)]
         
+        # Create a unique key for the game selector that matches our scheme from above
+        # Create a timestamp-like value for additional uniqueness
+        time_suffix = int(time.time()) % 10000
+        
+        if selected_opening == "All":
+            if selected_main and selected_main != "All":
+                game_key_str = f"game_select_All_{selected_main.replace(' ', '_')}"
+            else:
+                game_key_str = f"game_select_All_global_{time_suffix}"
+        else:
+            # Make sure opening_idx is defined 
+            if 'opening_idx' not in locals():
+                opening_idx = 0
+            game_key_str = f"game_select_{selected_opening.replace(' ', '_').replace(':', '').replace('.', '_')}_{opening_idx}"
+            
         selected_game_idx = st.selectbox(
             "Select a game to analyze:",
             options=range(len(game_options)),
             format_func=lambda x: game_options[x],
-            key=f"game_select_{selected_opening.replace(' ', '_').replace(':', '').replace('.', '_')}_{opening_idx}"
+            key=game_key_str
         )
         
         # Analyze the selected game
