@@ -72,8 +72,8 @@ def create_win_loss_pie(df):
     loss_pct = round((losses / total * 100), 1) if total > 0 else 0
     draw_pct = round((draws / total * 100), 1) if total > 0 else 0
     
-    # Create outside percentage-only labels
-    outside_labels = [f'Wins: {win_pct}%', f'Losses: {loss_pct}%', f'Draws: {draw_pct}%']
+    # Create outside percentage-only labels (larger bold font for better visibility)
+    outside_labels = [f'<b>Wins: {win_pct}%</b>', f'<b>Losses: {loss_pct}%</b>', f'<b>Draws: {draw_pct}%</b>']
     
     # Create inside count-only texts
     inside_counts = [str(wins), str(losses), str(draws)]
@@ -92,8 +92,31 @@ def create_win_loss_pie(df):
         # Don't use text attribute for outside labels (we'll use annotations instead)
         text=None,
         hoverinfo='label+percent+value',
-        hovertemplate='%{label}<br>Count: %{value}<br>Percentage: %{percent}<extra></extra>'
+        hovertemplate='%{label}<br>Count: %{value}<br>Percentage: %{percent}<extra></extra>',
+        # Add names for the legend
+        name='Game Results',
+        legendgroup='results'
     )])
+    
+    # Add hidden traces for color legend
+    fig.add_trace(go.Scatter(
+        x=[None], y=[None], 
+        mode='markers',
+        marker=dict(size=10, color='#4CAF50'),
+        showlegend=True, name='Wins'
+    ))
+    fig.add_trace(go.Scatter(
+        x=[None], y=[None], 
+        mode='markers',
+        marker=dict(size=10, color='#f44336'),
+        showlegend=True, name='Losses'
+    ))
+    fig.add_trace(go.Scatter(
+        x=[None], y=[None], 
+        mode='markers',
+        marker=dict(size=10, color='#2196F3'),
+        showlegend=True, name='Draws'
+    ))
     
     # Add the count labels as annotations instead of textposition='outside'
     annotations = []
@@ -105,7 +128,7 @@ def create_win_loss_pie(df):
             y=0.5,
             text=f'Total: {total}',
             showarrow=False,
-            font=dict(size=12)
+            font=dict(size=14, color='black', family='Arial, sans-serif')
         )
     )
     
@@ -119,7 +142,7 @@ def create_win_loss_pie(df):
             )
             
             # Calculate x,y position at edge of pie + offset
-            r = 1.2  # radius further outside pie for better visibility
+            r = 1.3  # radius further outside pie for better visibility
             x = 0.5 + r * np.cos(angle)
             y = 0.5 + r * np.sin(angle)
             
@@ -130,16 +153,23 @@ def create_win_loss_pie(df):
                     y=y,
                     text=label,
                     showarrow=False,
-                    font=dict(size=12)
+                    font=dict(size=14)
                 )
             )
     
     fig.update_layout(
         title='Game Results Distribution',
         template='plotly_white',
-        height=300,  # Reduced height for mobile
-        margin=dict(l=40, r=40, t=60, b=30),  # Increased margins for outside labels
-        showlegend=False,  # Hide legend since we're using direct labels
+        height=350,  # Increased height to accommodate legend
+        margin=dict(l=50, r=50, t=60, b=50),  # Increased margins for outside labels
+        showlegend=True,  # Show legend for the pie chart colors
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.2,  # Position below the chart
+            xanchor="center",
+            x=0.5
+        ),
         annotations=annotations
     )
     
