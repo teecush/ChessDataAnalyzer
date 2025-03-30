@@ -89,10 +89,8 @@ def create_win_loss_pie(df):
         insidetextfont=dict(size=12, color='white'),
         # Don't pull any slices so they're aligned properly
         pull=[0, 0, 0],
-        # Add count values outside the pie
-        text=outside_labels,
-        texttemplate='%{text}',
-        textfont=dict(size=12),
+        # Don't use text attribute for outside labels (we'll use annotations instead)
+        text=None,
         hoverinfo='label+percent+value',
         hovertemplate='%{label}<br>Count: %{value}<br>Percentage: %{percent}<extra></extra>'
     )])
@@ -111,16 +109,7 @@ def create_win_loss_pie(df):
         )
     )
     
-    fig.update_layout(
-        title='Game Results Distribution',
-        template='plotly_white',
-        height=300,  # Reduced height for mobile
-        margin=dict(l=20, r=20, t=60, b=20),  # Increased margins for text labels
-        showlegend=False,  # Hide legend since we're using direct labels
-        annotations=annotations
-    )
-    
-    # Add count labels as separate annotations
+    # Add count labels as annotations
     for i, label in enumerate(outside_labels):
         value = values[i]
         if value > 0:  # Only add annotation if the value is positive
@@ -130,17 +119,29 @@ def create_win_loss_pie(df):
             )
             
             # Calculate x,y position at edge of pie + offset
-            r = 1.1  # radius slightly outside pie
+            r = 1.2  # radius further outside pie for better visibility
             x = 0.5 + r * np.cos(angle)
             y = 0.5 + r * np.sin(angle)
             
-            fig.add_annotation(
-                x=x,
-                y=y,
-                text=label,
-                showarrow=False,
-                font=dict(size=10)
+            # Add to annotations list
+            annotations.append(
+                dict(
+                    x=x,
+                    y=y,
+                    text=label,
+                    showarrow=False,
+                    font=dict(size=12)
+                )
             )
+    
+    fig.update_layout(
+        title='Game Results Distribution',
+        template='plotly_white',
+        height=300,  # Reduced height for mobile
+        margin=dict(l=40, r=40, t=60, b=30),  # Increased margins for outside labels
+        showlegend=False,  # Hide legend since we're using direct labels
+        annotations=annotations
+    )
     
     return fig
 
