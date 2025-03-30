@@ -2,8 +2,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 
-def create_rating_progression(df):
-    """Create rating progression chart"""
+def create_rating_progression(df, side_filter="Both"):
+    """Create rating progression chart with side awareness"""
     # Filter out rows where New Rating is NaN for the chart
     rating_df = df[df['New Rating'].notna()].copy()
 
@@ -34,9 +34,14 @@ def create_rating_progression(df):
             line=dict(color='#FF4B4B', width=2, dash='dash'),
             showlegend=True
         ))
+    
+    # Update title with side information
+    title = 'Rating Progression Over Time'
+    if side_filter != "Both":
+        title = f'Rating Progression ({side_filter} Games)'
 
     fig.update_layout(
-        title='Rating Progression Over Time',
+        title=title,
         template='plotly_white',
         hovermode='x unified',
         height=300,  # Reduced height for mobile
@@ -53,8 +58,8 @@ def create_rating_progression(df):
     )
     return fig
 
-def create_win_loss_pie(df):
-    """Create win/loss distribution pie chart"""
+def create_win_loss_pie(df, side_filter="Both"):
+    """Create win/loss distribution pie chart with side awareness"""
     # Count results with case-insensitive matching
     # Use 'RESULT' column instead of 'Result'
     result_counts = df['RESULT'].str.lower().value_counts()
@@ -100,9 +105,14 @@ def create_win_loss_pie(df):
         showarrow=False
     )
     
+    # Set title with side information
+    title = 'Game Results Distribution'
+    if side_filter != "Both":
+        title = f'Results as {side_filter}'
+    
     # Clean up the chart
     fig.update_layout(
-        title='Game Results Distribution',
+        title=title,
         template='plotly_white',
         height=350,
         margin=dict(l=30, r=30, t=60, b=30),
@@ -120,8 +130,8 @@ def create_win_loss_pie(df):
     
     return fig
 
-def create_metric_over_time(df, metric_col, title, y_label):
-    """Create line chart for metrics over time"""
+def create_metric_over_time(df, metric_col, title, y_label, side_filter="Both"):
+    """Create line chart for metrics over time with side awareness"""
     # Filter out rows where metric is NaN
     metric_df = df[df[metric_col].notna()].copy()
 
@@ -152,9 +162,14 @@ def create_metric_over_time(df, metric_col, title, y_label):
             line=dict(color='#FF4B4B', width=2, dash='dash'),
             showlegend=True
         ))
+    
+    # Update title with side information
+    display_title = title
+    if side_filter != "Both":
+        display_title = f"{title} ({side_filter})"
 
     fig.update_layout(
-        title=title,
+        title=display_title,
         template='plotly_white',
         showlegend=True,
         legend=dict(
@@ -172,28 +187,32 @@ def create_metric_over_time(df, metric_col, title, y_label):
     )
     return fig
 
-def create_performance_charts(df):
-    """Create all performance metric charts"""
+def create_performance_charts(df, side_filter="Both"):
+    """Create all performance metric charts with side filter"""
     charts = {
         'acl': create_metric_over_time(
             df, 'ACL',
             'ACL Over Time',
-            'ACL'
+            'ACL',
+            side_filter
         ),
         'accuracy': create_metric_over_time(
             df, 'Accuracy %',
             'Accuracy % Over Time',
-            'Accuracy %'
+            'Accuracy %',
+            side_filter
         ),
         'game_rating': create_metric_over_time(
             df, 'Game Rating',
             'Game Rating Over Time',
-            'Game ELO'
+            'Game ELO',
+            side_filter
         ),
         'performance_rating': create_metric_over_time(
             df, 'Performance Rating',
             'Performance Rating Over Time',
-            'Performance Rating'
+            'Performance Rating',
+            side_filter
         )
     }
     return charts

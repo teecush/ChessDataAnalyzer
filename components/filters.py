@@ -36,6 +36,15 @@ def create_filters(df):
     else:
         rating_range = None
         st.sidebar.text("No valid ratings available")
+        
+    # Side filter (White/Black/Both)
+    st.sidebar.subheader("Game Side")
+    side_filter = st.sidebar.radio(
+        "Filter by side:",
+        options=["Both", "White", "Black"],
+        index=0,  # Default to "Both"
+        key="side_filter"
+    )
 
     # Debug info
     if date_range:
@@ -43,7 +52,8 @@ def create_filters(df):
 
     return {
         'date_range': date_range,
-        'rating_range': rating_range
+        'rating_range': rating_range,
+        'side_filter': side_filter
     }
 
 def apply_filters(df, filters):
@@ -64,5 +74,14 @@ def apply_filters(df, filters):
             df['New Rating'].between(filters['rating_range'][0], filters['rating_range'][1])
         )
         filtered_df = filtered_df[rating_mask]
+        
+    # Apply side filter (White/Black)
+    if filters['side_filter'] != "Both":
+        # Handle various formats of side data (W/WHITE/White or B/BLACK/Black)
+        if filters['side_filter'] == "White":
+            side_mask = df['Side'].str.upper().isin(['W', 'WHITE'])
+        else:  # Black
+            side_mask = df['Side'].str.upper().isin(['B', 'BLACK'])
+        filtered_df = filtered_df[side_mask]
 
     return filtered_df  # Return a copy to avoid SettingWithCopyWarning

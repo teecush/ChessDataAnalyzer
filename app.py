@@ -74,19 +74,19 @@ def main():
         with col3:
             st.metric("Win Percentage", f"{stats['win_percentage']:.1f}%")
 
-    # Create performance metric charts
+    # Create performance metric charts with side filtering
     st.subheader("Performance Metrics")
-    performance_charts = create_performance_charts(filtered_df)
+    performance_charts = create_performance_charts(filtered_df, filters['side_filter'])
 
     # Display charts in tabs
     # Changed tab order per request: Rating, Results, Accuracy, ACL, Game Rating, Performance Rating
     tab1, tab2 = st.tabs(["Rating", "Results"])
 
     with tab1:
-        st.plotly_chart(create_rating_progression(filtered_df), use_container_width=True)
+        st.plotly_chart(create_rating_progression(filtered_df, filters['side_filter']), use_container_width=True)
 
     with tab2:
-        st.plotly_chart(create_win_loss_pie(filtered_df), use_container_width=True)
+        st.plotly_chart(create_win_loss_pie(filtered_df, filters['side_filter']), use_container_width=True)
     
     # Accuracy metrics section
     st.subheader("Accuracy Metrics")
