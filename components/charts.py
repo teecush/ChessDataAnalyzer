@@ -64,23 +64,38 @@ def create_win_loss_pie(df):
 
     labels = ['Wins', 'Losses', 'Draws']
     values = [wins, losses, draws]
+    
+    # Create text labels with count values
+    text_labels = [f'Wins: {wins}', f'Losses: {losses}', f'Draws: {draws}']
 
-    fig = go.Figure(data=[go.Pie(labels=labels, values=values,
-                                hole=.3,
-                                marker_colors=['#4CAF50', '#f44336', '#2196F3'])])
+    fig = go.Figure(data=[go.Pie(
+        labels=labels, 
+        values=values,
+        hole=.3,
+        marker_colors=['#4CAF50', '#f44336', '#2196F3'],
+        text=text_labels,
+        textinfo='text',
+        textposition='outside',
+        outsidetextfont=dict(size=12),
+        pull=[0.03, 0.03, 0.03],  # Slightly pull slices for better text visibility
+        automargin=True
+    )])
+    
     fig.update_layout(
         title='Game Results Distribution',
         template='plotly_white',
         height=300,  # Reduced height for mobile
-        margin=dict(l=10, r=10, t=60, b=10),  # Increased top margin to prevent toolbar overlap
-        showlegend=True,
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1
-        )
+        margin=dict(l=20, r=20, t=60, b=20),  # Increased margins for text labels
+        showlegend=False,  # Hide legend since we're using direct labels
+        annotations=[
+            dict(
+                x=0.5,
+                y=0.5,
+                text=f'Total: {sum(values)}',
+                showarrow=False,
+                font=dict(size=12)
+            )
+        ]
     )
     return fig
 
