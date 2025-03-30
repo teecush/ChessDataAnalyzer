@@ -46,6 +46,29 @@
     text-transform: uppercase;
 }
 
+/* Styling for the chess resource links */
+.chess-links {
+    margin: 1rem 0 2rem 0;
+    padding: 0.8rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.chess-links a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+    margin: 0 0.2rem;
+}
+
+.chess-links a:hover {
+    color: #2c3e50;
+    text-decoration: underline;
+}
+
 /* Mobile-specific adjustments */
 @media (max-width: 768px) {
     .main {

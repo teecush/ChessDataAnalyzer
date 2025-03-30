@@ -9,7 +9,7 @@ from components.filters import create_filters, apply_filters
 
 # Page configuration
 st.set_page_config(
-    page_title="Chess Analytics Dashboard",
+    page_title="TeeCush's Chess Analytics Dashboard",
     page_icon="♟️",
     layout="wide",
     initial_sidebar_state="collapsed"  # Start with collapsed sidebar on mobile
@@ -22,8 +22,18 @@ with open('assets/chess_style.css') as f:
 # App header
 st.markdown("""
     <div class='chess-header'>
-        <h1>♟️ Chess Analytics Dashboard</h1>
+        <h1>♟️ TeeCush's Chess Analytics Dashboard</h1>
         <p>Track and analyze your chess performance</p>
+    </div>
+""", unsafe_allow_html=True)
+
+# Add links
+st.markdown("""
+    <div class='chess-links'>
+        <a href="https://lichess.org/study/aatGfpd6/C8WS6Cy8" target="_blank">Lichess Study</a> | 
+        <a href="https://www.chess.com/library/collections/tonyc-annex-chess-club-games-H8SCFdtS" target="_blank">Chess.com Library</a> | 
+        <a href="https://docs.google.com/spreadsheets/d/1Z1zFDzVF0_zxEuH3AwBNy8or2SYmpulRnKn2OYvSo5Q/edit?gid=0#gid=0" target="_blank">Chess Data Google Sheet</a> | 
+        <a href="https://www.chess.ca/en/ratings/p/?id=184535" target="_blank">CFC Ranking</a>
     </div>
 """, unsafe_allow_html=True)
 
@@ -67,32 +77,34 @@ def main():
     performance_charts = create_performance_charts(filtered_df)
 
     # Display charts in tabs
-    # Put Accuracy and ACL in separate tabs to give them more space
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "Rating", "Results", "Game Rating", "Performance Rating"
-    ])
+    # Changed tab order per request: Rating, Results, Accuracy, ACL, Game Rating, Performance Rating
+    tab1, tab2 = st.tabs(["Rating", "Results"])
 
     with tab1:
         st.plotly_chart(create_rating_progression(filtered_df), use_container_width=True)
 
     with tab2:
         st.plotly_chart(create_win_loss_pie(filtered_df), use_container_width=True)
-
-    with tab3:
-        st.plotly_chart(performance_charts['game_rating'], use_container_width=True)
-
-    with tab4:
-        st.plotly_chart(performance_charts['performance_rating'], use_container_width=True)
     
-    # Add separate sections for Accuracy and ACL with full width for better visualization on mobile
+    # Accuracy metrics section
     st.subheader("Accuracy Metrics")
-    accuracy_tab, acl_tab = st.tabs(["Accuracy %", "Average Centipawn Loss"])
+    accuracy_tab, acl_tab = st.tabs(["Accuracy %", "Average Centipawn Loss (ACL)"])
     
     with accuracy_tab:
         st.plotly_chart(performance_charts['accuracy'], use_container_width=True)
     
     with acl_tab:
         st.plotly_chart(performance_charts['acl'], use_container_width=True)
+        
+    # Game ratings section
+    st.subheader("Rating Metrics")
+    game_tab, perf_tab = st.tabs(["Game Rating", "Performance Rating"])
+    
+    with game_tab:
+        st.plotly_chart(performance_charts['game_rating'], use_container_width=True)
+        
+    with perf_tab:
+        st.plotly_chart(performance_charts['performance_rating'], use_container_width=True)
 
     # ML-based Analysis Section
     if len(filtered_df) >= 5:  # Only show ML analysis if we have enough games
@@ -124,15 +136,21 @@ def main():
     else:
         st.info("Need at least 5 games for AI analysis")
 
-    # Display raw data table with pagination
+    # Display raw data table - show all games, reverse order, and hide # column
     with st.expander("Game History", expanded=False):
-        page_size = 10  # Reduced page size for mobile
-        n_pages = len(filtered_df) // page_size + (1 if len(filtered_df) % page_size > 0 else 0)
-        if n_pages > 0:
-            page = st.number_input('Page', min_value=1, max_value=n_pages, value=1) - 1
-            start_idx = page * page_size
-            end_idx = min(start_idx + page_size, len(filtered_df))
-            st.dataframe(filtered_df.iloc[start_idx:end_idx], use_container_width=True)
+        if len(filtered_df) > 0:
+            # Create a copy of the dataframe to avoid modifying the original
+            display_df = filtered_df.copy()
+            
+            # Drop the # column since we don't need to show it
+            if '#' in display_df.columns:
+                display_df = display_df.drop(columns=['#'])
+            
+            # Sort by Date in descending order (most recent first)
+            display_df = display_df.sort_values('Date', ascending=False)
+            
+            # Show all games at once
+            st.dataframe(display_df, use_container_width=True)
 
 if __name__ == "__main__":
     main()
