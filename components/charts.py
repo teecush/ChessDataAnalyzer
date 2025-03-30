@@ -72,16 +72,21 @@ def create_win_loss_pie(df):
     loss_pct = round((losses / total * 100), 1) if total > 0 else 0
     draw_pct = round((draws / total * 100), 1) if total > 0 else 0
     
-    # Create outside text labels with count values and percentages
-    outside_labels = [f'Wins: {wins} ({win_pct}%)', f'Losses: {losses} ({loss_pct}%)', f'Draws: {draws} ({draw_pct}%)']
+    # Create outside percentage-only labels
+    outside_labels = [f'Wins: {win_pct}%', f'Losses: {loss_pct}%', f'Draws: {draw_pct}%']
+    
+    # Create inside count-only texts
+    inside_counts = [str(wins), str(losses), str(draws)]
 
     fig = go.Figure(data=[go.Pie(
         labels=labels, 
         values=values,
         hole=.3,
         marker_colors=['#4CAF50', '#f44336', '#2196F3'],
-        # Don't show text inside the pie
-        textinfo='none',
+        # Show count inside the pie
+        textinfo='value',
+        textposition='inside',
+        insidetextfont=dict(size=12, color='white'),
         # Don't pull any slices so they're aligned properly
         pull=[0, 0, 0],
         # Add count values outside the pie
