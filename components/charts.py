@@ -93,12 +93,11 @@ def create_win_loss_pie(df):
         text=None,
         hoverinfo='label+percent+value',
         hovertemplate='%{label}<br>Count: %{value}<br>Percentage: %{percent}<extra></extra>',
-        # Add names for the legend
-        name='Game Results',
-        legendgroup='results'
+        # Set showlegend to False for the pie chart itself
+        showlegend=False
     )])
     
-    # Add hidden traces for color legend
+    # Add traces for custom color legend only
     fig.add_trace(go.Scatter(
         x=[None], y=[None], 
         mode='markers',
@@ -157,6 +156,10 @@ def create_win_loss_pie(df):
                 )
             )
     
+    # Remove grid lines and axis ticks/labels
+    fig.update_xaxes(showgrid=False, zeroline=False, showticklabels=False)
+    fig.update_yaxes(showgrid=False, zeroline=False, showticklabels=False)
+    
     fig.update_layout(
         title='Game Results Distribution',
         template='plotly_white',
@@ -164,13 +167,16 @@ def create_win_loss_pie(df):
         margin=dict(l=50, r=50, t=60, b=50),  # Increased margins for outside labels
         showlegend=True,  # Show legend for the pie chart colors
         legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=-0.2,  # Position below the chart
-            xanchor="center",
-            x=0.5
+            orientation="v",
+            yanchor="top",
+            y=1.0,  # Position at top right corner
+            xanchor="right",
+            x=1.0
         ),
-        annotations=annotations
+        annotations=annotations,
+        # Remove axis labels 
+        xaxis={'visible': False, 'showticklabels': False},
+        yaxis={'visible': False, 'showticklabels': False}
     )
     
     return fig
