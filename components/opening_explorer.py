@@ -270,16 +270,43 @@ def create_opening_explorer(df):
             
             # Show openings in that category
             if selected_category:
+                # Get all openings in the selected category
                 openings_in_category = sorted(list(openings_by_category[selected_category]))
                 
+                # First show aggregate analysis for all games in this category (use the category name as a placeholder)
+                st.markdown(f"### Overview of all {selected_category}-category openings")
+                
+                # Get all games with openings starting with selected category
+                category_games = opening_df[opening_df['OpeningMain'].str.startswith(selected_category) | 
+                                           opening_df['ECO'].str.startswith(selected_category)]
+                
+                # Display aggregate metrics for this category
+                total_category_games = len(category_games)
+                category_wins = (category_games['Result'].str.lower() == 'win').sum()
+                category_losses = (category_games['Result'].str.lower() == 'loss').sum()
+                category_draws = (category_games['Result'].str.lower() == 'draw').sum()
+                
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("Total Games", total_category_games)
+                with col2:
+                    st.metric("Wins", category_wins)
+                with col3:
+                    st.metric("Losses", category_losses)
+                with col4:
+                    st.metric("Draws", category_draws)
+                
+                # Add a selectbox for specific openings within this category
                 selected_cat_opening = st.selectbox(
-                    f"Openings in category {selected_category}:",
-                    options=openings_in_category,
+                    f"Select specific opening in category {selected_category}:",
+                    options=["All"] + openings_in_category,
                     key=f"opening_in_category_{selected_category}"
                 )
                 
-                # Process the selection
-                analyze_opening(df, opening_df, selected_cat_opening)
+                # Process the selection (only if not "All")
+                if selected_cat_opening != "All":
+                    st.markdown(f"### Analysis for {selected_cat_opening}")
+                    analyze_opening(df, opening_df, selected_cat_opening)
         else:
             st.info("No category information available for openings.")
             
@@ -330,12 +357,17 @@ def analyze_opening(df, opening_df, selected_opening):
     with col2:
         st.metric("As Black", black_games)
     
-    # Add option to filter by side
+    # Add option to filter by side (include a unique timestamp-like element to avoid collisions)
+    # Create a unique key by combining opening name and its position in the dataframe
+    opening_idx = opening_df[opening_df['OpeningFull'] == selected_opening].index.min()
+    if pd.isna(opening_idx):
+        opening_idx = 0
+        
     side_filter = st.radio(
         "Filter by side:",
         options=["All", "White", "Black"],
         horizontal=True,
-        key=f"side_filter_{selected_opening.replace(' ', '_').replace(':', '')}"
+        key=f"side_filter_{selected_opening.replace(' ', '_').replace(':', '').replace('.', '_')}_{opening_idx}"
     )
     
     # Apply side filter - ensure case-insensitive matching
@@ -375,7 +407,7 @@ def analyze_opening(df, opening_df, selected_opening):
             "Select a game to analyze:",
             options=range(len(game_options)),
             format_func=lambda x: game_options[x],
-            key=f"game_select_{selected_opening.replace(' ', '_').replace(':', '')}"
+            key=f"game_select_{selected_opening.replace(' ', '_').replace(':', '').replace('.', '_')}_{opening_idx}"
         )
         
         # Analyze the selected game
