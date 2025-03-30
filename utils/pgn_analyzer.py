@@ -167,7 +167,12 @@ def analyze_game(pgn_text, player_side=None):
         
         # Check if there are comments that might indicate mistakes
         comment = node.comment.strip() if hasattr(node, 'comment') else ""
-        is_mistake = bool(re.search(r'[?!]{1,2}|mistake|blunder|inaccuracy', comment, re.IGNORECASE))
+        # More comprehensive regex to catch mistakes and blunders
+        is_mistake = bool(re.search(r'[?!]{1,2}|mistake|blunder|inaccuracy|error|missed|poor|wrong|bad|weak|dubious', comment, re.IGNORECASE))
+        
+        # If ACL or similar metrics are in the comment, likely a mistake
+        if re.search(r'cent[i]?pawn|c\.?p\.?|acl|loss', comment, re.IGNORECASE):
+            is_mistake = True
         
         if is_mistake:
             mistakes.append({

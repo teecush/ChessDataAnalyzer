@@ -12,8 +12,31 @@ def create_opening_explorer(df):
     
     st.subheader("Opening Explorer")
     
+    # Add a filter for white or black side games
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        side_filter = st.radio(
+            "Filter by color:",
+            ["All Games", "White Games", "Black Games"],
+            key="opening_explorer_side_filter"
+        )
+    
+    # Apply the side filter if needed
+    if side_filter == "White Games":
+        filtered_df = df[df['Side'].isin(['W', 'White'])]
+        if len(filtered_df) == 0:
+            st.info("No games found where you played White.")
+            return
+    elif side_filter == "Black Games":
+        filtered_df = df[df['Side'].isin(['B', 'Black'])]
+        if len(filtered_df) == 0:
+            st.info("No games found where you played Black.")
+            return
+    else:
+        filtered_df = df
+    
     # Get opening performance statistics with the new hierarchical structure
-    opening_results = get_opening_performance(df)
+    opening_results = get_opening_performance(filtered_df)
     
     # Check if we have data
     if not isinstance(opening_results, dict) or 'opening_df' not in opening_results:
@@ -24,6 +47,10 @@ def create_opening_explorer(df):
     opening_df = opening_results['opening_df']
     opening_stats_main = opening_results['opening_stats_main']
     opening_stats_full = opening_results['opening_stats_full']
+    
+    # Show how many games are in the filtered dataset
+    with col2:
+        st.write(f"Showing data from {len(filtered_df)} games.")
     
     # Create tabs for different views
     overview_tab, main_openings_tab, detailed_tab = st.tabs(["Overview", "Main Openings", "Full Openings"])
