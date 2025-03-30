@@ -4,12 +4,11 @@ def create_filters(df):
     """Create sidebar filters for the dashboard"""
     st.sidebar.header('Filters')
 
-    # Show available date range
+    # Get date range for filter
     valid_dates = df[df['Date'].notna()]['Date']
     if len(valid_dates) > 0:
         min_date = valid_dates.min().date()
         max_date = valid_dates.max().date()
-        st.sidebar.text(f"Available dates:\n{min_date} to {max_date}")
 
         # Date range filter - default to full range
         date_range = st.sidebar.date_input(
@@ -21,7 +20,7 @@ def create_filters(df):
         )
     else:
         date_range = None
-        st.sidebar.text("No valid dates available")
+        st.sidebar.info("No valid dates available")
 
     # Rating range filter - only for games with ratings
     valid_ratings = df[df['New Rating'].notna()]['New Rating']
@@ -46,9 +45,7 @@ def create_filters(df):
         key="side_filter"
     )
 
-    # Debug info
-    if date_range:
-        st.sidebar.text(f"Selected date range:\n{date_range[0]} to {date_range[1]}")
+    # Remove debug info about column types
 
     return {
         'date_range': date_range,

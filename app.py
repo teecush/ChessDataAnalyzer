@@ -14,7 +14,7 @@ st.set_page_config(
     page_title="TeeCush's Chess Analytics Dashboard",
     page_icon="♟️",
     layout="wide",
-    initial_sidebar_state="expanded"  # Start with expanded sidebar to show filters
+    initial_sidebar_state="collapsed"  # Start with collapsed sidebar for more screen space
 )
 
 # Load custom CSS
