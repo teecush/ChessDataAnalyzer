@@ -30,7 +30,8 @@ def create_game_analyzer(df):
     selected_game_label = st.selectbox(
         "Select a game to analyze:",
         options=games_with_pgn['Game_Label'].tolist(),
-        index=0
+        index=0,
+        key="game_analyzer_select"
     )
     
     # Get the selected game
@@ -151,7 +152,8 @@ def create_game_analyzer(df):
             min_value=0, 
             max_value=move_count, 
             value=0,
-            help="Slide to see the position after each move."
+            help="Slide to see the position after each move.",
+            key=f"move_slider_{selected_game_label.replace(' ', '_')}"
         )
         
         # Display current position

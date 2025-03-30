@@ -16,7 +16,8 @@ def create_filters(df):
             'Select Date Range',
             [min_date, max_date],
             min_value=min_date,
-            max_value=max_date
+            max_value=max_date,
+            key="date_range_filter"
         )
     else:
         date_range = None
@@ -29,7 +30,8 @@ def create_filters(df):
             'Rating Range',
             int(valid_ratings.min()),
             int(valid_ratings.max()),
-            (int(valid_ratings.min()), int(valid_ratings.max()))
+            (int(valid_ratings.min()), int(valid_ratings.max())),
+            key="rating_range_filter"
         )
     else:
         rating_range = None

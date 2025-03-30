@@ -217,7 +217,8 @@ def create_opening_explorer(df):
         selected_main = st.selectbox(
             "Select main opening type:",
             options=main_options,
-            index=0
+            index=0,
+            key="main_opening_select"
         )
         
         # Filter specific openings based on the main selection
@@ -233,7 +234,8 @@ def create_opening_explorer(df):
         selected_opening = st.selectbox(
             "Select specific opening:",
             options=specific_openings,
-            index=0
+            index=0,
+            key="specific_opening_select"
         )
         
         # Process the selection to find games
@@ -262,7 +264,8 @@ def create_opening_explorer(df):
             # Create a selectbox for categories
             selected_category = st.selectbox(
                 "Select opening category:",
-                options=categories
+                options=categories,
+                key="category_select"
             )
             
             # Show openings in that category
@@ -271,7 +274,8 @@ def create_opening_explorer(df):
                 
                 selected_cat_opening = st.selectbox(
                     f"Openings in category {selected_category}:",
-                    options=openings_in_category
+                    options=openings_in_category,
+                    key=f"opening_in_category_{selected_category}"
                 )
                 
                 # Process the selection
@@ -330,7 +334,8 @@ def analyze_opening(df, opening_df, selected_opening):
     side_filter = st.radio(
         "Filter by side:",
         options=["All", "White", "Black"],
-        horizontal=True
+        horizontal=True,
+        key=f"side_filter_{selected_opening.replace(' ', '_').replace(':', '')}"
     )
     
     # Apply side filter - ensure case-insensitive matching
@@ -369,7 +374,8 @@ def analyze_opening(df, opening_df, selected_opening):
         selected_game_idx = st.selectbox(
             "Select a game to analyze:",
             options=range(len(game_options)),
-            format_func=lambda x: game_options[x]
+            format_func=lambda x: game_options[x],
+            key=f"game_select_{selected_opening.replace(' ', '_').replace(':', '')}"
         )
         
         # Analyze the selected game
