@@ -49,9 +49,17 @@ def process_chess_data(df):
         # Keep only the columns we need for visualization
         # Add 'RESULT' column for the win-loss chart
         df['RESULT'] = df['Result']  # Create a copy of Result column as RESULT
-        processed_df = df[['Date', '#', 'Performance Rating', 'New Rating', 
+        
+        # Include PGN column if it exists (it will, we added it in google_sheets.py)
+        columns_to_keep = ['Date', '#', 'Performance Rating', 'New Rating', 
                           'Side', 'Result', 'RESULT', 'sparkline data', 'ACL',
-                          'Accuracy %', 'Game Rating', 'Opponent Name', 'Opp. ELO']].copy()
+                          'Accuracy %', 'Game Rating', 'Opponent Name', 'Opp. ELO']
+        
+        # Add PGN column if it exists
+        if 'PGN' in df.columns:
+            columns_to_keep.append('PGN')
+            
+        processed_df = df[columns_to_keep].copy()
 
         # Debug information
         print("Processed data shape:", processed_df.shape)
@@ -97,5 +105,48 @@ def calculate_statistics(df):
     return stats
 
 def get_opening_stats(df):
-    """No longer used - returning empty series"""
-    return pd.Series()
+    """Extract opening statistics from PGN data"""
+    if df is None or 'PGN' not in df.columns:
+        return pd.Series()
+    
+    openings = []
+    variations = []
+    
+    # Regular expressions to extract opening and variation info from PGN
+    import re
+    opening_pattern = r'\[Opening\s+"([^"]+)"\]'
+    variation_pattern = r'\[Variation\s+"([^"]+)"\]'
+    
+    for pgn in df['PGN']:
+        if pd.isna(pgn) or not pgn:
+            openings.append(None)
+            variations.append(None)
+            continue
+            
+        # Extract opening
+        opening_match = re.search(opening_pattern, pgn)
+        opening = opening_match.group(1) if opening_match else "Unknown Opening"
+        openings.append(opening)
+        
+        # Extract variation if present
+        variation_match = re.search(variation_pattern, pgn)
+        variation = variation_match.group(1) if variation_match else None
+        variations.append(variation)
+    
+    # Create a new dataframe with the extracted data
+    opening_df = pd.DataFrame({
+        'Opening': openings,
+        'Variation': variations
+    })
+    
+    # Join with original dataframe to include results
+    df_with_openings = pd.concat([df.reset_index(drop=True), opening_df.reset_index(drop=True)], axis=1)
+    
+    # Create opening statistics
+    opening_stats = df_with_openings.groupby('Opening').size()
+    opening_stats = opening_stats.sort_values(ascending=False)
+    
+    # Filter out None or empty values
+    opening_stats = opening_stats[opening_stats.index.notnull() & (opening_stats.index != 'Unknown Opening')]
+    
+    return opening_stats

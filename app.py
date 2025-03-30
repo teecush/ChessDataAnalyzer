@@ -1,11 +1,13 @@
 import streamlit as st
 import pandas as pd
 from utils.google_sheets import get_google_sheets_data
-from utils.data_processor import process_chess_data, calculate_statistics
+from utils.data_processor import process_chess_data, calculate_statistics, get_opening_stats
 from utils.ml_analysis import generate_performance_insights
 from components.charts import (create_rating_progression, create_win_loss_pie,
-                             create_performance_charts)
+                             create_performance_charts, create_opening_bar)
 from components.filters import create_filters, apply_filters
+from components.opening_explorer import create_opening_explorer
+from components.game_analyzer import create_game_analyzer
 
 # Page configuration
 st.set_page_config(
@@ -136,6 +138,16 @@ def main():
     else:
         st.info("Need at least 5 games for AI analysis")
 
+    # New Opening Explorer section
+    if 'PGN' in filtered_df.columns:
+        with st.expander("Opening Explorer", expanded=False):
+            create_opening_explorer(filtered_df)
+            
+    # New Game Analysis section
+    if 'PGN' in filtered_df.columns:
+        with st.expander("Game Analysis", expanded=False):
+            create_game_analyzer(filtered_df)
+    
     # Display raw data table - show all games, reverse order, and hide # column and sparkline data
     with st.expander("Game History", expanded=False):
         if len(filtered_df) > 0:
@@ -156,6 +168,9 @@ def main():
                 columns_to_drop.append('New Rating')
             if 'Game Rating' in display_df.columns:
                 columns_to_drop.append('Game Rating')
+            # Also hide PGN column from game history as it's large
+            if 'PGN' in display_df.columns:
+                columns_to_drop.append('PGN')
             
             if columns_to_drop:
                 display_df = display_df.drop(columns=columns_to_drop)

@@ -23,25 +23,49 @@ def get_google_sheets_data():
         # Debug information before processing
         st.sidebar.write("Raw data rows:", len(df))
 
-        if len(df.columns) >= 12:
-            # Keep first 12 columns
-            df = df.iloc[:, :12]
-
-            # Check if first row contains headers
-            expected_headers = [
+        # Check if the dataframe contains columns we need
+        if len(df.columns) >= 13:  # Now checking for 13 columns including PGN
+            # Check if first row contains headers (partial check)
+            expected_core_headers = [
                 'Performance Rating', 'New Rating', '#', 'Date',
                 'Side', 'Result', 'sparkline data', 'Average Centipawn Loss (ACL)',
                 'Accuracy %', 'Game Rating', 'Opponent Name', 'Opponent ELO'
             ]
-
-            # Skip first row only if it matches headers, using string comparison
-            if all(str(df.iloc[0][i]).strip().lower() == str(expected_headers[i]).strip().lower() 
-                  for i in range(len(expected_headers))):
+            
+            # Add PGN to expected headers
+            expected_headers = expected_core_headers.copy()
+            expected_headers.append('PGN')  # Add PGN as the 13th column
+            
+            # Check if first row matches headers (focusing on the first 12)
+            header_match = True
+            for i in range(min(len(expected_core_headers), len(df.columns))):
+                if i < len(df.columns) and i < len(expected_core_headers):
+                    header_val = str(df.iloc[0][i]).strip().lower()
+                    expected_val = str(expected_core_headers[i]).strip().lower()
+                    if header_val != expected_val:
+                        header_match = False
+                        break
+            
+            # Skip first row only if it matches headers
+            if header_match:
                 df = df.iloc[1:]
                 df = df.reset_index(drop=True)
-
-            # Set column names
-            df.columns = expected_headers
+            
+            # Check if we have the PGN column (should be the 13th column)
+            if len(df.columns) >= 13:
+                actual_cols = list(df.columns)
+                # Assign expected column names to the dataframe, keeping any extra columns
+                new_cols = expected_headers.copy()
+                # Add any extra columns with original names
+                if len(actual_cols) > len(new_cols):
+                    for i in range(len(new_cols), len(actual_cols)):
+                        new_cols.append(actual_cols[i])
+                df.columns = new_cols
+            else:
+                # If PGN column doesn't exist, use the first 12 columns and add a blank PGN column
+                df = df.iloc[:, :12]
+                df.columns = expected_core_headers
+                df['PGN'] = ''  # Add empty PGN column
 
             # Debug information after processing
             st.sidebar.write("Processed data rows:", len(df))

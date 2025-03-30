@@ -45,7 +45,7 @@ def analyze_playing_strength(df):
     return pd.DataFrame(cluster_stats)
 
 def generate_performance_insights(df):
-    """Generate ML-based insights about player performance"""
+    """Generate ML-based insights about player performance, now enhanced with PGN analysis"""
     features = extract_game_features(df)
 
     insights = {
@@ -73,6 +73,38 @@ def generate_performance_insights(df):
 
     # Add personalized recommendations
     text_insights.extend(insights['recommendations'])
+    
+    # Add PGN-based analysis if available
+    if 'PGN' in df.columns and not df['PGN'].isna().all():
+        try:
+            # Import PGN analyzer only if needed
+            from utils.pgn_analyzer import get_common_mistakes
+            
+            # Add common mistake patterns
+            mistake_patterns = get_common_mistakes(df)
+            if mistake_patterns:
+                text_insights.extend([""] + ["🔍 " + pattern for pattern in mistake_patterns])
+                
+            # Add opening-based recommendations if we have enough data
+            # Count openings played at least twice
+            from utils.pgn_analyzer import extract_opening_info
+            opening_counts = df['PGN'].apply(
+                lambda x: extract_opening_info(x)['opening'] if pd.notna(x) and x else None
+            ).value_counts()
+            
+            common_openings = opening_counts[opening_counts >= 2].index.tolist()
+            
+            if common_openings:
+                # Get most common opening
+                most_common = common_openings[0]
+                text_insights.append(f"🏆 You have the most experience with the {most_common} opening")
+                
+                # Add advice about expanding repertoire if appropriate
+                if len(common_openings) <= 2 and len(df) >= 10:
+                    text_insights.append("🎭 Consider expanding your opening repertoire to gain experience with different structures")
+        except Exception as e:
+            # If any errors occur with PGN analysis, don't break the main analysis
+            print(f"Error in PGN-based ML analysis: {e}")
 
     insights['text_insights'] = text_insights
     return insights
