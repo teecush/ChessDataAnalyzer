@@ -155,13 +155,14 @@ def main():
             # Sort by Date in descending order (most recent first)
             display_df = display_df.sort_values('Date', ascending=False)
             
-            # Add opponent search functionality
+            # Add opponent search functionality with auto-update
             st.subheader("Search by Opponent")
-            opponent_search = st.text_input("Enter opponent name to search", "")
+            opponent_search = st.text_input("Enter opponent name to search (results update as you type)", "", key="opponent_search")
             
-            # Filter by opponent name if search is provided
+            # Always filter by opponent name (even if empty string)
+            # When empty, it will match all names (no filtering)
+            # Case-insensitive search using .str.contains()
             if opponent_search:
-                # Case-insensitive search using .str.contains()
                 display_df = display_df[display_df['Opponent Name'].str.lower().str.contains(opponent_search.lower())]
                 st.write(f"Found {len(display_df)} games against opponents matching '{opponent_search}'")
             

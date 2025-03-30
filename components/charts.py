@@ -140,7 +140,7 @@ def create_performance_charts(df):
     """Create all performance metric charts"""
     charts = {
         'acl': create_metric_over_time(
-            df, 'Average Centipawn Loss (ACL)',
+            df, 'ACL',
             'ACL Over Time',
             'ACL'
         ),

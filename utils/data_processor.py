@@ -39,12 +39,15 @@ def process_chess_data(df):
         df['Opponent ELO'] = pd.to_numeric(df['Opponent ELO'], errors='coerce')
         df['Accuracy %'] = pd.to_numeric(df['Accuracy %'], errors='coerce')
         df['Average Centipawn Loss (ACL)'] = pd.to_numeric(df['Average Centipawn Loss (ACL)'], errors='coerce')
+        
+        # Rename ACL column to shorter name
+        df.rename(columns={'Average Centipawn Loss (ACL)': 'ACL'}, inplace=True)
 
         # Keep only the columns we need for visualization
         # Add 'RESULT' column for the win-loss chart
         df['RESULT'] = df['Result']  # Create a copy of Result column as RESULT
         processed_df = df[['Date', '#', 'Performance Rating', 'New Rating', 
-                          'Side', 'Result', 'RESULT', 'sparkline data', 'Average Centipawn Loss (ACL)',
+                          'Side', 'Result', 'RESULT', 'sparkline data', 'ACL',
                           'Accuracy %', 'Game Rating', 'Opponent Name', 'Opponent ELO']].copy()
 
         # Debug information
