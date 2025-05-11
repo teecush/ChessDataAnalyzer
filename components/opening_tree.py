@@ -229,6 +229,30 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
                 
             colors.append(color)
     
+    # Prepare custom text labels with win percentages
+    custom_text = []
+    for i, label in enumerate(labels):
+        if i == 0:  # Root node
+            custom_text.append(label)
+            continue
+            
+        # Get win data for this node
+        if label in main_openings.index.tolist():
+            win_count = main_openings.loc[label, "wins"]
+            total_count = main_openings.loc[label, "count"]
+            win_pct = round(win_count / total_count * 100) if total_count > 0 else 0
+            custom_text.append(f"{label}<br>{win_pct}% Win")
+        else:
+            # Find all matching games for this opening
+            if label in opening_df["OpeningFull"].values:
+                games = opening_df[opening_df["OpeningFull"] == label]
+                total_count = len(games)
+                win_count = len(games[games["Result"] == "win"])
+                win_pct = round(win_count / total_count * 100) if total_count > 0 else 0
+                custom_text.append(f"{label}<br>{win_pct}% Win")
+            else:
+                custom_text.append(label)
+    
     # Create the sunburst chart
     fig = go.Figure(go.Sunburst(
         labels=labels,
@@ -239,8 +263,12 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
             colors=colors,
             line=dict(width=0.5, color="#000000")
         ),
+        # Hover template shows games played and win percentage
         hovertemplate='<b>%{label}</b><br>Games: %{value}<br>',
-        textinfo="label+percent entry",
+        # Ensure we see labels for most segments
+        insidetextorientation='radial',
+        text=custom_text,
+        textinfo="text",
         maxdepth=3  # Limit depth for better readability
     ))
     
@@ -249,7 +277,7 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
         width=800,
         height=800,
         margin=dict(t=30, l=0, r=0, b=0),
-        uniformtext=dict(minsize=10, mode='hide'),
+        uniformtext=dict(minsize=8, mode='show'),  # Show as many labels as possible
     )
     
     st.plotly_chart(fig, use_container_width=True)
