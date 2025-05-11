@@ -233,25 +233,40 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
     custom_text = []
     for i, label in enumerate(labels):
         if i == 0:  # Root node
-            custom_text.append(label)
+            custom_text.append("<b>All Openings</b>")
             continue
+        
+        # Format longer labels to wrap on multiple lines
+        formatted_label = label
+        if len(label) > 15:
+            # Split long names at logical points (spaces, hyphens)
+            split_points = [' ', '-', ':']
+            for split_char in split_points:
+                if split_char in label and len(label) > 15:
+                    parts = label.split(split_char, 1)
+                    if len(parts[0]) > 5:  # Only split if first part is reasonably long
+                        formatted_label = parts[0] + split_char + "<br>" + parts[1]
+                        break
             
         # Get win data for this node
         if label in main_openings.index.tolist():
+            # This is a main opening
             win_count = main_openings.loc[label, "wins"]
             total_count = main_openings.loc[label, "count"]
             win_pct = round(win_count / total_count * 100) if total_count > 0 else 0
-            custom_text.append(f"{label}<br>{win_pct}% Win")
+            # Add (ML) for mainline and make it bold
+            custom_text.append(f"<b>{formatted_label} (ML)</b><br>{win_pct}% Win")
         else:
-            # Find all matching games for this opening
+            # Check if this is a variation (full opening)
             if label in opening_df["OpeningFull"].values:
                 games = opening_df[opening_df["OpeningFull"] == label]
                 total_count = len(games)
                 win_count = len(games[games["Result"] == "win"])
                 win_pct = round(win_count / total_count * 100) if total_count > 0 else 0
-                custom_text.append(f"{label}<br>{win_pct}% Win")
+                custom_text.append(f"<b>{formatted_label}</b><br>{win_pct}% Win")
             else:
-                custom_text.append(label)
+                # Catch-all for any other nodes
+                custom_text.append(f"<b>{formatted_label}</b>")
     
     # Create the sunburst chart
     fig = go.Figure(go.Sunburst(
@@ -266,18 +281,31 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
         # Hover template shows games played and win percentage
         hovertemplate='<b>%{label}</b><br>Games: %{value}<br>',
         # Ensure we see labels for most segments
-        insidetextorientation='radial',
+        insidetextorientation='auto',  # Let Plotly decide the best orientation
         text=custom_text,
         textinfo="text",
-        maxdepth=3  # Limit depth for better readability
+        maxdepth=3,  # Limit depth for better readability
+        # Improve text presentation
+        leaf=dict(opacity=0.9),  # Make leaf nodes slightly more visible
+        textfont=dict(
+            size=11,  # Increase base font size
+            family="Arial, sans-serif"
+        )
     ))
     
     fig.update_layout(
         title="Opening Repertoire Breakdown",
-        width=800,
-        height=800,
+        width=850,
+        height=850,  # Slightly larger for better visibility
         margin=dict(t=30, l=0, r=0, b=0),
-        uniformtext=dict(minsize=8, mode='show'),  # Show as many labels as possible
+        uniformtext=dict(minsize=10, mode='show'),  # Show more labels with larger minimum size
+        # Make chart more readable
+        paper_bgcolor='rgba(255,255,255,0.9)',
+        plot_bgcolor='rgba(255,255,255,0.9)',
+        font=dict(
+            family="Arial, sans-serif",
+            size=12  # Larger font size for chart elements
+        )
     )
     
     st.plotly_chart(fig, use_container_width=True)
