@@ -402,7 +402,7 @@ def create_treemap_visualization(opening_df, side_filter):
                 text=treemap_text,
                 hovertemplate='<b>%{label}</b><br>%{text}<br>',
                 textinfo="label+value",
-                maxdepth=2
+                maxdepth=3  # Allow deeper zoom levels
             ))
             
             fig.update_layout(
@@ -487,7 +487,7 @@ def create_treemap_visualization(opening_df, side_filter):
                 text=treemap_text,
                 hovertemplate='<b>%{label}</b><br>%{text}<br>',
                 textinfo="label+value",
-                maxdepth=2
+                maxdepth=3  # Allow deeper zoom levels
             ))
             
             fig.update_layout(
@@ -700,7 +700,7 @@ def create_single_treemap(opening_df, side_filter):
             text=treemap_text,
             hovertemplate='<b>%{label}</b><br>%{text}<br>',
             textinfo="label+value",
-            maxdepth=2  # Limit depth for better readability
+            maxdepth=3  # Allow deeper zoom levels for better interactivity
         ))
     except Exception as e:
         st.error(f"Error creating treemap: {str(e)}")
