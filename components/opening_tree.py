@@ -125,11 +125,20 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
     values = []
     colors = []
     
-    # Add "All Openings" as the root
+    # Add "All Openings" as the root with color based on side_filter
     labels.append("All Openings")
     parents.append("")  # Root has no parent
     values.append(len(opening_df))
-    colors.append("#777777")  # Neutral color for root
+    
+    # Choose root color based on side filter
+    if side_filter == "White Pieces":
+        root_color = "rgba(255, 255, 255, 0.8)"  # White for white pieces
+    elif side_filter == "Black Pieces":
+        root_color = "rgba(128, 128, 128, 0.8)"  # Light gray for black pieces
+    else:
+        root_color = "rgba(180, 180, 220, 0.8)"  # Light purple for all games
+        
+    colors.append(root_color)
     
     # Add main openings
     main_openings = opening_df.groupby("OpeningMain").agg(
@@ -268,6 +277,14 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
                 custom_text.append(f"{formatted_label}")
     
     # Create the sunburst chart
+    # Set border color based on side filter
+    if side_filter == "White Pieces":
+        border_color = "rgba(200, 200, 200, 0.8)"  # Light gray for white pieces
+    elif side_filter == "Black Pieces":
+        border_color = "rgba(100, 100, 100, 0.8)"  # Dark gray for black pieces
+    else:
+        border_color = "rgba(150, 150, 200, 0.8)"  # Purple-ish for all games
+    
     fig = go.Figure(go.Sunburst(
         labels=labels,
         parents=parents,
@@ -275,7 +292,7 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
         branchvalues="total",
         marker=dict(
             colors=colors,
-            line=dict(width=0.5, color="#000000")
+            line=dict(width=0.5, color=border_color)
         ),
         # Hover template shows games played and win percentage
         hovertemplate='<b>%{label}</b><br>Games: %{value}<br>',
@@ -308,6 +325,34 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
 
 def create_treemap_visualization(opening_df, side_filter):
     """Create a treemap visualization of opening performance"""
+    # Similar approach to the sunburst, check if we need to split by side
+    if side_filter in ["White Pieces", "Black Pieces"]:
+        # Just create one treemap with the filtered data
+        create_single_treemap(opening_df, side_filter)
+    else:
+        # Create tabs for All, White, and Black
+        st.subheader("Opening Treemaps (By Color)")
+        treemap_tabs = st.tabs(["All Games", "White Pieces", "Black Pieces"])
+        
+        with treemap_tabs[0]:
+            create_single_treemap(opening_df, "All Games")
+            
+        with treemap_tabs[1]:
+            white_df = opening_df[opening_df['Side'].str.lower().isin(['w', 'white'])]
+            if len(white_df) > 0:
+                create_single_treemap(white_df, "White Pieces")
+            else:
+                st.info("No games found where you played White.")
+                
+        with treemap_tabs[2]:
+            black_df = opening_df[opening_df['Side'].str.lower().isin(['b', 'black'])]
+            if len(black_df) > 0:
+                create_single_treemap(black_df, "Black Pieces")
+            else:
+                st.info("No games found where you played Black.")
+
+def create_single_treemap(opening_df, side_filter):
+    """Create a single treemap visualization for the given data and side filter"""
     st.subheader(f"Opening Treemap ({side_filter})")
     
     # Group by hierarchy
@@ -325,11 +370,20 @@ def create_treemap_visualization(opening_df, side_filter):
     treemap_colors = []
     treemap_text = []
     
-    # Add root
+    # Add root with color based on side filter
     treemap_labels.append("Tony's Openings")
     treemap_parents.append("")
     treemap_values.append(len(opening_df))
-    treemap_colors.append("#777777")
+    
+    # Choose color based on side filter
+    if side_filter == "White Pieces":
+        root_color = "rgba(255, 255, 255, 0.9)"  # White for white pieces
+    elif side_filter == "Black Pieces":
+        root_color = "rgba(128, 128, 128, 0.9)"  # Light gray for black pieces
+    else:
+        root_color = "rgba(180, 180, 220, 0.9)"  # Light purple for all games
+        
+    treemap_colors.append(root_color)
     treemap_text.append(f"Total Games: {len(opening_df)}")
     
     # Add main openings
@@ -397,6 +451,14 @@ def create_treemap_visualization(opening_df, side_filter):
             treemap_text.append(f"Games: {full['count']}<br>Win: {full['wins']} ({win_pct}%)<br>Loss: {full['losses']}<br>Draw: {full['draws']}")
     
     # Create the treemap
+    # Set border color based on side filter
+    if side_filter == "White Pieces":
+        border_color = "rgba(200, 200, 200, 0.8)"  # Light gray for white pieces
+    elif side_filter == "Black Pieces":
+        border_color = "rgba(100, 100, 100, 0.8)"  # Dark gray for black pieces
+    else:
+        border_color = "rgba(150, 150, 200, 0.8)"  # Purple-ish for all games
+        
     fig = go.Figure(go.Treemap(
         labels=treemap_labels,
         parents=treemap_parents,
@@ -404,7 +466,7 @@ def create_treemap_visualization(opening_df, side_filter):
         branchvalues="total",
         marker=dict(
             colors=treemap_colors,
-            line=dict(width=0.5, color="#000000")
+            line=dict(width=0.5, color=border_color)
         ),
         text=treemap_text,
         hovertemplate='<b>%{label}</b><br>%{text}<br>',
@@ -413,7 +475,7 @@ def create_treemap_visualization(opening_df, side_filter):
     ))
     
     fig.update_layout(
-        title="Opening Repertoire by Games Played",
+        title=f"Opening Repertoire by Games Played ({side_filter})",
         width=900,
         height=700,
         margin=dict(t=30, l=0, r=0, b=0)
