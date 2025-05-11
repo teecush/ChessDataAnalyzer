@@ -748,8 +748,8 @@ def create_opening_stats_table(main_stats, full_stats):
         # Process main opening stats
         main_df = pd.DataFrame(main_stats)
         
-        # Format columns
-        main_df['Win %'] = main_df['win_rate'].apply(lambda x: f"{x:.1f}%")
+        # Format columns - use win_pct instead of win_rate
+        main_df['Win %'] = main_df['win_pct'].apply(lambda x: f"{x:.1f}%")
         main_df['White Games'] = main_df['white']
         main_df['Black Games'] = main_df['black']
         
@@ -781,7 +781,7 @@ def create_opening_stats_table(main_stats, full_stats):
                 return ''
         
         # Sort by total games descending
-        display_main = display_main.sort_values(by='Games', ascending=False)
+        display_main = display_main.sort_values('Games', ascending=False)
         
         # Style the dataframe
         styled_main = display_main.style.applymap(
@@ -797,8 +797,8 @@ def create_opening_stats_table(main_stats, full_stats):
         # Process variation stats
         full_df = pd.DataFrame(full_stats)
         
-        # Format columns
-        full_df['Win %'] = full_df['win_rate'].apply(lambda x: f"{x:.1f}%")
+        # Format columns - use win_pct instead of win_rate
+        full_df['Win %'] = full_df['win_pct'].apply(lambda x: f"{x:.1f}%")
         full_df['White Games'] = full_df['white']
         full_df['Black Games'] = full_df['black']
         
@@ -807,7 +807,7 @@ def create_opening_stats_table(main_stats, full_stats):
         display_full.columns = ['Opening', 'Games', 'Wins', 'Losses', 'Draws', 'Win %', 'White', 'Black']
         
         # Sort by total games descending
-        display_full = display_full.sort_values(by='Games', ascending=False)
+        display_full = display_full.sort_values('Games', ascending=False)
         
         # Style the dataframe
         styled_full = display_full.style.applymap(
