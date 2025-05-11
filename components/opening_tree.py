@@ -336,15 +336,15 @@ def display_treemap_instructions():
     
     with col1:
         st.markdown("""
-        <div style='background-color:rgba(139, 0, 0, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
-        ≤20%<br>Dark Red
+        <div style='background-color:rgba(128, 0, 32, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
+        ≤20%<br>Deep Red
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-        <div style='background-color:rgba(255, 0, 0, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
-        20-35%<br>Light Red
+        <div style='background-color:rgba(255, 105, 180, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
+        20-35%<br>Pink
         </div>
         """, unsafe_allow_html=True)
     
@@ -404,8 +404,8 @@ def create_treemap_visualization(opening_df, side_filter):
         white_df = opening_df[opening_df['Side'].str.lower().isin(['w', 'white'])]
         
         if len(white_df) > 0:
-            # Direct implementation instead of calling create_single_treemap
-            st.subheader("White Pieces Openings")
+            # Use the create_single_treemap function
+            create_single_treemap(white_df, "White Pieces")
             
             # Group by hierarchy
             main_openings = white_df.groupby(["OpeningMain"]).agg(
@@ -749,11 +749,11 @@ def create_single_treemap(opening_df, side_filter):
         treemap_parents.append("Tony's Openings")
         treemap_values.append(main["count"])
         
-        # Color based on win rate with new color scheme
+        # Color based on win rate with updated color scheme
         if win_pct <= 20:
-            color = "rgba(139, 0, 0, 0.8)"  # Dark red
+            color = "rgba(128, 0, 32, 0.8)"  # Deep red
         elif win_pct <= 35:
-            color = "rgba(255, 0, 0, 0.8)"  # Light red
+            color = "rgba(255, 105, 180, 0.8)"  # Pink
         elif win_pct <= 65:
             color = "rgba(255, 215, 0, 0.8)"  # Yellow
         elif win_pct <= 80:
