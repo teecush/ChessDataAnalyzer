@@ -334,6 +334,10 @@ def create_treemap_visualization(opening_df, side_filter):
     st.subheader("Opening Treemaps (By Color)")
     treemap_tabs = st.tabs(["All Games", "White Pieces", "Black Pieces"])
     
+    # Fix to ensure side filtering works correctly
+    # Copy dataframe to avoid mutations
+    opening_df = opening_df.copy()
+    
     with treemap_tabs[0]:
         # All games
         create_single_treemap(opening_df, "All Games")
@@ -402,7 +406,11 @@ def create_treemap_visualization(opening_df, side_filter):
                 text=treemap_text,
                 hovertemplate='<b>%{label}</b><br>%{text}<br>',
                 textinfo="label+value",
-                maxdepth=3  # Allow deeper zoom levels
+                maxdepth=3,  # Allow deeper zoom levels
+                root_color="rgba(255, 255, 255, 0.9)",  # Consistent root color
+                # Start with only one level visible (hide variations until clicked)
+                visible=True,
+                level=1  # Only show the first level initially
             ))
             
             fig.update_layout(
@@ -487,7 +495,11 @@ def create_treemap_visualization(opening_df, side_filter):
                 text=treemap_text,
                 hovertemplate='<b>%{label}</b><br>%{text}<br>',
                 textinfo="label+value",
-                maxdepth=3  # Allow deeper zoom levels
+                maxdepth=3,  # Allow deeper zoom levels
+                root_color="rgba(128, 128, 128, 0.9)",  # Consistent root color for Black
+                # Start with only one level visible (hide variations until clicked)
+                visible=True,
+                level=1  # Only show the first level initially
             ))
             
             fig.update_layout(
@@ -700,7 +712,10 @@ def create_single_treemap(opening_df, side_filter):
             text=treemap_text,
             hovertemplate='<b>%{label}</b><br>%{text}<br>',
             textinfo="label+value",
-            maxdepth=3  # Allow deeper zoom levels for better interactivity
+            maxdepth=3,  # Allow deeper zoom levels for better interactivity
+            # Start with only one level visible (hide variations until clicked)
+            visible=True,
+            level=1  # Only show the first level initially
         ))
     except Exception as e:
         st.error(f"Error creating treemap: {str(e)}")
