@@ -500,9 +500,6 @@ def create_single_treemap(opening_df, side_filter):
         text=treemap_text,
         hovertemplate='<b>%{label}</b><br>%{text}<extra></extra>',
         maxdepth=3,  # Allow deeper zoom levels
-        # Start with just main pieces, reveal segments on first click, zoom on second
-        visible=True,
-        level=0,  # Only show the root level initially
         tiling=dict(
             packing="squarify",  # Use squarify to fill the entire box
             pad=0  # No padding between tiles
