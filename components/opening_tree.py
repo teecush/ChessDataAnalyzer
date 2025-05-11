@@ -132,14 +132,14 @@ def display_treemap_instructions():
     
     with col1:
         st.markdown("""
-        <div style='background-color:rgba(128, 0, 32, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
+        <div style='background-color:#f23628;color:white;padding:5px;border-radius:3px;text-align:center;'>
         ≤20%<br>Deep Red
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-        <div style='background-color:rgba(255, 105, 180, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
+        <div style='background-color:#f2cbdc;color:black;padding:5px;border-radius:3px;text-align:center;'>
         20-35%<br>Pink
         </div>
         """, unsafe_allow_html=True)
@@ -236,9 +236,9 @@ def create_single_treemap(opening_df, side_filter):
         
         # Color based on win rate with updated color scheme
         if win_pct <= 20:
-            color = "rgba(128, 0, 32, 0.8)"  # Deep red
+            color = "#f23628"  # Deep red
         elif win_pct <= 35:
-            color = "rgba(255, 105, 180, 0.8)"  # Pink
+            color = "#f2cbdc"  # Pink
         elif win_pct <= 65:
             color = "rgba(255, 215, 0, 0.8)"  # Yellow
         elif win_pct <= 80:
@@ -295,9 +295,9 @@ def create_single_treemap(opening_df, side_filter):
                 
                 # Set color using the same scheme as main openings
                 if win_pct <= 20:
-                    color = "rgba(128, 0, 32, 0.8)"  # Deep red
+                    color = "#f23628"  # Deep red
                 elif win_pct <= 35:
-                    color = "rgba(255, 105, 180, 0.8)"  # Pink
+                    color = "#f2cbdc"  # Pink
                 elif win_pct <= 65:
                     color = "rgba(255, 215, 0, 0.8)"  # Yellow
                 elif win_pct <= 80:
@@ -327,12 +327,18 @@ def create_single_treemap(opening_df, side_filter):
         maxdepth=3,  # Allow deeper zoom levels
         # Start with just main pieces, reveal segments on first click, zoom on second
         visible=True,
-        level=0  # Only show the root level initially
+        level=0,  # Only show the root level initially
+        tiling=dict(
+            packing="squarify",  # Use squarify to fill the entire box
+            pad=0  # No padding between tiles
+        ),
+        branchvalues="total"  # Set to total to make children fill parent area
     ))
     
     fig.update_layout(
         margin=dict(t=30, l=10, r=10, b=10),
-        height=700
+        height=700,
+        uniformtext=dict(mode="hide", minsize=10)  # Hide text that doesn't fit
     )
     
     st.plotly_chart(fig, use_container_width=True)
