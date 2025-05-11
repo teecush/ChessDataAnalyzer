@@ -323,6 +323,15 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
     </div>
     """, unsafe_allow_html=True)
 
+def display_treemap_instructions():
+    """Display common instructions for the treemaps"""
+    st.markdown("""
+    <div style="text-align: center; color: #666; margin-top: -20px;">
+        <small>Win rate colors: red (<33%) → yellow (33-67%) → green (>67%) → blue-green (>80%)</small><br>
+        <small><i>Click on an opening to zoom in and see variations. Double-click to zoom out.</i></small>
+    </div>
+    """, unsafe_allow_html=True)
+
 def create_treemap_visualization(opening_df, side_filter):
     """Create a treemap visualization of opening performance"""
     # If we're filtering by a single side, show only one treemap
@@ -433,7 +442,7 @@ def create_treemap_visualization(opening_df, side_filter):
     
     with treemap_tabs[2]:
         # Black pieces
-        black_df = opening_df[opening_df['Side'].str.lower().isin(['b', 'black'])]
+        black_df = opening_df[opening_df['Side'].str.lower().isin(['b', 'black'])].copy()
         
         if len(black_df) > 0:
             # Direct implementation instead of calling create_single_treemap
