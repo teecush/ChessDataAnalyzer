@@ -152,8 +152,8 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
     
     with col6:
         st.markdown("""
-        <div style='background-color:rgba(0, 206, 209, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        >95%<br>Turquoise
+        <div style='background-color:#389ae4;color:white;padding:5px;border-radius:3px;text-align:center;'>
+        >95%<br>Blue
         </div>
         """, unsafe_allow_html=True)
     
@@ -227,7 +227,7 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
         elif win_pct <= 95:
             color = "rgba(0, 128, 0, 0.8)"  # Dark green
         else:
-            color = "rgba(0, 206, 209, 0.8)"  # Turquoise/blue
+            color = "#389ae4"  # Blue
             
         colors.append(color)
         hover_texts.append(f"Games: {row['count']}<br>Wins: {row['wins']} ({win_pct:.1f}%)<br>Losses: {row['losses']}<br>Draws: {row['draws']}")
@@ -289,7 +289,7 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
         elif win_pct <= 95:
             color = "rgba(0, 128, 0, 0.8)"  # Dark green
         else:
-            color = "rgba(0, 206, 209, 0.8)"  # Turquoise/blue
+            color = "#389ae4"  # Blue
             
         colors.append(color)
         hover_texts.append(f"Games: {row['count']}<br>Wins: {row['wins']} ({win_pct:.1f}%)<br>Losses: {row['losses']}<br>Draws: {row['draws']}")
@@ -363,8 +363,8 @@ def display_treemap_instructions():
     
     with col6:
         st.markdown("""
-        <div style='background-color:rgba(0, 206, 209, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        >95%<br>Turquoise
+        <div style='background-color:#389ae4;color:white;padding:5px;border-radius:3px;text-align:center;'>
+        >95%<br>Blue
         </div>
         """, unsafe_allow_html=True)
     
@@ -414,8 +414,8 @@ def create_single_treemap(opening_df, side_filter):
     
     with col6:
         st.markdown("""
-        <div style='background-color:rgba(0, 206, 209, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        >95%<br>Turquoise
+        <div style='background-color:#389ae4;color:white;padding:5px;border-radius:3px;text-align:center;'>
+        >95%<br>Blue
         </div>
         """, unsafe_allow_html=True)
     
@@ -489,7 +489,7 @@ def create_single_treemap(opening_df, side_filter):
         elif win_pct <= 95:
             color = "rgba(0, 128, 0, 0.8)"  # Dark green
         else:
-            color = "rgba(0, 206, 209, 0.8)"  # Turquoise/blue
+            color = "#389ae4"  # Blue
             
         colors.append(color)
         hover_texts.append(f"Games: {row['count']}<br>Wins: {row['wins']} ({win_pct:.1f}%)<br>Losses: {row['losses']}<br>Draws: {row['draws']}")
@@ -551,7 +551,7 @@ def create_single_treemap(opening_df, side_filter):
         elif win_pct <= 95:
             color = "rgba(0, 128, 0, 0.8)"  # Dark green
         else:
-            color = "rgba(0, 206, 209, 0.8)"  # Turquoise/blue
+            color = "#389ae4"  # Blue
             
         colors.append(color)
         hover_texts.append(f"Games: {row['count']}<br>Wins: {row['wins']} ({win_pct:.1f}%)<br>Losses: {row['losses']}<br>Draws: {row['draws']}")
@@ -657,8 +657,8 @@ def create_sankey_diagram(opening_df, side_filter):
     
     with col6:
         st.markdown("""
-        <div style='background-color:rgba(0, 206, 209, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        >95%<br>Turquoise
+        <div style='background-color:#389ae4;color:white;padding:5px;border-radius:3px;text-align:center;'>
+        >95%<br>Blue
         </div>
         """, unsafe_allow_html=True)
     
@@ -716,7 +716,7 @@ def create_sankey_diagram(opening_df, side_filter):
         elif win_pct <= 95:
             color = "rgba(0, 128, 0, 0.8)"  # Dark green
         else:
-            color = "rgba(0, 206, 209, 0.8)"  # Turquoise/blue
+            color = "#389ae4"  # Blue
             
         nodes.append(opening)
         node_colors.append(color)
@@ -835,7 +835,7 @@ def create_opening_stats_table(main_stats, full_stats):
                 elif pct <= 95:
                     return f'background-color: rgba(0, 128, 0, 0.3); color: black'
                 else:
-                    return f'background-color: rgba(0, 206, 209, 0.3); color: black'
+                    return f'background-color: #389ae4; color: black'
             except:
                 return ''
         
