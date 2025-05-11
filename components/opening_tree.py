@@ -341,6 +341,7 @@ def create_treemap_visualization(opening_df, side_filter):
     - Double-click to zoom back out
     - Hover over a section to see detailed statistics
     - Colors indicate win rate: red (<33%) → yellow (33-67%) → green (>67%) → blue-green (>80%)
+    - Main openings have thicker borders to distinguish them from variations
     """)
     
     # If we're filtering by a single side, show only one treemap
@@ -458,7 +459,10 @@ def create_treemap_visualization(opening_df, side_filter):
                 branchvalues="total",
                 marker=dict(
                     colors=treemap_colors,
-                    line=dict(width=0.5, color="rgba(200, 200, 200, 0.8)")
+                    # Create custom line widths - thicker for main openings
+                    line=dict(color="rgba(200, 200, 200, 0.8)"),
+                    line_width=[2.5 if parent == "White Openings" and label != "White Openings" else 0.8 
+                               for label, parent in zip(treemap_labels, treemap_parents)]
                 ),
                 text=treemap_text,
                 hovertemplate='<b>%{label}</b><br>%{text}<br>',
@@ -586,7 +590,10 @@ def create_treemap_visualization(opening_df, side_filter):
                 branchvalues="total",
                 marker=dict(
                     colors=treemap_colors,
-                    line=dict(width=0.5, color="rgba(100, 100, 100, 0.8)")
+                    # Create custom line widths - thicker for main openings
+                    line=dict(color="rgba(100, 100, 100, 0.8)"),
+                    line_width=[2.5 if parent == "Black Openings" and label != "Black Openings" else 0.8 
+                               for label, parent in zip(treemap_labels, treemap_parents)]
                 ),
                 text=treemap_text,
                 hovertemplate='<b>%{label}</b><br>%{text}<br>',
@@ -803,7 +810,10 @@ def create_single_treemap(opening_df, side_filter):
             branchvalues="total",
             marker=dict(
                 colors=treemap_colors,
-                line=dict(width=0.5, color=border_color)
+                # Create custom line widths - thicker for main openings
+                line=dict(color=border_color),
+                line_width=[2.5 if parent == "Tony's Openings" and label != "Tony's Openings" else 0.8 
+                           for label, parent in zip(treemap_labels, treemap_parents)]
             ),
             text=treemap_text,
             hovertemplate='<b>%{label}</b><br>%{text}<br>',
