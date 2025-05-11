@@ -8,6 +8,7 @@ from components.charts import (create_rating_progression, create_win_loss_pie,
 from components.filters import create_filters, apply_filters
 from components.opening_explorer import create_opening_explorer
 from components.game_analyzer import create_game_analyzer
+from components.opening_tree import create_opening_tree_visualization
 
 # Page configuration
 st.set_page_config(
@@ -138,12 +139,17 @@ def main():
     else:
         st.info("Need at least 5 games for AI analysis")
 
-    # New Opening Explorer section
+    # Opening Tree Visualization section
+    if 'PGN' in filtered_df.columns:
+        with st.expander("Opening Repertoire Tree", expanded=True):
+            create_opening_tree_visualization(filtered_df)
+    
+    # Opening Explorer section
     if 'PGN' in filtered_df.columns:
         with st.expander("Opening Explorer", expanded=False):
             create_opening_explorer(filtered_df)
             
-    # New Game Analysis section
+    # Game Analysis section
     if 'PGN' in filtered_df.columns:
         with st.expander("Game Analysis", expanded=False):
             create_game_analyzer(filtered_df)
