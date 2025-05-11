@@ -334,6 +334,15 @@ def display_treemap_instructions():
 
 def create_treemap_visualization(opening_df, side_filter):
     """Create a treemap visualization of opening performance"""
+    # Add instructions for treemap interaction
+    st.info("""
+    **Interactive Treemap Instructions:**
+    - Click on an opening to zoom in and see variations within it
+    - Double-click to zoom back out
+    - Hover over a section to see detailed statistics
+    - Colors indicate win rate: red (<33%) → yellow (33-67%) → green (>67%) → blue-green (>80%)
+    """)
+    
     # If we're filtering by a single side, show only one treemap
     if side_filter in ["White Pieces", "Black Pieces"]:
         create_single_treemap(opening_df, side_filter)
@@ -610,6 +619,8 @@ def create_treemap_visualization(opening_df, side_filter):
 def create_single_treemap(opening_df, side_filter):
     """Create a single treemap visualization for the given data and side filter"""
     st.subheader(f"Opening Treemap ({side_filter})")
+    
+    # No need to display instructions again if they're already shown in the parent function
     
     # Ensure DataFrame is a copy to avoid modification warnings
     opening_df = opening_df.copy()
