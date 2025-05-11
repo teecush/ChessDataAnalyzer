@@ -327,10 +327,56 @@ def display_treemap_instructions():
     """Display common instructions for the treemaps"""
     st.markdown("""
     <div style="text-align: center; color: #666; margin-top: -20px;">
-        <small>Win rate colors: red (<33%) → yellow (33-67%) → green (>67%) → blue-green (>80%)</small><br>
         <small><i>Click on an opening to zoom in and see variations. Double-click to zoom out.</i></small>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Display color legend in 6 columns
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
+    
+    with col1:
+        st.markdown("""
+        <div style='background-color:rgba(139, 0, 0, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
+        ≤20%<br>Dark Red
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style='background-color:rgba(255, 0, 0, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
+        20-35%<br>Light Red
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style='background-color:rgba(255, 215, 0, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
+        35-65%<br>Yellow
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown("""
+        <div style='background-color:rgba(144, 238, 144, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
+        65-80%<br>Light Green
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col5:
+        st.markdown("""
+        <div style='background-color:rgba(0, 128, 0, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
+        80-95%<br>Dark Green
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col6:
+        st.markdown("""
+        <div style='background-color:rgba(0, 206, 209, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
+        >95%<br>Turquoise
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Color represents win percentage</i></p>", unsafe_allow_html=True)
 
 def create_treemap_visualization(opening_df, side_filter):
     """Create a treemap visualization of opening performance"""
