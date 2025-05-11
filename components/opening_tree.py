@@ -112,52 +112,7 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
     if show_title:
         st.subheader(f"Opening Results ({side_filter})")
     
-    # Display color legend
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    
-    with col1:
-        st.markdown("""
-        <div style='background-color:#f23628;color:white;padding:5px;border-radius:3px;text-align:center;'>
-        ≤20%<br>Deep Red
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div style='background-color:#f2cbdc;color:black;padding:5px;border-radius:3px;text-align:center;'>
-        20-35%<br>Pink
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div style='background-color:rgba(255, 215, 0, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        35-65%<br>Yellow
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
-        <div style='background-color:rgba(144, 238, 144, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        65-80%<br>Light Green
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col5:
-        st.markdown("""
-        <div style='background-color:rgba(0, 128, 0, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
-        80-95%<br>Dark Green
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col6:
-        st.markdown("""
-        <div style='background-color:#389ae4;color:white;padding:5px;border-radius:3px;text-align:center;'>
-        >95%<br>Blue
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Click segments to explore opening variations</i></p>", unsafe_allow_html=True)
+    # We'll display the legend at the bottom, after the visualization
     
     # Check if we have data
     if len(opening_df) == 0:
@@ -314,6 +269,59 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
     )
     
     st.plotly_chart(fig, use_container_width=True)
+    
+    # Display a smaller color legend at the bottom
+    st.markdown("<p style='text-align:center;font-size:0.7em;'><i>Win Rate Color Legend</i></p>", unsafe_allow_html=True)
+    cols = st.columns(12)
+    
+    with cols[0]:
+        st.markdown("""
+        <div style='background-color:#f23628;color:white;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        ≤20%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[1]:
+        st.markdown("""
+        <div style='background-color:#f2cbdc;color:black;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        20-35%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[2]:
+        st.markdown("""
+        <div style='background-color:rgba(255, 215, 0, 0.8);color:black;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        35-65%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[3]:
+        st.markdown("""
+        <div style='background-color:rgba(144, 238, 144, 0.8);color:black;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        65-80%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[4]:
+        st.markdown("""
+        <div style='background-color:rgba(0, 128, 0, 0.8);color:white;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        80-95%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[5]:
+        st.markdown("""
+        <div style='background-color:#389ae4;color:white;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        >95%
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with cols[7:]:
+        st.markdown("""
+        <div style='padding:2px;text-align:center;font-size:0.7em;'>
+        <i>Note: <strong>Main Line</strong> indicates the primary variation of an opening</i>
+        </div>
+        """, unsafe_allow_html=True)
 
 def display_treemap_instructions():
     """Display common instructions for the treemaps"""
@@ -374,52 +382,7 @@ def create_single_treemap(opening_df, side_filter):
     """Create a simple treemap visualization for the given data and side filter"""
     st.subheader(f"Opening Treemap ({side_filter})")
     
-    # Display color legend
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    
-    with col1:
-        st.markdown("""
-        <div style='background-color:#f23628;color:white;padding:5px;border-radius:3px;text-align:center;'>
-        ≤20%<br>Deep Red
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div style='background-color:#f2cbdc;color:black;padding:5px;border-radius:3px;text-align:center;'>
-        20-35%<br>Pink
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div style='background-color:rgba(255, 215, 0, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        35-65%<br>Yellow
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
-        <div style='background-color:rgba(144, 238, 144, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        65-80%<br>Light Green
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col5:
-        st.markdown("""
-        <div style='background-color:rgba(0, 128, 0, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
-        80-95%<br>Dark Green
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col6:
-        st.markdown("""
-        <div style='background-color:#389ae4;color:white;padding:5px;border-radius:3px;text-align:center;'>
-        >95%<br>Blue
-        </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Click on an opening to explore variations</i></p>", unsafe_allow_html=True)
+    # We'll display the legend at the bottom, after the visualization
     
     # Check if we have data
     if len(opening_df) == 0:
@@ -576,6 +539,59 @@ def create_single_treemap(opening_df, side_filter):
     )
     
     st.plotly_chart(fig, use_container_width=True)
+    
+    # Display a smaller color legend at the bottom
+    st.markdown("<p style='text-align:center;font-size:0.7em;'><i>Win Rate Color Legend</i></p>", unsafe_allow_html=True)
+    cols = st.columns(12)
+    
+    with cols[0]:
+        st.markdown("""
+        <div style='background-color:#f23628;color:white;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        ≤20%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[1]:
+        st.markdown("""
+        <div style='background-color:#f2cbdc;color:black;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        20-35%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[2]:
+        st.markdown("""
+        <div style='background-color:rgba(255, 215, 0, 0.8);color:black;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        35-65%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[3]:
+        st.markdown("""
+        <div style='background-color:rgba(144, 238, 144, 0.8);color:black;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        65-80%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[4]:
+        st.markdown("""
+        <div style='background-color:rgba(0, 128, 0, 0.8);color:white;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        80-95%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[5]:
+        st.markdown("""
+        <div style='background-color:#389ae4;color:white;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        >95%
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with cols[7:]:
+        st.markdown("""
+        <div style='padding:2px;text-align:center;font-size:0.7em;'>
+        <i>Note: <strong>Main Line</strong> indicates the primary variation of an opening</i>
+        </div>
+        """, unsafe_allow_html=True)
 
 def create_treemap_visualization(opening_df, side_filter):
     """Create a treemap visualization of opening performance"""
@@ -616,51 +632,9 @@ def create_treemap_visualization(opening_df, side_filter):
 def create_sankey_diagram(opening_df, side_filter):
     """Create Sankey diagrams showing flow from main openings to results"""
     
-    # Display color legend
+    # Display title
     st.markdown("<p style='text-align:center;font-size:0.9em;'><b>Opening Flow Diagram</b></p>", unsafe_allow_html=True)
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    
-    with col1:
-        st.markdown("""
-        <div style='background-color:#f23628;color:white;padding:5px;border-radius:3px;text-align:center;'>
-        ≤20%<br>Deep Red
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div style='background-color:#f2cbdc;color:black;padding:5px;border-radius:3px;text-align:center;'>
-        20-35%<br>Pink
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div style='background-color:rgba(255, 215, 0, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        35-65%<br>Yellow
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
-        <div style='background-color:rgba(144, 238, 144, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        65-80%<br>Light Green
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col5:
-        st.markdown("""
-        <div style='background-color:rgba(0, 128, 0, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
-        80-95%<br>Dark Green
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col6:
-        st.markdown("""
-        <div style='background-color:#389ae4;color:white;padding:5px;border-radius:3px;text-align:center;'>
-        >95%<br>Blue
-        </div>
-        """, unsafe_allow_html=True)
+    # We'll display the legend at the bottom, after the visualization
     
     # Ensure we have data
     if len(opening_df) == 0:
@@ -792,6 +766,59 @@ def create_sankey_diagram(opening_df, side_filter):
     )
     
     st.plotly_chart(fig, use_container_width=True)
+    
+    # Display a smaller color legend at the bottom
+    st.markdown("<p style='text-align:center;font-size:0.7em;'><i>Win Rate Color Legend</i></p>", unsafe_allow_html=True)
+    cols = st.columns(12)
+    
+    with cols[0]:
+        st.markdown("""
+        <div style='background-color:#f23628;color:white;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        ≤20%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[1]:
+        st.markdown("""
+        <div style='background-color:#f2cbdc;color:black;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        20-35%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[2]:
+        st.markdown("""
+        <div style='background-color:rgba(255, 215, 0, 0.8);color:black;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        35-65%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[3]:
+        st.markdown("""
+        <div style='background-color:rgba(144, 238, 144, 0.8);color:black;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        65-80%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[4]:
+        st.markdown("""
+        <div style='background-color:rgba(0, 128, 0, 0.8);color:white;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        80-95%
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with cols[5]:
+        st.markdown("""
+        <div style='background-color:#389ae4;color:white;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
+        >95%
+        </div>
+        """, unsafe_allow_html=True)
+        
+    with cols[7:]:
+        st.markdown("""
+        <div style='padding:2px;text-align:center;font-size:0.7em;'>
+        <i>Note: <strong>Main Line</strong> indicates the primary variation of an opening</i>
+        </div>
+        """, unsafe_allow_html=True)
 
 def create_opening_stats_table(main_stats, full_stats):
     """Create a detailed table with opening statistics"""
