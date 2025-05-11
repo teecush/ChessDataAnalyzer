@@ -18,9 +18,13 @@ st.set_page_config(
     initial_sidebar_state="collapsed"  # Start with collapsed sidebar for more screen space
 )
 
-# Load custom CSS
-with open('assets/chess_style.css') as f:
-    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+# Load custom CSS and JavaScript
+with open("assets/chess_style.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+# Add JavaScript for right-click YouTube search functionality
+with open("assets/custom_interactions.js") as f:
+    st.markdown(f"<script>{f.read()}</script>", unsafe_allow_html=True)
 
 # App header
 st.markdown("""

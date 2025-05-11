@@ -268,7 +268,13 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
         height=700
     )
     
+    # Wrap the plotly chart in a div with treemap-container class for right-click functionality
+    st.markdown("<div class='treemap-container'>", unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Add right-click instructions
+    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Right-click (or long-press on mobile) on any opening to search YouTube tutorials</i></p>", unsafe_allow_html=True)
     
     # Display a smaller color legend at the bottom
     st.markdown("<p style='text-align:center;font-size:0.7em;'><i>Win Rate Color Legend</i></p>", unsafe_allow_html=True)
@@ -537,7 +543,13 @@ def create_single_treemap(opening_df, side_filter):
         height=700
     )
     
+    # Wrap the plotly chart in a div with treemap-container class for right-click functionality
+    st.markdown("<div class='treemap-container'>", unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Add right-click instructions
+    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Right-click (or long-press on mobile) on any opening to search YouTube tutorials</i></p>", unsafe_allow_html=True)
     
     # Display a smaller color legend at the bottom
     st.markdown("<p style='text-align:center;font-size:0.7em;'><i>Win Rate Color Legend</i></p>", unsafe_allow_html=True)
@@ -763,7 +775,13 @@ def create_sankey_diagram(opening_df, side_filter):
         height=700
     )
     
+    # Wrap the plotly chart in a div with treemap-container class for right-click functionality
+    st.markdown("<div class='treemap-container'>", unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Add right-click instructions
+    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Right-click (or long-press on mobile) on any opening to search YouTube tutorials</i></p>", unsafe_allow_html=True)
     
     # Display a smaller color legend at the bottom
     st.markdown("<p style='text-align:center;font-size:0.7em;'><i>Win Rate Color Legend</i></p>", unsafe_allow_html=True)
