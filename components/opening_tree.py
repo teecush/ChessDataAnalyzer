@@ -334,15 +334,7 @@ def display_treemap_instructions():
 
 def create_treemap_visualization(opening_df, side_filter):
     """Create a treemap visualization of opening performance"""
-    # Add instructions for treemap interaction
-    st.info("""
-    **Interactive Treemap Instructions:**
-    - Click on an opening to zoom in and see variations within it
-    - Double-click to zoom back out
-    - Hover over a section to see detailed statistics
-    - Colors indicate win rate: red (<33%) → yellow (33-67%) → green (>67%) → blue-green (>80%)
-    - Main openings have thicker borders to distinguish them from variations
-    """)
+    # Instructions removed as requested
     
     # If we're filtering by a single side, show only one treemap
     if side_filter in ["White Pieces", "Black Pieces"]:
@@ -391,7 +383,9 @@ def create_treemap_visualization(opening_df, side_filter):
                 
                 win_pct = round(main["wins"] / main["count"] * 100, 1) if main["count"] > 0 else 0
                 
-                treemap_labels.append(main["OpeningMain"])
+                # Add opening with win percentage in brackets
+                win_pct_display = int(round(win_pct, 0))
+                treemap_labels.append(f"{main['OpeningMain']} ({win_pct_display}%)")
                 treemap_parents.append("White Openings")
                 treemap_values.append(main["count"])
                 
