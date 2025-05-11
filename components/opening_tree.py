@@ -268,13 +268,7 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
         height=700
     )
     
-    # Wrap the plotly chart in a div with treemap-container class for right-click functionality
-    st.markdown("<div class='treemap-container'>", unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Add right-click instructions
-    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Right-click (or long-press on mobile) on any opening to search YouTube tutorials</i></p>", unsafe_allow_html=True)
     
     # Display a smaller color legend at the bottom
     st.markdown("<p style='text-align:center;font-size:0.7em;'><i>Win Rate Color Legend</i></p>", unsafe_allow_html=True)
@@ -384,21 +378,8 @@ def display_treemap_instructions():
     st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Color represents win percentage</i></p>", unsafe_allow_html=True)
 
 def create_single_treemap(opening_df, side_filter):
-    """Create a simple treemap visualization for the given data and side filter with right-click YouTube search"""
+    """Create a simple treemap visualization for the given data and side filter"""
     st.subheader(f"Opening Treemap ({side_filter})")
-    
-    # Debug - check what data we're receiving
-    st.write(f"Treemap data shape: {opening_df.shape}")
-    if len(opening_df.columns) > 0:
-        st.write(f"Treemap columns: {opening_df.columns.tolist()}")
-        
-        # Check for required opening columns
-        has_opening_cols = 'OpeningMain' in opening_df.columns and 'Opening' in opening_df.columns
-        st.write(f"Has required opening columns: {has_opening_cols}")
-        
-        # Check for required stat columns
-        has_stat_cols = 'wins' in opening_df.columns and 'losses' in opening_df.columns and 'draws' in opening_df.columns
-        st.write(f"Has required stat columns: {has_stat_cols}")
     
     # We'll display the legend at the bottom, after the visualization
     
@@ -556,13 +537,7 @@ def create_single_treemap(opening_df, side_filter):
         height=700
     )
     
-    # Wrap the plotly chart in a div with treemap-container class for right-click functionality
-    st.markdown("<div class='treemap-container'>", unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Add right-click instructions
-    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Right-click (or long-press on mobile) on any opening to search YouTube tutorials</i></p>", unsafe_allow_html=True)
     
     # Display a smaller color legend at the bottom
     st.markdown("<p style='text-align:center;font-size:0.7em;'><i>Win Rate Color Legend</i></p>", unsafe_allow_html=True)
@@ -616,128 +591,11 @@ def create_single_treemap(opening_df, side_filter):
         </div>
         """, unsafe_allow_html=True)
 
-def add_youtube_search_buttons(opening_df):
-    """Add expandable list of opening variations ranked by performance with YouTube search links"""
-    
-    # Debug info to see what's happening with our data
-    st.write(f"Opening data shape: {opening_df.shape}")
-    if len(opening_df.columns) > 0:
-        st.write(f"Columns: {opening_df.columns.tolist()}")
-    
-    # If no data, return early
-    if len(opening_df) == 0:
-        st.info("No opening data available with the current filters.")
-        return
-    
-    # Calculate win percentages for each opening
-    # Make sure we have at least one row with these columns
-    if 'OpeningMain' in opening_df.columns and 'Opening' in opening_df.columns:
-        # Calculate aggregates based on the first non-groupby column to avoid count issues
-        agg_column = next((col for col in opening_df.columns if col not in ['OpeningMain', 'Opening']), None)
-        
-        if agg_column is not None:
-            opening_stats = opening_df.groupby(['OpeningMain', 'Opening']).agg({
-                agg_column: 'count',  # Get count using any column
-                'wins': 'sum',
-                'losses': 'sum',
-                'draws': 'sum'
-            }).reset_index()
-            
-            # Rename the count column
-            opening_stats = opening_stats.rename(columns={agg_column: 'count'})
-        else:
-            # Fallback if we can't find a suitable column
-            opening_stats = opening_df.groupby(['OpeningMain', 'Opening']).size().reset_index(name='count')
-            opening_stats['wins'] = opening_df.groupby(['OpeningMain', 'Opening'])['wins'].sum().values
-            opening_stats['losses'] = opening_df.groupby(['OpeningMain', 'Opening'])['losses'].sum().values
-            opening_stats['draws'] = opening_df.groupby(['OpeningMain', 'Opening'])['draws'].sum().values
-    else:
-        # Create an empty dataframe with the required columns
-        opening_stats = pd.DataFrame({'OpeningMain': [], 'Opening': [], 'count': [], 'wins': [], 'losses': [], 'draws': []})
-    
-    # Calculate win percentage and handle division by zero
-    if not opening_stats.empty:
-        # Avoid division by zero
-        opening_stats['win_pct'] = np.where(
-            opening_stats['count'] > 0,
-            (opening_stats['wins'] / opening_stats['count']) * 100,
-            0  # Default to 0% if no games
-        )
-        
-        # Sort by performance (worst to best)
-        opening_stats = opening_stats.sort_values('win_pct', ascending=True)
-    else:
-        # For empty dataframe, just return without showing anything
-        st.info("No opening data available with the current filters.")
-        return
-    
-    # Create an expander for the YouTube search links
-    with st.expander("🎬 Opening Tutorials (Ranked by Performance)"):
-        # Show a table of openings with performance and YouTube links
-        for _, row in opening_stats.iterrows():
-            # Determine color based on win percentage
-            win_pct = row['win_pct']
-            
-            if win_pct <= 20:
-                color = "#f23628"  # Deep red
-                color_text = "deep-red"
-            elif win_pct <= 35:
-                color = "#f2cbdc"  # Pink
-                color_text = "pink"
-            elif win_pct <= 65:
-                color = "rgba(255, 255, 0, 0.8)"  # Yellow
-                color_text = "yellow"
-            elif win_pct <= 80:
-                color = "rgba(144, 238, 144, 0.8)"  # Light green
-                color_text = "light-green"
-            elif win_pct <= 95:
-                color = "rgba(0, 128, 0, 0.8)"  # Dark green
-                color_text = "dark-green"
-            else:
-                color = "#389ae4"  # Blue
-                color_text = "blue"
-            
-            # Safe conversions to handle potential non-numeric values
-            opening_name = str(row['Opening'])
-            
-            try:
-                games = int(row['count'])
-                wins = int(row['wins'])
-                losses = int(row['losses'])
-                draws = int(row['draws'])
-            except (ValueError, TypeError):
-                # Default values if conversion fails
-                games = 0
-                wins = 0
-                losses = 0
-                draws = 0
-            
-            # Create YouTube search link with proper URL encoding
-            search_query = "chess opening " + opening_name
-            youtube_link = f"https://www.youtube.com/results?search_query={'+'.join(search_query.split())}"
-            
-            # Create a row with colored background based on performance
-            st.markdown(f"""
-                <div style="display:flex; margin-bottom:5px; background-color:{color}; padding:8px; border-radius:5px; align-items:center;">
-                    <div style="flex-grow:1; color:{'black' if win_pct > 20 else 'white'};">
-                        <span style="font-weight:500;">{opening_name}</span><br>
-                        <span style="font-size:0.8em;">Games: {games} | Win: {wins} ({win_pct:.1f}%) | Loss: {losses} | Draw: {draws}</span>
-                    </div>
-                    <div>
-                        <a href="{youtube_link}" target="_blank" style="text-decoration:none; background-color:white; color:black; padding:5px 10px; border-radius:3px; font-size:0.8em; display:inline-block;">
-                            🎬 Watch Tutorials
-                        </a>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
-
 def create_treemap_visualization(opening_df, side_filter):
     """Create a treemap visualization of opening performance"""
     # If we're filtering by a single side, show only one treemap
     if side_filter in ["White Pieces", "Black Pieces"]:
         create_single_treemap(opening_df, side_filter)
-        # Add YouTube search buttons after the treemap
-        add_youtube_search_buttons(opening_df)
         return
     
     # Otherwise, split into three tabs - All, White, and Black
@@ -750,8 +608,6 @@ def create_treemap_visualization(opening_df, side_filter):
     with treemap_tabs[0]:
         # All games
         create_single_treemap(opening_df, "All Games")
-        # Add YouTube search buttons for common openings
-        add_youtube_search_buttons(opening_df)
         
     with treemap_tabs[1]:
         # White pieces
@@ -759,8 +615,6 @@ def create_treemap_visualization(opening_df, side_filter):
         
         if len(white_df) > 0:
             create_single_treemap(white_df, "White Pieces")
-            # Add YouTube search buttons for common openings
-            add_youtube_search_buttons(white_df)
         else:
             st.info("No games found where you played White.")
             
@@ -770,8 +624,6 @@ def create_treemap_visualization(opening_df, side_filter):
         
         if len(black_df) > 0:
             create_single_treemap(black_df, "Black Pieces")
-            # Add YouTube search buttons for common openings
-            add_youtube_search_buttons(black_df)
         else:
             st.info("No games found where you played Black.")
 
@@ -911,13 +763,7 @@ def create_sankey_diagram(opening_df, side_filter):
         height=700
     )
     
-    # Wrap the plotly chart in a div with treemap-container class for right-click functionality
-    st.markdown("<div class='treemap-container'>", unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Add right-click instructions
-    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Right-click (or long-press on mobile) on any opening to search YouTube tutorials</i></p>", unsafe_allow_html=True)
     
     # Display a smaller color legend at the bottom
     st.markdown("<p style='text-align:center;font-size:0.7em;'><i>Win Rate Color Legend</i></p>", unsafe_allow_html=True)
