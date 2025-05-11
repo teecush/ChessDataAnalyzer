@@ -112,12 +112,187 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
     if show_title:
         st.subheader(f"Opening Results ({side_filter})")
         
-    # Color legend for better understanding
-    st.markdown("""
-    <div style="text-align: center; color: #666; margin-bottom: 10px;">
-        <small>Colors indicate win rate: red (poor) → yellow (average) → green (good)</small>
-    </div>
-    """, unsafe_allow_html=True)
+    # Display color legend with the new colors
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
+    
+    with col1:
+        st.markdown("""
+        <div style='background-color:#f23628;color:white;padding:5px;border-radius:3px;text-align:center;'>
+        ≤20%<br>Deep Red
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style='background-color:#f2cbdc;color:black;padding:5px;border-radius:3px;text-align:center;'>
+        20-35%<br>Pink
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style='background-color:rgba(255, 215, 0, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
+        35-65%<br>Yellow
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown("""
+        <div style='background-color:rgba(144, 238, 144, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
+        65-80%<br>Light Green
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col5:
+        st.markdown("""
+        <div style='background-color:rgba(0, 128, 0, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
+        80-95%<br>Dark Green
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col6:
+        st.markdown("""
+        <div style='background-color:rgba(0, 206, 209, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
+        >95%<br>Turquoise
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Click segments to explore opening variations</i></p>", unsafe_allow_html=True)
+    
+    # Ensure we have data to work with
+    if len(opening_df) == 0:
+        st.warning("No data available for this filter")
+        return
+        
+    # Ensure we have OpeningMain values
+    if opening_df['OpeningMain'].isnull().sum() > 0:
+        opening_df['OpeningMain'] = opening_df['OpeningMain'].fillna("Unknown")
+    
+    # Group by main openings to get stats
+    main_openings = opening_df.groupby(["OpeningMain"]).agg(
+        count=("OpeningMain", "count"),
+        wins=("Result", lambda x: (x == "win").sum()),
+        losses=("Result", lambda x: (x == "loss").sum()),
+        draws=("Result", lambda x: (x == "draw").sum())
+    ).reset_index()
+    
+    # Initialize sunburst data
+    sunburst_labels = ["All Openings"]  # Root node
+    sunburst_parents = [""]
+    sunburst_values = [len(opening_df)]
+    sunburst_colors = ["rgba(180, 180, 220, 0.9)"]  # Root color
+    sunburst_text = [f"Total Games: {len(opening_df)}"]
+    
+    # Add main openings
+    for _, main in main_openings.iterrows():
+        if main["OpeningMain"] in ["Unknown", "", None] or pd.isna(main["OpeningMain"]):
+            continue
+            
+        # Get win percentage
+        win_pct = round(main["wins"] / main["count"] * 100, 1) if main["count"] > 0 else 0
+        win_pct_display = int(round(win_pct, 0))
+        
+        # Add to sunburst chart
+        sunburst_labels.append(f"{main['OpeningMain']} ({win_pct_display}%)")
+        sunburst_parents.append("All Openings")
+        sunburst_values.append(main["count"])
+        
+        # Set color using our new color scheme
+        if win_pct <= 20:
+            color = "#f23628"  # Deep red
+        elif win_pct <= 35:
+            color = "#f2cbdc"  # Pink
+        elif win_pct <= 65:
+            color = "rgba(255, 215, 0, 0.8)"  # Yellow
+        elif win_pct <= 80:
+            color = "rgba(144, 238, 144, 0.8)"  # Light green
+        elif win_pct <= 95:
+            color = "rgba(0, 128, 0, 0.8)"  # Dark green
+        else:
+            color = "rgba(0, 206, 209, 0.8)"  # Turquoise/blue
+            
+        sunburst_colors.append(color)
+        sunburst_text.append(f"Games: {main['count']}<br>Win: {main['wins']} ({win_pct}%)<br>Loss: {main['losses']}<br>Draw: {main['draws']}")
+    
+    # Add variations
+    for _, row in opening_df.iterrows():
+        main_opening = row["OpeningMain"]
+        full_opening = row["OpeningFull"]
+        
+        # Skip if equal or missing data
+        if pd.isna(main_opening) or pd.isna(full_opening) or main_opening == full_opening:
+            continue
+        
+        # Skip duplicates
+        variation_name = full_opening.replace(f"{main_opening} ", "").strip()
+        if not variation_name:
+            variation_name = "Main Line"
+        
+        # Skip if we've already processed this variation
+        full_label = f"{variation_name} "
+        if full_label in sunburst_labels:
+            continue
+            
+        # Count games with this variation
+        variation_df = opening_df[opening_df["OpeningFull"] == full_opening]
+        games_count = len(variation_df)
+        
+        if games_count > 0:
+            # Get win rate
+            wins_count = len(variation_df[variation_df["Result"] == "win"])
+            win_pct = round(wins_count / games_count * 100, 1) if games_count > 0 else 0
+            win_pct_display = int(round(win_pct, 0))
+            
+            # Find parent main opening in sunburst labels
+            parent_idx = -1
+            for i, label in enumerate(sunburst_labels):
+                if label.startswith(main_opening) and sunburst_parents[i] == "All Openings":
+                    parent_idx = i
+                    break
+                    
+            if parent_idx >= 0:
+                # Add to sunburst
+                sunburst_labels.append(f"{variation_name} ({win_pct_display}%)")
+                sunburst_parents.append(sunburst_labels[parent_idx])
+                sunburst_values.append(games_count)
+                
+                # Set color using the same scheme as main openings
+                if win_pct <= 20:
+                    color = "#f23628"  # Deep red
+                elif win_pct <= 35:
+                    color = "#f2cbdc"  # Pink
+                elif win_pct <= 65:
+                    color = "rgba(255, 215, 0, 0.8)"  # Yellow
+                elif win_pct <= 80:
+                    color = "rgba(144, 238, 144, 0.8)"  # Light green
+                elif win_pct <= 95:
+                    color = "rgba(0, 128, 0, 0.8)"  # Dark green
+                else:
+                    color = "rgba(0, 206, 209, 0.8)"  # Turquoise/blue
+                    
+                sunburst_colors.append(color)
+                sunburst_text.append(f"Games: {games_count}<br>Wins: {wins_count} ({win_pct}%)")
+    
+    # Create the sunburst visualization
+    fig = go.Figure(go.Sunburst(
+        labels=sunburst_labels,
+        parents=sunburst_parents,
+        values=sunburst_values,
+        marker=dict(
+            colors=sunburst_colors,
+            line=dict(color="white", width=1)
+        ),
+        text=sunburst_text,
+        hovertemplate='<b>%{label}</b><br>%{text}<extra></extra>',
+        branchvalues="total"
+    ))
+    
+    fig.update_layout(
+        margin=dict(t=30, l=0, r=0, b=0),
+        height=700
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
 
 def display_treemap_instructions():
     """Display common instructions for the treemaps"""
@@ -381,8 +556,279 @@ def create_treemap_visualization(opening_df, side_filter):
 
 def create_sankey_diagram(opening_df, side_filter):
     """Create Sankey diagrams showing flow from main openings to results"""
-    st.warning("This feature is unavailable at the moment")
+    
+    # Display color legend
+    st.markdown("<p style='text-align:center;font-size:0.9em;'><b>Opening Flow Diagram</b></p>", unsafe_allow_html=True)
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
+    
+    with col1:
+        st.markdown("""
+        <div style='background-color:#f23628;color:white;padding:5px;border-radius:3px;text-align:center;'>
+        ≤20%<br>Deep Red
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown("""
+        <div style='background-color:#f2cbdc;color:black;padding:5px;border-radius:3px;text-align:center;'>
+        20-35%<br>Pink
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown("""
+        <div style='background-color:rgba(255, 215, 0, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
+        35-65%<br>Yellow
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown("""
+        <div style='background-color:rgba(144, 238, 144, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
+        65-80%<br>Light Green
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col5:
+        st.markdown("""
+        <div style='background-color:rgba(0, 128, 0, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
+        80-95%<br>Dark Green
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col6:
+        st.markdown("""
+        <div style='background-color:rgba(0, 206, 209, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
+        >95%<br>Turquoise
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Ensure we have data
+    if len(opening_df) == 0:
+        st.warning("No data available for this filter")
+        return
+        
+    # Handle missing values
+    opening_df = opening_df.copy()
+    opening_df['OpeningMain'] = opening_df['OpeningMain'].fillna("Unknown")
+    
+    # Group data
+    main_openings = opening_df.groupby(['OpeningMain', 'Result']).size().reset_index(name='count')
+    
+    # Prepare nodes and links
+    nodes = []
+    node_colors = []
+    
+    # Starting nodes
+    if side_filter == "White Pieces":
+        start_node = "White Pieces"
+        node_color = "rgba(255, 255, 255, 0.8)"  # White color
+    elif side_filter == "Black Pieces":
+        start_node = "Black Pieces"
+        node_color = "rgba(128, 128, 128, 0.8)"  # Gray color
+    else:
+        start_node = "All Games"
+        node_color = "rgba(180, 180, 220, 0.8)"  # Purple-ish for all games
+    
+    nodes.append(start_node)
+    node_colors.append(node_color)
+    
+    # Add opening nodes
+    unique_openings = opening_df['OpeningMain'].unique()
+    for opening in unique_openings:
+        if pd.isna(opening) or opening == "Unknown":
+            continue
+            
+        # Get win rate for this opening
+        opening_games = opening_df[opening_df['OpeningMain'] == opening]
+        win_count = len(opening_games[opening_games['Result'] == 'win'])
+        total_count = len(opening_games)
+        win_pct = (win_count / total_count * 100) if total_count > 0 else 0
+        
+        # Determine color based on win rate
+        if win_pct <= 20:
+            color = "#f23628"  # Deep red
+        elif win_pct <= 35:
+            color = "#f2cbdc"  # Pink
+        elif win_pct <= 65:
+            color = "rgba(255, 215, 0, 0.8)"  # Yellow
+        elif win_pct <= 80:
+            color = "rgba(144, 238, 144, 0.8)"  # Light green
+        elif win_pct <= 95:
+            color = "rgba(0, 128, 0, 0.8)"  # Dark green
+        else:
+            color = "rgba(0, 206, 209, 0.8)"  # Turquoise/blue
+            
+        nodes.append(opening)
+        node_colors.append(color)
+    
+    # Add result nodes
+    nodes.extend(["Win", "Loss", "Draw"])
+    node_colors.extend(["rgba(0, 180, 0, 0.8)", "rgba(220, 20, 20, 0.8)", "rgba(120, 120, 200, 0.8)"])
+    
+    # Create node indices
+    node_indices = {node: i for i, node in enumerate(nodes)}
+    
+    # Prepare links from start to openings
+    opening_counts = opening_df.groupby('OpeningMain').size().reset_index(name='count')
+    
+    sources = []
+    targets = []
+    values = []
+    link_colors = []
+    
+    for _, row in opening_counts.iterrows():
+        opening = row['OpeningMain']
+        count = row['count']
+        
+        if opening in node_indices:
+            sources.append(node_indices[start_node])
+            targets.append(node_indices[opening])
+            values.append(count)
+            
+            # Get color from the node colors
+            opening_idx = nodes.index(opening)
+            link_colors.append(node_colors[opening_idx])
+    
+    # Prepare links from openings to results
+    for _, row in main_openings.iterrows():
+        opening = row['OpeningMain']
+        result = row['Result'].capitalize()
+        count = row['count']
+        
+        if opening in node_indices and result in node_indices:
+            sources.append(node_indices[opening])
+            targets.append(node_indices[result])
+            values.append(count)
+            
+            # Use result colors for these links
+            if result == "Win":
+                link_colors.append("rgba(0, 180, 0, 0.6)")
+            elif result == "Loss":
+                link_colors.append("rgba(220, 20, 20, 0.6)")
+            else:
+                link_colors.append("rgba(120, 120, 200, 0.6)")
+    
+    # Create Sankey diagram
+    fig = go.Figure(data=[go.Sankey(
+        node = dict(
+            pad = 15,
+            thickness = 20,
+            line = dict(color = "black", width = 0.5),
+            label = nodes,
+            color = node_colors
+        ),
+        link = dict(
+            source = sources,
+            target = targets,
+            value = values,
+            color = link_colors
+        )
+    )])
+    
+    fig.update_layout(
+        title_text=f"Opening Flow ({side_filter})",
+        font_size=12,
+        height=700
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
 
 def create_opening_stats_table(main_stats, full_stats):
     """Create a detailed table with opening statistics"""
-    st.warning("This feature is unavailable at the moment")
+    # Handle empty data
+    if main_stats is None or full_stats is None or len(main_stats) == 0:
+        st.warning("No opening statistics available")
+        return
+    
+    # Create two tabs for main openings and variations
+    stats_tabs = st.tabs(["Main Openings", "Opening Variations"])
+    
+    with stats_tabs[0]:
+        # Process main opening stats
+        main_df = pd.DataFrame(main_stats)
+        
+        # Format columns
+        main_df['Win %'] = main_df['win_rate'].apply(lambda x: f"{x:.1f}%")
+        main_df['White Games'] = main_df['white']
+        main_df['Black Games'] = main_df['black']
+        
+        # Select columns to display
+        display_main = main_df[['OpeningMain', 'total', 'wins', 'losses', 'draws', 'Win %', 'White Games', 'Black Games']]
+        display_main.columns = ['Opening', 'Games', 'Wins', 'Losses', 'Draws', 'Win %', 'White', 'Black']
+        
+        # Apply color styling based on win rate
+        def style_win_rate(val):
+            """Style the win percentage column"""
+            # Parse percentage value
+            try:
+                pct = float(val.replace("%", ""))
+                
+                # Apply color scheme consistent with charts
+                if pct <= 20:
+                    return f'background-color: {rgb_to_rgba("#f23628", 0.3)}; color: black'
+                elif pct <= 35:
+                    return f'background-color: {rgb_to_rgba("#f2cbdc", 0.6)}; color: black'
+                elif pct <= 65:
+                    return f'background-color: rgba(255, 215, 0, 0.3); color: black'
+                elif pct <= 80:
+                    return f'background-color: rgba(144, 238, 144, 0.4); color: black'
+                elif pct <= 95:
+                    return f'background-color: rgba(0, 128, 0, 0.3); color: black'
+                else:
+                    return f'background-color: rgba(0, 206, 209, 0.3); color: black'
+            except:
+                return ''
+        
+        # Sort by total games descending
+        display_main = display_main.sort_values(by='Games', ascending=False)
+        
+        # Style the dataframe
+        styled_main = display_main.style.applymap(
+            style_win_rate, 
+            subset=['Win %']
+        )
+        
+        # Show table
+        st.write("### Main Opening Statistics")
+        st.dataframe(styled_main, use_container_width=True)
+    
+    with stats_tabs[1]:
+        # Process variation stats
+        full_df = pd.DataFrame(full_stats)
+        
+        # Format columns
+        full_df['Win %'] = full_df['win_rate'].apply(lambda x: f"{x:.1f}%")
+        full_df['White Games'] = full_df['white']
+        full_df['Black Games'] = full_df['black']
+        
+        # Select columns to display
+        display_full = full_df[['OpeningFull', 'total', 'wins', 'losses', 'draws', 'Win %', 'White Games', 'Black Games']]
+        display_full.columns = ['Opening', 'Games', 'Wins', 'Losses', 'Draws', 'Win %', 'White', 'Black']
+        
+        # Sort by total games descending
+        display_full = display_full.sort_values(by='Games', ascending=False)
+        
+        # Style the dataframe
+        styled_full = display_full.style.applymap(
+            style_win_rate, 
+            subset=['Win %']
+        )
+        
+        # Show table
+        st.write("### Opening Variations Statistics")
+        st.dataframe(styled_full, use_container_width=True)
+
+def rgb_to_rgba(rgb_color, alpha=1.0):
+    """Convert RGB hex to rgba string for styling"""
+    # Handle different input formats
+    if rgb_color.startswith("#"):
+        # Hex color
+        r = int(rgb_color[1:3], 16)
+        g = int(rgb_color[3:5], 16)
+        b = int(rgb_color[5:7], 16)
+    else:
+        # Already rgba, just return it
+        return rgb_color
+    
+    return f"rgba({r}, {g}, {b}, {alpha})"
