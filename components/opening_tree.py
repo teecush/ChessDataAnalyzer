@@ -526,29 +526,47 @@ def create_single_treemap(opening_df, side_filter):
     else:
         border_color = "rgba(150, 150, 200, 0.8)"  # Purple-ish for all games
         
-    fig = go.Figure(go.Treemap(
-        labels=treemap_labels,
-        parents=treemap_parents,
-        values=treemap_values,
-        branchvalues="total",
-        marker=dict(
-            colors=treemap_colors,
-            line=dict(width=0.5, color=border_color)
-        ),
-        text=treemap_text,
-        hovertemplate='<b>%{label}</b><br>%{text}<br>',
-        textinfo="label+value",
-        maxdepth=2  # Limit depth for better readability
-    ))
+    # Add debugging for treemap data
+    st.write(f"Treemap data prepared: {len(treemap_labels)} nodes")
     
-    fig.update_layout(
-        title=f"Opening Repertoire by Games Played ({side_filter})",
-        width=900,
-        height=700,
-        margin=dict(t=30, l=0, r=0, b=0)
-    )
+    # Check if we have data to display
+    if len(treemap_labels) <= 1:
+        st.error("Not enough data to create a treemap visualization")
+        return
+        
+    try:
+        fig = go.Figure(go.Treemap(
+            labels=treemap_labels,
+            parents=treemap_parents,
+            values=treemap_values,
+            branchvalues="total",
+            marker=dict(
+                colors=treemap_colors,
+                line=dict(width=0.5, color=border_color)
+            ),
+            text=treemap_text,
+            hovertemplate='<b>%{label}</b><br>%{text}<br>',
+            textinfo="label+value",
+            maxdepth=2  # Limit depth for better readability
+        ))
+    except Exception as e:
+        st.error(f"Error creating treemap: {str(e)}")
+        return
     
-    st.plotly_chart(fig, use_container_width=True)
+    try:
+        fig.update_layout(
+            title=f"Opening Repertoire by Games Played ({side_filter})",
+            width=900,
+            height=700,
+            margin=dict(t=30, l=0, r=0, b=0)
+        )
+        
+        # Actually display the chart
+        st.plotly_chart(fig, use_container_width=True)
+        
+        st.success("Treemap visualization created successfully")
+    except Exception as e:
+        st.error(f"Error displaying treemap: {str(e)}")
     
     st.markdown("""
     <div style="text-align: center; color: #666; margin-top: -20px;">
