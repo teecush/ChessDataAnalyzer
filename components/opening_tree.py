@@ -316,7 +316,7 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
         </div>
         """, unsafe_allow_html=True)
         
-    with cols[7:]:
+    # Add a note about Main Line at the end
         st.markdown("""
         <div style='padding:2px;text-align:center;font-size:0.7em;'>
         <i>Note: <strong>Main Line</strong> indicates the primary variation of an opening</i>
@@ -586,7 +586,7 @@ def create_single_treemap(opening_df, side_filter):
         </div>
         """, unsafe_allow_html=True)
         
-    with cols[7:]:
+    # Add a note about Main Line at the end
         st.markdown("""
         <div style='padding:2px;text-align:center;font-size:0.7em;'>
         <i>Note: <strong>Main Line</strong> indicates the primary variation of an opening</i>
@@ -813,7 +813,7 @@ def create_sankey_diagram(opening_df, side_filter):
         </div>
         """, unsafe_allow_html=True)
         
-    with cols[7:]:
+    # Add a note about Main Line at the end
         st.markdown("""
         <div style='padding:2px;text-align:center;font-size:0.7em;'>
         <i>Note: <strong>Main Line</strong> indicates the primary variation of an opening</i>
