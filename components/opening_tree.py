@@ -404,23 +404,8 @@ def create_treemap_visualization(opening_df, side_filter):
         white_df = opening_df[opening_df['Side'].str.lower().isin(['w', 'white'])]
         
         if len(white_df) > 0:
-            # Use the create_single_treemap function
+            # Use the create_single_treemap function - this function handles all the visualization
             create_single_treemap(white_df, "White Pieces")
-            
-            # Group by hierarchy
-            main_openings = white_df.groupby(["OpeningMain"]).agg(
-                count=("OpeningMain", "count"),
-                wins=("Result", lambda x: (x == "win").sum()),
-                losses=("Result", lambda x: (x == "loss").sum()),
-                draws=("Result", lambda x: (x == "draw").sum())
-            ).reset_index()
-            
-            # Prepare data
-            treemap_labels = ["White Openings"]  # Root node
-            treemap_parents = [""]
-            treemap_values = [len(white_df)]
-            treemap_colors = ["rgba(255, 255, 255, 0.8)"]  # White for root
-            treemap_text = [f"Total White Games: {len(white_df)}"]
             
             # Add main openings
             for _, main in main_openings.iterrows():
