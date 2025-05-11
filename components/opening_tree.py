@@ -407,6 +407,13 @@ def create_treemap_visualization(opening_df, side_filter):
             )
             
             st.plotly_chart(fig, use_container_width=True)
+            
+            # Add color legend
+            st.markdown("""
+            <div style="text-align: center; color: #666; margin-top: -20px;">
+                <small>Colors indicate win rate: red (poor) → yellow (average) → green (good)</small>
+            </div>
+            """, unsafe_allow_html=True)
         else:
             st.info("No games found where you played White.")
     
@@ -479,6 +486,13 @@ def create_treemap_visualization(opening_df, side_filter):
             )
             
             st.plotly_chart(fig, use_container_width=True)
+            
+            # Add color legend
+            st.markdown("""
+            <div style="text-align: center; color: #666; margin-top: -20px;">
+                <small>Colors indicate win rate: red (poor) → yellow (average) → green (good)</small>
+            </div>
+            """, unsafe_allow_html=True)
         else:
             st.info("No games found where you played Black.")
 
