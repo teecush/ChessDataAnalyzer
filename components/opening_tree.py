@@ -387,6 +387,19 @@ def create_single_treemap(opening_df, side_filter):
     """Create a simple treemap visualization for the given data and side filter with right-click YouTube search"""
     st.subheader(f"Opening Treemap ({side_filter})")
     
+    # Debug - check what data we're receiving
+    st.write(f"Treemap data shape: {opening_df.shape}")
+    if len(opening_df.columns) > 0:
+        st.write(f"Treemap columns: {opening_df.columns.tolist()}")
+        
+        # Check for required opening columns
+        has_opening_cols = 'OpeningMain' in opening_df.columns and 'Opening' in opening_df.columns
+        st.write(f"Has required opening columns: {has_opening_cols}")
+        
+        # Check for required stat columns
+        has_stat_cols = 'wins' in opening_df.columns and 'losses' in opening_df.columns and 'draws' in opening_df.columns
+        st.write(f"Has required stat columns: {has_stat_cols}")
+    
     # We'll display the legend at the bottom, after the visualization
     
     # Check if we have data
@@ -605,6 +618,11 @@ def create_single_treemap(opening_df, side_filter):
 
 def add_youtube_search_buttons(opening_df):
     """Add expandable list of opening variations ranked by performance with YouTube search links"""
+    
+    # Debug info to see what's happening with our data
+    st.write(f"Opening data shape: {opening_df.shape}")
+    if len(opening_df.columns) > 0:
+        st.write(f"Columns: {opening_df.columns.tolist()}")
     
     # If no data, return early
     if len(opening_df) == 0:
