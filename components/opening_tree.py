@@ -341,7 +341,7 @@ def create_treemap_visualization(opening_df, side_filter):
     - Double-click to zoom back out
     - Hover over a section to see detailed statistics
     - Colors indicate win rate: red (<33%) → yellow (33-67%) → green (>67%) → blue-green (>80%)
-    - Main openings have thicker borders and bold, larger text to distinguish them from variations
+    - Main openings have thicker borders to distinguish them from variations
     """)
     
     # If we're filtering by a single side, show only one treemap
@@ -451,16 +451,6 @@ def create_treemap_visualization(opening_df, side_filter):
                     treemap_colors.append(color)
                     treemap_text.append(f"Games: {full_games}<br>Win: {full_wins} ({round(win_pct, 1)}%)")
 
-            # Create helper lists for styling
-            line_width_list = [2.5 if parent == "White Openings" and label != "White Openings" else 0.8 
-                             for label, parent in zip(treemap_labels, treemap_parents)]
-            
-            font_family_list = ["Arial Bold, sans-serif" if parent == "White Openings" and label != "White Openings" 
-                              else "Arial, sans-serif" for label, parent in zip(treemap_labels, treemap_parents)]
-            
-            font_size_list = [14 if parent == "White Openings" and label != "White Openings" 
-                            else 11 for label, parent in zip(treemap_labels, treemap_parents)]
-            
             # Create and display the white pieces treemap
             fig = go.Figure(go.Treemap(
                 labels=treemap_labels,
@@ -469,18 +459,24 @@ def create_treemap_visualization(opening_df, side_filter):
                 branchvalues="total",
                 marker=dict(
                     colors=treemap_colors,
+                    # Create custom line widths - thicker for main openings
                     line=dict(color="rgba(200, 200, 200, 0.8)"),
-                    line_width=line_width_list
+                    line_width=[2.5 if parent == "White Openings" and label != "White Openings" else 0.8 
+                               for label, parent in zip(treemap_labels, treemap_parents)]
                 ),
                 text=treemap_text,
                 hovertemplate='<b>%{label}</b><br>%{text}<br>',
                 textinfo="label+value",
                 maxdepth=3,  # Allow deeper zoom levels
                 root_color="rgba(255, 255, 255, 0.9)",  # Consistent root color
+                # Make main opening titles bold with larger font
                 textfont=dict(
-                    family=font_family_list,
-                    size=font_size_list
+                    family=["Arial Bold, sans-serif" if parent == "White Openings" and label != "White Openings" 
+                            else "Arial, sans-serif" for label, parent in zip(treemap_labels, treemap_parents)],
+                    size=[14 if parent == "White Openings" and label != "White Openings" 
+                          else 11 for label, parent in zip(treemap_labels, treemap_parents)]
                 ),
+                # Start with only one level visible (hide variations until clicked)
                 visible=True,
                 level=1  # Only show the first level initially
             ))
@@ -593,16 +589,6 @@ def create_treemap_visualization(opening_df, side_filter):
                     treemap_colors.append(color)
                     treemap_text.append(f"Games: {full_games}<br>Win: {full_wins} ({round(win_pct, 1)}%)")
 
-            # Create helper lists for styling
-            line_width_list = [2.5 if parent == "Black Openings" and label != "Black Openings" else 0.8 
-                             for label, parent in zip(treemap_labels, treemap_parents)]
-            
-            font_family_list = ["Arial Bold, sans-serif" if parent == "Black Openings" and label != "Black Openings" 
-                              else "Arial, sans-serif" for label, parent in zip(treemap_labels, treemap_parents)]
-            
-            font_size_list = [14 if parent == "Black Openings" and label != "Black Openings" 
-                            else 11 for label, parent in zip(treemap_labels, treemap_parents)]
-            
             # Create and display the black pieces treemap
             fig = go.Figure(go.Treemap(
                 labels=treemap_labels,
@@ -611,18 +597,24 @@ def create_treemap_visualization(opening_df, side_filter):
                 branchvalues="total",
                 marker=dict(
                     colors=treemap_colors,
+                    # Create custom line widths - thicker for main openings
                     line=dict(color="rgba(100, 100, 100, 0.8)"),
-                    line_width=line_width_list
+                    line_width=[2.5 if parent == "Black Openings" and label != "Black Openings" else 0.8 
+                               for label, parent in zip(treemap_labels, treemap_parents)]
                 ),
                 text=treemap_text,
                 hovertemplate='<b>%{label}</b><br>%{text}<br>',
                 textinfo="label+value",
                 maxdepth=3,  # Allow deeper zoom levels
                 root_color="rgba(128, 128, 128, 0.9)",  # Consistent root color for Black
+                # Make main opening titles bold with larger font
                 textfont=dict(
-                    family=font_family_list,
-                    size=font_size_list
+                    family=["Arial Bold, sans-serif" if parent == "Black Openings" and label != "Black Openings" 
+                            else "Arial, sans-serif" for label, parent in zip(treemap_labels, treemap_parents)],
+                    size=[14 if parent == "Black Openings" and label != "Black Openings" 
+                          else 11 for label, parent in zip(treemap_labels, treemap_parents)]
                 ),
+                # Start with only one level visible (hide variations until clicked)
                 visible=True,
                 level=1  # Only show the first level initially
             ))
@@ -825,17 +817,6 @@ def create_single_treemap(opening_df, side_filter):
         return
         
     try:
-        # Create line width list for borders - thicker for main openings
-        line_width_list = [2.5 if parent == "Tony's Openings" and label != "Tony's Openings" else 0.8 
-                          for label, parent in zip(treemap_labels, treemap_parents)]
-        
-        # Create font family and size lists for bold main openings
-        font_family_list = ["Arial Bold, sans-serif" if parent == "Tony's Openings" and label != "Tony's Openings" 
-                           else "Arial, sans-serif" for label, parent in zip(treemap_labels, treemap_parents)]
-        
-        font_size_list = [14 if parent == "Tony's Openings" and label != "Tony's Openings" 
-                         else 11 for label, parent in zip(treemap_labels, treemap_parents)]
-        
         fig = go.Figure(go.Treemap(
             labels=treemap_labels,
             parents=treemap_parents,
@@ -843,17 +824,16 @@ def create_single_treemap(opening_df, side_filter):
             branchvalues="total",
             marker=dict(
                 colors=treemap_colors,
+                # Create custom line widths - thicker for main openings
                 line=dict(color=border_color),
-                line_width=line_width_list
+                line_width=[2.5 if parent == "Tony's Openings" and label != "Tony's Openings" else 0.8 
+                           for label, parent in zip(treemap_labels, treemap_parents)]
             ),
             text=treemap_text,
             hovertemplate='<b>%{label}</b><br>%{text}<br>',
             textinfo="label+value",
             maxdepth=3,  # Allow deeper zoom levels for better interactivity
-            textfont=dict(
-                family=font_family_list,
-                size=font_size_list
-            ),
+            # Start with only one level visible (hide variations until clicked)
             visible=True,
             level=1  # Only show the first level initially
         ))
