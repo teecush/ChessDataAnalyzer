@@ -604,33 +604,113 @@ def create_single_treemap(opening_df, side_filter):
         """, unsafe_allow_html=True)
 
 def add_youtube_search_buttons(opening_df):
-    """Add direct YouTube search buttons for common openings"""
-    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Search for opening tutorials on YouTube:</i></p>", unsafe_allow_html=True)
+    """Add expandable list of opening variations ranked by performance with YouTube search links"""
     
-    # Extract the most common openings from the data
-    common_openings = []
-    if len(opening_df) > 0:
-        # Get the top 5 most frequent main openings
-        common_openings = opening_df['OpeningMain'].value_counts().head(5).index.tolist()
+    # If no data, return early
+    if len(opening_df) == 0:
+        st.info("No opening data available with the current filters.")
+        return
     
-    # If no data, add some common openings
-    if not common_openings:
-        common_openings = ["Sicilian Defense", "Ruy Lopez", "Queen's Gambit", "French Defense", "Italian Game"]
+    # Calculate win percentages for each opening
+    # Make sure we have at least one row with these columns
+    if 'OpeningMain' in opening_df.columns and 'Opening' in opening_df.columns:
+        # Calculate aggregates based on the first non-groupby column to avoid count issues
+        agg_column = next((col for col in opening_df.columns if col not in ['OpeningMain', 'Opening']), None)
+        
+        if agg_column is not None:
+            opening_stats = opening_df.groupby(['OpeningMain', 'Opening']).agg({
+                agg_column: 'count',  # Get count using any column
+                'wins': 'sum',
+                'losses': 'sum',
+                'draws': 'sum'
+            }).reset_index()
+            
+            # Rename the count column
+            opening_stats = opening_stats.rename(columns={agg_column: 'count'})
+        else:
+            # Fallback if we can't find a suitable column
+            opening_stats = opening_df.groupby(['OpeningMain', 'Opening']).size().reset_index(name='count')
+            opening_stats['wins'] = opening_df.groupby(['OpeningMain', 'Opening'])['wins'].sum().values
+            opening_stats['losses'] = opening_df.groupby(['OpeningMain', 'Opening'])['losses'].sum().values
+            opening_stats['draws'] = opening_df.groupby(['OpeningMain', 'Opening'])['draws'].sum().values
+    else:
+        # Create an empty dataframe with the required columns
+        opening_stats = pd.DataFrame({'OpeningMain': [], 'Opening': [], 'count': [], 'wins': [], 'losses': [], 'draws': []})
     
-    # Create columns for the buttons
-    cols = st.columns(len(common_openings))
+    # Calculate win percentage and handle division by zero
+    if not opening_stats.empty:
+        # Avoid division by zero
+        opening_stats['win_pct'] = np.where(
+            opening_stats['count'] > 0,
+            (opening_stats['wins'] / opening_stats['count']) * 100,
+            0  # Default to 0% if no games
+        )
+        
+        # Sort by performance (worst to best)
+        opening_stats = opening_stats.sort_values('win_pct', ascending=True)
+    else:
+        # For empty dataframe, just return without showing anything
+        st.info("No opening data available with the current filters.")
+        return
     
-    # Add a button for each common opening
-    for i, opening in enumerate(common_openings):
-        with cols[i]:
-            youtube_link = f"https://www.youtube.com/results?search_query=chess+opening+{opening.replace(' ', '+')}"
+    # Create an expander for the YouTube search links
+    with st.expander("🎬 Opening Tutorials (Ranked by Performance)"):
+        # Show a table of openings with performance and YouTube links
+        for _, row in opening_stats.iterrows():
+            # Determine color based on win percentage
+            win_pct = row['win_pct']
+            
+            if win_pct <= 20:
+                color = "#f23628"  # Deep red
+                color_text = "deep-red"
+            elif win_pct <= 35:
+                color = "#f2cbdc"  # Pink
+                color_text = "pink"
+            elif win_pct <= 65:
+                color = "rgba(255, 255, 0, 0.8)"  # Yellow
+                color_text = "yellow"
+            elif win_pct <= 80:
+                color = "rgba(144, 238, 144, 0.8)"  # Light green
+                color_text = "light-green"
+            elif win_pct <= 95:
+                color = "rgba(0, 128, 0, 0.8)"  # Dark green
+                color_text = "dark-green"
+            else:
+                color = "#389ae4"  # Blue
+                color_text = "blue"
+            
+            # Safe conversions to handle potential non-numeric values
+            opening_name = str(row['Opening'])
+            
+            try:
+                games = int(row['count'])
+                wins = int(row['wins'])
+                losses = int(row['losses'])
+                draws = int(row['draws'])
+            except (ValueError, TypeError):
+                # Default values if conversion fails
+                games = 0
+                wins = 0
+                losses = 0
+                draws = 0
+            
+            # Create YouTube search link with proper URL encoding
+            search_query = "chess opening " + opening_name
+            youtube_link = f"https://www.youtube.com/results?search_query={'+'.join(search_query.split())}"
+            
+            # Create a row with colored background based on performance
             st.markdown(f"""
-                <a href="{youtube_link}" target="_blank" style="text-decoration:none;">
-                    <div style="background-color:#f0f2f6; border-radius:5px; padding:5px; text-align:center; margin-bottom:10px;">
-                        <span style="font-size:16px;">🎬</span><br>
-                        <span style="font-size:0.7em;">{opening}</span>
+                <div style="display:flex; margin-bottom:5px; background-color:{color}; padding:8px; border-radius:5px; align-items:center;">
+                    <div style="flex-grow:1; color:{'black' if win_pct > 20 else 'white'};">
+                        <span style="font-weight:500;">{opening_name}</span><br>
+                        <span style="font-size:0.8em;">Games: {games} | Win: {wins} ({win_pct:.1f}%) | Loss: {losses} | Draw: {draws}</span>
                     </div>
-                </a>
+                    <div>
+                        <a href="{youtube_link}" target="_blank" style="text-decoration:none; background-color:white; color:black; padding:5px 10px; border-radius:3px; font-size:0.8em; display:inline-block;">
+                            🎬 Watch Tutorials
+                        </a>
+                    </div>
+                </div>
             """, unsafe_allow_html=True)
 
 def create_treemap_visualization(opening_df, side_filter):
