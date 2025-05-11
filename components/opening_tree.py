@@ -338,30 +338,62 @@ def create_treemap_visualization(opening_df, side_filter):
             create_single_treemap(opening_df, "All Games")
             
         with treemap_tabs[1]:
-            white_df = opening_df[opening_df['Side'].str.lower().isin(['w', 'white'])]
-            if len(white_df) > 0:
-                create_single_treemap(white_df, "White Pieces")
+            # Add debugging information
+            st.write(f"Full dataset has {len(opening_df)} games")
+            st.write(f"Columns available: {opening_df.columns.tolist()}")
+            
+            # Try with a different approach to filter White games
+            if 'Side' in opening_df.columns:
+                white_df = opening_df[opening_df['Side'].str.lower().isin(['w', 'white'])]
+                st.write(f"Found {len(white_df)} games with White pieces")
+                if len(white_df) > 0:
+                    create_single_treemap(white_df, "White Pieces")
+                else:
+                    st.info("No games found where you played White.")
             else:
-                st.info("No games found where you played White.")
+                st.error("The 'Side' column is missing from the dataset")
                 
         with treemap_tabs[2]:
-            black_df = opening_df[opening_df['Side'].str.lower().isin(['b', 'black'])]
-            if len(black_df) > 0:
-                create_single_treemap(black_df, "Black Pieces")
+            # Add debugging information 
+            if 'Side' in opening_df.columns:
+                black_df = opening_df[opening_df['Side'].str.lower().isin(['b', 'black'])]
+                st.write(f"Found {len(black_df)} games with Black pieces")
+                if len(black_df) > 0:
+                    create_single_treemap(black_df, "Black Pieces")
+                else:
+                    st.info("No games found where you played Black.")
             else:
-                st.info("No games found where you played Black.")
+                st.error("The 'Side' column is missing from the dataset")
 
 def create_single_treemap(opening_df, side_filter):
     """Create a single treemap visualization for the given data and side filter"""
     st.subheader(f"Opening Treemap ({side_filter})")
     
+    # Add debugging for column existence
+    st.write(f"Creating treemap with {len(opening_df)} games")
+    if len(opening_df) == 0:
+        st.warning("No data available for this filter")
+        return
+        
+    # Check for required columns
+    required_columns = ["OpeningMain", "Result"]
+    missing_columns = [col for col in required_columns if col not in opening_df.columns]
+    if missing_columns:
+        st.error(f"Missing required columns: {missing_columns}")
+        st.write(f"Available columns: {opening_df.columns.tolist()}")
+        return
+    
     # Group by hierarchy
-    main_openings = opening_df.groupby(["OpeningMain"]).agg(
-        count=("OpeningMain", "count"),
-        wins=("Result", lambda x: (x == "win").sum()),
-        losses=("Result", lambda x: (x == "loss").sum()),
-        draws=("Result", lambda x: (x == "draw").sum())
-    ).reset_index()
+    try:
+        main_openings = opening_df.groupby(["OpeningMain"]).agg(
+            count=("OpeningMain", "count"),
+            wins=("Result", lambda x: (x == "win").sum()),
+            losses=("Result", lambda x: (x == "loss").sum()),
+            draws=("Result", lambda x: (x == "draw").sum())
+        ).reset_index()
+    except Exception as e:
+        st.error(f"Error during aggregation: {str(e)}")
+        return
     
     # Prepare data for treemap
     treemap_labels = []
