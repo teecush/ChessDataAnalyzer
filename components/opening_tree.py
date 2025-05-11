@@ -463,9 +463,9 @@ def create_treemap_visualization(opening_df, side_filter):
                 textinfo="label+value",
                 maxdepth=3,  # Allow deeper zoom levels
                 root_color="rgba(255, 255, 255, 0.9)",  # Consistent root color
-                # Start with only one level visible (hide variations until clicked)
+                # Start with just main pieces, reveal segments on first click, zoom on second
                 visible=True,
-                level=1  # Only show the first level initially
+                level=0  # Only show the root level initially
             ))
             
             fig.update_layout(
@@ -594,9 +594,9 @@ def create_treemap_visualization(opening_df, side_filter):
                 textinfo="label+value",
                 maxdepth=3,  # Allow deeper zoom levels
                 root_color="rgba(128, 128, 128, 0.9)",  # Consistent root color for Black
-                # Start with only one level visible (hide variations until clicked)
+                # Start with just main pieces, reveal segments on first click, zoom on second
                 visible=True,
-                level=1  # Only show the first level initially
+                level=0  # Only show the root level initially
             ))
             
             fig.update_layout(
@@ -813,9 +813,9 @@ def create_single_treemap(opening_df, side_filter):
             hovertemplate='<b>%{label}</b><br>%{text}<br>',
             textinfo="label+value",
             maxdepth=3,  # Allow deeper zoom levels for better interactivity
-            # Start with only one level visible (hide variations until clicked)
+            # Start with just main pieces, reveal segments on first click, zoom on second
             visible=True,
-            level=1  # Only show the first level initially
+            level=0  # Only show the root level initially
         ))
     except Exception as e:
         st.error(f"Error creating treemap: {str(e)}")
