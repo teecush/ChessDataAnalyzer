@@ -369,20 +369,30 @@ def create_single_treemap(opening_df, side_filter):
     """Create a single treemap visualization for the given data and side filter"""
     st.subheader(f"Opening Treemap ({side_filter})")
     
+    # Ensure DataFrame is a copy to avoid modification warnings
+    opening_df = opening_df.copy()
+    
     # Add debugging for column existence
     st.write(f"Creating treemap with {len(opening_df)} games")
     if len(opening_df) == 0:
         st.warning("No data available for this filter")
         return
         
-    # Check for required columns
-    required_columns = ["OpeningMain", "Result"]
-    missing_columns = [col for col in required_columns if col not in opening_df.columns]
-    if missing_columns:
-        st.error(f"Missing required columns: {missing_columns}")
-        st.write(f"Available columns: {opening_df.columns.tolist()}")
-        return
+    # Ensure we have OpeningMain values
+    if opening_df['OpeningMain'].isnull().sum() > 0:
+        # Fill NaN values with "Unknown"
+        opening_df['OpeningMain'] = opening_df['OpeningMain'].fillna("Unknown")
+        st.write(f"Filled {opening_df['OpeningMain'].isnull().sum()} NaN values in OpeningMain")
     
+    # Make sure Result column has proper values
+    if 'Result' not in opening_df.columns:
+        st.error("Result column is missing")
+        return
+        
+    # Ensure Result has proper values
+    if opening_df['Result'].isnull().sum() > 0:
+        opening_df['Result'] = opening_df['Result'].fillna("unknown")
+        
     # Group by hierarchy
     try:
         main_openings = opening_df.groupby(["OpeningMain"]).agg(
@@ -391,6 +401,10 @@ def create_single_treemap(opening_df, side_filter):
             losses=("Result", lambda x: (x == "loss").sum()),
             draws=("Result", lambda x: (x == "draw").sum())
         ).reset_index()
+        
+        # Debug aggregation
+        st.write(f"Found {len(main_openings)} main openings")
+        
     except Exception as e:
         st.error(f"Error during aggregation: {str(e)}")
         return
@@ -443,18 +457,39 @@ def create_single_treemap(opening_df, side_filter):
         treemap_colors.append(color)
         treemap_text.append(f"Games: {main['count']}<br>Win: {main['wins']} ({win_pct}%)<br>Loss: {main['losses']}<br>Draw: {main['draws']}")
     
+    # Debug - add information about sub-openings processing
+    st.write("Processing sub-openings data...")
+    
     # Add full openings under main openings
     for main_opening in main_openings["OpeningMain"]:
         if main_opening in ["Unknown", "", None] or pd.isna(main_opening):
             continue
             
         # Filter for this main opening
-        full_openings = opening_df[opening_df["OpeningMain"] == main_opening].groupby("OpeningFull").agg(
-            count=("OpeningFull", "count"),
-            wins=("Result", lambda x: (x == "win").sum()),
-            losses=("Result", lambda x: (x == "loss").sum()),
-            draws=("Result", lambda x: (x == "draw").sum())
-        ).reset_index()
+        try:
+            # Check if OpeningFull column exists in the filtered dataset
+            if 'OpeningFull' not in opening_df.columns:
+                st.warning(f"OpeningFull column missing, skipping detailed analysis for {main_opening}")
+                continue
+                
+            # Get the games for this opening
+            opening_games = opening_df[opening_df["OpeningMain"] == main_opening]
+            
+            # Check if there are any games
+            if len(opening_games) == 0:
+                st.warning(f"No games found for opening {main_opening}")
+                continue
+                
+            # Group by OpeningFull
+            full_openings = opening_games.groupby("OpeningFull").agg(
+                count=("OpeningFull", "count"),
+                wins=("Result", lambda x: (x == "win").sum()),
+                losses=("Result", lambda x: (x == "loss").sum()),
+                draws=("Result", lambda x: (x == "draw").sum())
+            ).reset_index()
+        except Exception as e:
+            st.error(f"Error processing sub-openings for {main_opening}: {str(e)}")
+            continue
         
         for _, full in full_openings.iterrows():
             # Skip if same as main or unknown
