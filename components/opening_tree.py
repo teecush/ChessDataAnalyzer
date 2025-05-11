@@ -383,24 +383,25 @@ def create_treemap_visualization(opening_df, side_filter):
                 
                 win_pct = round(main["wins"] / main["count"] * 100, 1) if main["count"] > 0 else 0
                 
-                # Add to treemap (original format - win percentage in text)
-                treemap_labels.append(main["OpeningMain"])
+                # Add to treemap with win percentage in brackets
+                win_pct_display = int(round(win_pct, 0))
+                treemap_labels.append(f"{main['OpeningMain']} ({win_pct_display}%)")
                 treemap_parents.append("White Openings")
                 treemap_values.append(main["count"])
                 
-                # Color based on win rate
-                if win_pct < 33:
-                    # Red to yellow gradient for poor win rates
-                    color = f"rgba(255, {int(255 * win_pct / 33)}, 0, 0.8)"
-                elif win_pct < 67:
-                    # Yellow to green gradient for average win rates
-                    color = f"rgba({int(255 * (2 - win_pct/33))}, 255, 0, 0.8)"
+                # Color based on win rate with new color scheme
+                if win_pct <= 20:
+                    color = "rgba(139, 0, 0, 0.8)"  # Dark red
+                elif win_pct <= 35:
+                    color = "rgba(255, 0, 0, 0.8)"  # Light red
+                elif win_pct <= 65:
+                    color = "rgba(255, 215, 0, 0.8)"  # Yellow
+                elif win_pct <= 80:
+                    color = "rgba(144, 238, 144, 0.8)"  # Light green
+                elif win_pct <= 95:
+                    color = "rgba(0, 128, 0, 0.8)"  # Dark green
                 else:
-                    # Green to blue gradient for excellent win rates
-                    # When win_pct is 67, it's fully green; when 100, it adds blue
-                    green = 255
-                    blue = int(255 * (win_pct - 67) / 33)
-                    color = f"rgba(0, {green}, {blue}, 0.8)"
+                    color = "rgba(0, 206, 209, 0.8)"  # Turquoise/blue
                 
                 treemap_colors.append(color)
                 treemap_text.append(f"Games: {main['count']}<br>Win: {main['wins']} ({win_pct}%)<br>Loss: {main['losses']}<br>Draw: {main['draws']}")
@@ -515,24 +516,25 @@ def create_treemap_visualization(opening_df, side_filter):
                 
                 win_pct = round(main["wins"] / main["count"] * 100, 1) if main["count"] > 0 else 0
                 
-                # Add to treemap (original format)
-                treemap_labels.append(main["OpeningMain"])
+                # Add to treemap with win percentage in brackets
+                win_pct_display = int(round(win_pct, 0))
+                treemap_labels.append(f"{main['OpeningMain']} ({win_pct_display}%)")
                 treemap_parents.append("Black Openings")
                 treemap_values.append(main["count"])
                 
-                # Color based on win rate - same as white pieces for consistency
-                if win_pct < 33:
-                    # Red to yellow gradient for poor win rates
-                    color = f"rgba(255, {int(255 * win_pct / 33)}, 0, 0.8)"
-                elif win_pct < 67:
-                    # Yellow to green gradient for average win rates
-                    color = f"rgba({int(255 * (2 - win_pct/33))}, 255, 0, 0.8)"
+                # Color based on win rate with new color scheme
+                if win_pct <= 20:
+                    color = "rgba(139, 0, 0, 0.8)"  # Dark red
+                elif win_pct <= 35:
+                    color = "rgba(255, 0, 0, 0.8)"  # Light red
+                elif win_pct <= 65:
+                    color = "rgba(255, 215, 0, 0.8)"  # Yellow
+                elif win_pct <= 80:
+                    color = "rgba(144, 238, 144, 0.8)"  # Light green
+                elif win_pct <= 95:
+                    color = "rgba(0, 128, 0, 0.8)"  # Dark green
                 else:
-                    # Green to blue gradient for excellent win rates
-                    # When win_pct is 67, it's fully green; when 100, it adds blue
-                    green = 255
-                    blue = int(255 * (win_pct - 67) / 33)
-                    color = f"rgba(0, {green}, {blue}, 0.8)"
+                    color = "rgba(0, 206, 209, 0.8)"  # Turquoise/blue
                 
                 treemap_colors.append(color)
                 treemap_text.append(f"Games: {main['count']}<br>Win: {main['wins']} ({win_pct}%)<br>Loss: {main['losses']}<br>Draw: {main['draws']}")
@@ -694,23 +696,25 @@ def create_single_treemap(opening_df, side_filter):
         # Get win percentage
         win_pct = round(main["wins"] / main["count"] * 100, 1) if main["count"] > 0 else 0
         
-        # Add to treemap (original format)
-        treemap_labels.append(main["OpeningMain"])
+        # Add to treemap with win percentage in brackets
+        win_pct_display = int(round(win_pct, 0))
+        treemap_labels.append(f"{main['OpeningMain']} ({win_pct_display}%)")
         treemap_parents.append("Tony's Openings")
         treemap_values.append(main["count"])
         
-        # Color based on win rate - consistent with other functions
-        if win_pct < 33:
-            # Red to yellow gradient for poor win rates
-            color = f"rgba(255, {int(255 * win_pct / 33)}, 0, 0.8)"
-        elif win_pct < 67:
-            # Yellow to green gradient for average win rates
-            color = f"rgba({int(255 * (2 - win_pct/33))}, 255, 0, 0.8)"
+        # Color based on win rate with new color scheme
+        if win_pct <= 20:
+            color = "rgba(139, 0, 0, 0.8)"  # Dark red
+        elif win_pct <= 35:
+            color = "rgba(255, 0, 0, 0.8)"  # Light red
+        elif win_pct <= 65:
+            color = "rgba(255, 215, 0, 0.8)"  # Yellow
+        elif win_pct <= 80:
+            color = "rgba(144, 238, 144, 0.8)"  # Light green
+        elif win_pct <= 95:
+            color = "rgba(0, 128, 0, 0.8)"  # Dark green
         else:
-            # Green to blue gradient for excellent win rates
-            green = 255
-            blue = int(255 * (win_pct - 67) / 33)
-            color = f"rgba(0, {green}, {blue}, 0.8)"
+            color = "rgba(0, 206, 209, 0.8)"  # Turquoise/blue
             
         treemap_colors.append(color)
         treemap_text.append(f"Games: {main['count']}<br>Win: {main['wins']} ({win_pct}%)<br>Loss: {main['losses']}<br>Draw: {main['draws']}")
