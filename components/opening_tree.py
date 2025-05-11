@@ -654,13 +654,18 @@ def create_single_treemap(opening_df, side_filter):
             treemap_parents.append(main_opening)
             treemap_values.append(full["count"])
             
-            # Color based on win rate
+            # Color based on win rate - consistent with other functions
             if win_pct < 33:
+                # Red to yellow gradient for poor win rates
                 color = f"rgba(255, {int(255 * win_pct / 33)}, 0, 0.8)"
             elif win_pct < 67:
+                # Yellow to green gradient for average win rates
                 color = f"rgba({int(255 * (2 - win_pct/33))}, 255, 0, 0.8)"
             else:
-                color = f"rgba(0, 255, {int(255 * (win_pct - 67) / 33)}, 0.8)"
+                # Green to blue gradient for excellent win rates
+                green = 255
+                blue = int(255 * (win_pct - 67) / 33)
+                color = f"rgba(0, {green}, {blue}, 0.8)"
                 
             treemap_colors.append(color)
             treemap_text.append(f"Games: {full['count']}<br>Win: {full['wins']} ({win_pct}%)<br>Loss: {full['losses']}<br>Draw: {full['draws']}")
