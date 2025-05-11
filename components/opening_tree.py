@@ -614,8 +614,8 @@ def create_single_treemap(opening_df, side_filter):
     # Ensure DataFrame is a copy to avoid modification warnings
     opening_df = opening_df.copy()
     
-    # Add debugging for column existence
-    st.write(f"Creating treemap with {len(opening_df)} games")
+    # Debug info kept in comments for future reference
+    # Creating treemap with opening_df games
     if len(opening_df) == 0:
         st.warning("No data available for this filter")
         return
@@ -644,8 +644,7 @@ def create_single_treemap(opening_df, side_filter):
             draws=("Result", lambda x: (x == "draw").sum())
         ).reset_index()
         
-        # Debug aggregation
-        st.write(f"Found {len(main_openings)} main openings")
+        # Found main_openings.shape[0] main openings
         
     except Exception as e:
         st.error(f"Error during aggregation: {str(e)}")
@@ -704,8 +703,7 @@ def create_single_treemap(opening_df, side_filter):
         treemap_colors.append(color)
         treemap_text.append(f"Games: {main['count']}<br>Win: {main['wins']} ({win_pct}%)<br>Loss: {main['losses']}<br>Draw: {main['draws']}")
     
-    # Debug - add information about sub-openings processing
-    st.write("Processing sub-openings data...")
+    # Process sub-openings data (variations)
     
     # Add full openings under main openings
     for main_opening in main_openings["OpeningMain"]:
@@ -716,7 +714,7 @@ def create_single_treemap(opening_df, side_filter):
         try:
             # Check if OpeningFull column exists in the filtered dataset
             if 'OpeningFull' not in opening_df.columns:
-                st.warning(f"OpeningFull column missing, skipping detailed analysis for {main_opening}")
+                # OpeningFull column missing, skipping detailed analysis
                 continue
                 
             # Get the games for this opening
@@ -724,7 +722,7 @@ def create_single_treemap(opening_df, side_filter):
             
             # Check if there are any games
             if len(opening_games) == 0:
-                st.warning(f"No games found for opening {main_opening}")
+                # No games found for this opening
                 continue
                 
             # Group by OpeningFull
