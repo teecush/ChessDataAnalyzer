@@ -661,6 +661,8 @@ def create_treemap_visualization(opening_df, side_filter):
         
         if len(white_df) > 0:
             create_single_treemap(white_df, "White Pieces")
+            # Add YouTube search buttons for common openings
+            add_youtube_search_buttons(white_df)
         else:
             st.info("No games found where you played White.")
             
@@ -670,6 +672,8 @@ def create_treemap_visualization(opening_df, side_filter):
         
         if len(black_df) > 0:
             create_single_treemap(black_df, "Black Pieces")
+            # Add YouTube search buttons for common openings
+            add_youtube_search_buttons(black_df)
         else:
             st.info("No games found where you played Black.")
 
