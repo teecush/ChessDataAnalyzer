@@ -402,6 +402,45 @@ def create_treemap_visualization(opening_df, side_filter):
                 treemap_colors.append(color)
                 treemap_text.append(f"Games: {main['count']}<br>Win: {main['wins']} ({win_pct}%)<br>Loss: {main['losses']}<br>Draw: {main['draws']}")
             
+            # Add variations to the white treemap
+            for _, row in white_df.iterrows():
+                main_opening = row["OpeningMain"] 
+                full_opening = row["OpeningFull"]
+                
+                # Skip if they are the same or if any is missing
+                if (pd.isna(main_opening) or pd.isna(full_opening) or 
+                    main_opening == full_opening or 
+                    main_opening in ["Unknown", ""] or
+                    full_opening in ["Unknown", ""]):
+                    continue
+                
+                # Only add if this full opening isn't already in the treemap
+                if full_opening not in treemap_labels:
+                    treemap_labels.append(full_opening)
+                    treemap_parents.append(main_opening)  # Parent is the main opening
+                    
+                    # Count games with this full opening
+                    full_games = len(white_df[white_df["OpeningFull"] == full_opening])
+                    treemap_values.append(full_games)
+                    
+                    # Calculate win rate
+                    full_wins = len(white_df[(white_df["OpeningFull"] == full_opening) & 
+                                            (white_df["Result"] == "win")])
+                    win_pct = full_wins / full_games * 100 if full_games > 0 else 0
+                    
+                    # Determine color based on win rate
+                    if win_pct < 33:
+                        color = f"rgba(255, {int(255 * win_pct / 33)}, 0, 0.8)"
+                    elif win_pct < 67:
+                        color = f"rgba({int(255 * (2 - win_pct/33))}, 255, 0, 0.8)"
+                    else:
+                        green = 255
+                        blue = int(255 * (win_pct - 67) / 33) if win_pct > 67 else 0
+                        color = f"rgba(0, {green}, {blue}, 0.8)"
+                    
+                    treemap_colors.append(color)
+                    treemap_text.append(f"Games: {full_games}<br>Win: {full_wins} ({round(win_pct, 1)}%)")
+
             # Create and display the white pieces treemap
             fig = go.Figure(go.Treemap(
                 labels=treemap_labels,
@@ -491,6 +530,45 @@ def create_treemap_visualization(opening_df, side_filter):
                 treemap_colors.append(color)
                 treemap_text.append(f"Games: {main['count']}<br>Win: {main['wins']} ({win_pct}%)<br>Loss: {main['losses']}<br>Draw: {main['draws']}")
             
+            # Add variations to the black treemap
+            for _, row in black_df.iterrows():
+                main_opening = row["OpeningMain"] 
+                full_opening = row["OpeningFull"]
+                
+                # Skip if they are the same or if any is missing
+                if (pd.isna(main_opening) or pd.isna(full_opening) or 
+                    main_opening == full_opening or 
+                    main_opening in ["Unknown", ""] or
+                    full_opening in ["Unknown", ""]):
+                    continue
+                
+                # Only add if this full opening isn't already in the treemap
+                if full_opening not in treemap_labels:
+                    treemap_labels.append(full_opening)
+                    treemap_parents.append(main_opening)  # Parent is the main opening
+                    
+                    # Count games with this full opening
+                    full_games = len(black_df[black_df["OpeningFull"] == full_opening])
+                    treemap_values.append(full_games)
+                    
+                    # Calculate win rate
+                    full_wins = len(black_df[(black_df["OpeningFull"] == full_opening) & 
+                                            (black_df["Result"] == "win")])
+                    win_pct = full_wins / full_games * 100 if full_games > 0 else 0
+                    
+                    # Determine color based on win rate
+                    if win_pct < 33:
+                        color = f"rgba(255, {int(255 * win_pct / 33)}, 0, 0.8)"
+                    elif win_pct < 67:
+                        color = f"rgba({int(255 * (2 - win_pct/33))}, 255, 0, 0.8)"
+                    else:
+                        green = 255
+                        blue = int(255 * (win_pct - 67) / 33) if win_pct > 67 else 0
+                        color = f"rgba(0, {green}, {blue}, 0.8)"
+                    
+                    treemap_colors.append(color)
+                    treemap_text.append(f"Games: {full_games}<br>Win: {full_wins} ({round(win_pct, 1)}%)")
+
             # Create and display the black pieces treemap
             fig = go.Figure(go.Treemap(
                 labels=treemap_labels,
