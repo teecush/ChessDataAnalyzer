@@ -603,11 +603,43 @@ def create_single_treemap(opening_df, side_filter):
         </div>
         """, unsafe_allow_html=True)
 
+def add_youtube_search_buttons(opening_df):
+    """Add direct YouTube search buttons for common openings"""
+    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Search for opening tutorials on YouTube:</i></p>", unsafe_allow_html=True)
+    
+    # Extract the most common openings from the data
+    common_openings = []
+    if len(opening_df) > 0:
+        # Get the top 5 most frequent main openings
+        common_openings = opening_df['OpeningMain'].value_counts().head(5).index.tolist()
+    
+    # If no data, add some common openings
+    if not common_openings:
+        common_openings = ["Sicilian Defense", "Ruy Lopez", "Queen's Gambit", "French Defense", "Italian Game"]
+    
+    # Create columns for the buttons
+    cols = st.columns(len(common_openings))
+    
+    # Add a button for each common opening
+    for i, opening in enumerate(common_openings):
+        with cols[i]:
+            youtube_link = f"https://www.youtube.com/results?search_query=chess+opening+{opening.replace(' ', '+')}"
+            st.markdown(f"""
+                <a href="{youtube_link}" target="_blank" style="text-decoration:none;">
+                    <div style="background-color:#f0f2f6; border-radius:5px; padding:5px; text-align:center; margin-bottom:10px;">
+                        <span style="font-size:16px;">🎬</span><br>
+                        <span style="font-size:0.7em;">{opening}</span>
+                    </div>
+                </a>
+            """, unsafe_allow_html=True)
+
 def create_treemap_visualization(opening_df, side_filter):
     """Create a treemap visualization of opening performance"""
     # If we're filtering by a single side, show only one treemap
     if side_filter in ["White Pieces", "Black Pieces"]:
         create_single_treemap(opening_df, side_filter)
+        # Add YouTube search buttons after the treemap
+        add_youtube_search_buttons(opening_df)
         return
     
     # Otherwise, split into three tabs - All, White, and Black
@@ -620,6 +652,8 @@ def create_treemap_visualization(opening_df, side_filter):
     with treemap_tabs[0]:
         # All games
         create_single_treemap(opening_df, "All Games")
+        # Add YouTube search buttons for common openings
+        add_youtube_search_buttons(opening_df)
         
     with treemap_tabs[1]:
         # White pieces

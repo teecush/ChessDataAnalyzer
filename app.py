@@ -23,8 +23,129 @@ with open("assets/chess_style.css") as f:
     st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Add JavaScript for right-click YouTube search functionality
-with open("assets/custom_interactions.js") as f:
-    st.markdown(f"<script>{f.read()}</script>", unsafe_allow_html=True)
+st.markdown("""
+<script>
+// Function to handle right-click on treemap segments
+function setupTreemapRightClick() {
+  // Use setTimeout to allow charts to render
+  setTimeout(function() {
+    // Try to find all treemap elements
+    const treemapSegments = document.querySelectorAll('.treemap-container .main-svg .trace path');
+    
+    if (treemapSegments.length > 0) {
+      console.log('Found ' + treemapSegments.length + ' treemap segments');
+      
+      treemapSegments.forEach(segment => {
+        // Add context menu event listener
+        segment.addEventListener('contextmenu', function(e) {
+          e.preventDefault(); // Prevent default context menu
+          
+          // Try to get opening name from various attributes
+          let openingName = segment.getAttribute('data-info') || 
+                           segment.parentElement.querySelector('text')?.textContent || 
+                           'chess opening';
+          
+          // Create context menu at cursor position
+          const menu = document.createElement('div');
+          menu.id = 'custom-context-menu';
+          menu.style.position = 'absolute';
+          menu.style.left = e.pageX + 'px';
+          menu.style.top = e.pageY + 'px';
+          
+          // Add YouTube search option
+          const searchItem = document.createElement('div');
+          searchItem.textContent = '🎬 Search YouTube for this opening';
+          searchItem.onclick = function() {
+            const query = encodeURIComponent('chess opening ' + openingName);
+            window.open('https://www.youtube.com/results?search_query=' + query, '_blank');
+            menu.remove();
+          };
+          
+          menu.appendChild(searchItem);
+          document.body.appendChild(menu);
+          
+          // Close menu when clicking outside
+          document.addEventListener('click', function closeMenu(e) {
+            if (!menu.contains(e.target)) {
+              menu.remove();
+              document.removeEventListener('click', closeMenu);
+            }
+          });
+        });
+        
+        // Add long-press for mobile devices
+        let timer;
+        segment.addEventListener('touchstart', function(e) {
+          timer = setTimeout(function() {
+            // Get opening name similar to above
+            let openingName = segment.getAttribute('data-info') || 
+                             segment.parentElement.querySelector('text')?.textContent || 
+                             'chess opening';
+            
+            // Create context menu at touch position
+            const menu = document.createElement('div');
+            menu.id = 'custom-context-menu';
+            menu.style.position = 'absolute';
+            menu.style.left = e.touches[0].pageX + 'px';
+            menu.style.top = e.touches[0].pageY + 'px';
+            
+            // Add YouTube search option
+            const searchItem = document.createElement('div');
+            searchItem.textContent = '🎬 Search YouTube for this opening';
+            searchItem.onclick = function() {
+              const query = encodeURIComponent('chess opening ' + openingName);
+              window.open('https://www.youtube.com/results?search_query=' + query, '_blank');
+              menu.remove();
+            };
+            
+            menu.appendChild(searchItem);
+            document.body.appendChild(menu);
+            
+            // Close menu when touching outside
+            document.addEventListener('touchstart', function closeTouchMenu(e) {
+              if (!menu.contains(e.target)) {
+                menu.remove();
+                document.removeEventListener('touchstart', closeTouchMenu);
+              }
+            });
+          }, 800); // 800ms for long press
+        });
+        
+        segment.addEventListener('touchend', function() {
+          clearTimeout(timer);
+        });
+        
+        segment.addEventListener('touchmove', function() {
+          clearTimeout(timer);
+        });
+      });
+    } else {
+      console.log('No treemap segments found, retrying later...');
+      // Retry in case charts haven't fully rendered
+      setTimeout(setupTreemapRightClick, 1000);
+    }
+  }, 1000); // Initial delay
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', setupTreemapRightClick);
+
+// Also run after Streamlit rerenders (for page navigation, etc.)
+const observer = new MutationObserver(function(mutations) {
+  for (const mutation of mutations) {
+    if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+      // If treemap container is added to the DOM
+      if (document.querySelector('.treemap-container')) {
+        setupTreemapRightClick();
+      }
+    }
+  }
+});
+
+// Start observing the document
+observer.observe(document.body, { childList: true, subtree: true });
+</script>
+""", unsafe_allow_html=True)
 
 # App header
 st.markdown("""
