@@ -383,9 +383,8 @@ def create_treemap_visualization(opening_df, side_filter):
                 
                 win_pct = round(main["wins"] / main["count"] * 100, 1) if main["count"] > 0 else 0
                 
-                # Add opening with win percentage in brackets
-                win_pct_display = int(round(win_pct, 0))
-                treemap_labels.append(f"{main['OpeningMain']} ({win_pct_display}%)")
+                # Add to treemap (original format - win percentage in text)
+                treemap_labels.append(main["OpeningMain"])
                 treemap_parents.append("White Openings")
                 treemap_values.append(main["count"])
                 
@@ -516,9 +515,8 @@ def create_treemap_visualization(opening_df, side_filter):
                 
                 win_pct = round(main["wins"] / main["count"] * 100, 1) if main["count"] > 0 else 0
                 
-                # Add opening with win percentage in brackets
-                win_pct_display = int(round(win_pct, 0))
-                treemap_labels.append(f"{main['OpeningMain']} ({win_pct_display}%)")
+                # Add to treemap (original format)
+                treemap_labels.append(main["OpeningMain"])
                 treemap_parents.append("Black Openings")
                 treemap_values.append(main["count"])
                 
@@ -696,9 +694,8 @@ def create_single_treemap(opening_df, side_filter):
         # Get win percentage
         win_pct = round(main["wins"] / main["count"] * 100, 1) if main["count"] > 0 else 0
         
-        # Add to treemap with win percentage in brackets
-        win_pct_display = int(round(win_pct, 0))
-        treemap_labels.append(f"{main['OpeningMain']} ({win_pct_display}%)")
+        # Add to treemap (original format)
+        treemap_labels.append(main["OpeningMain"])
         treemap_parents.append("Tony's Openings")
         treemap_values.append(main["count"])
         
