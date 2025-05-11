@@ -112,52 +112,30 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
     if show_title:
         st.subheader(f"Opening Results ({side_filter})")
     
-    # Display color legend
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    
-    with col1:
-        st.markdown("""
-        <div style='background-color:#f23628;color:white;padding:5px;border-radius:3px;text-align:center;'>
-        ≤20%<br>Deep Red
+    # Display color legend - mobile optimized
+    st.markdown("""
+    <div style="display:flex; justify-content:space-between; margin-bottom:5px; flex-wrap:wrap; font-size:0.7rem;">
+        <div style="background-color:#f23628; color:white; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            ≤20%<br>Red
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div style='background-color:#f2cbdc;color:black;padding:5px;border-radius:3px;text-align:center;'>
-        20-35%<br>Pink
+        <div style="background-color:#f2cbdc; color:black; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            20-35%<br>Pink
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div style='background-color:rgba(255, 215, 0, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        35-65%<br>Yellow
+        <div style="background-color:rgba(255, 215, 0, 0.8); color:black; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            35-65%<br>Yellow
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
-        <div style='background-color:rgba(144, 238, 144, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        65-80%<br>Light Green
+        <div style="background-color:rgba(144, 238, 144, 0.8); color:black; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            65-80%<br>Green
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col5:
-        st.markdown("""
-        <div style='background-color:rgba(0, 128, 0, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
-        80-95%<br>Dark Green
+        <div style="background-color:rgba(0, 128, 0, 0.8); color:white; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            80-95%<br>DkGreen
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col6:
-        st.markdown("""
-        <div style='background-color:#389ae4;color:white;padding:5px;border-radius:3px;text-align:center;'>
-        >95%<br>Blue
+        <div style="background-color:#389ae4; color:white; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            >95%<br>Blue
         </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Click segments to explore opening variations</i></p>", unsafe_allow_html=True)
+    </div>
+    <p style='text-align:center;font-size:0.7em;margin-top:0;'><i>Tap segments to explore opening variations</i></p>
+    """, unsafe_allow_html=True)
     
     # Check if we have data
     if len(opening_df) == 0:
@@ -305,12 +283,17 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
         ),
         text=hover_texts,
         hovertemplate='<b>%{label}</b><br>%{text}<extra></extra>',
-        branchvalues="total"  # Use total so children add up to parent
+        branchvalues="total",  # Use total so children add up to parent
+        insidetextorientation='radial',  # Better text orientation for mobile
+        insidetextfont=dict(size=10)  # Smaller font for better mobile view
     ))
     
+    # Optimized for mobile (especially iPhone 16)
     fig.update_layout(
-        margin=dict(t=30, l=0, r=0, b=0),
-        height=700
+        margin=dict(t=10, l=0, r=0, b=0),
+        height=450,
+        autosize=True,
+        uniformtext=dict(minsize=10, mode='hide')  # Hide text that's too small
     )
     
     st.plotly_chart(fig, use_container_width=True)
@@ -374,52 +357,30 @@ def create_single_treemap(opening_df, side_filter):
     """Create a simple treemap visualization for the given data and side filter"""
     st.subheader(f"Opening Treemap ({side_filter})")
     
-    # Display color legend
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    
-    with col1:
-        st.markdown("""
-        <div style='background-color:#f23628;color:white;padding:5px;border-radius:3px;text-align:center;'>
-        ≤20%<br>Deep Red
+    # Display color legend - mobile optimized
+    st.markdown("""
+    <div style="display:flex; justify-content:space-between; margin-bottom:5px; flex-wrap:wrap; font-size:0.7rem;">
+        <div style="background-color:#f23628; color:white; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            ≤20%<br>Red
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div style='background-color:#f2cbdc;color:black;padding:5px;border-radius:3px;text-align:center;'>
-        20-35%<br>Pink
+        <div style="background-color:#f2cbdc; color:black; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            20-35%<br>Pink
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div style='background-color:rgba(255, 215, 0, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        35-65%<br>Yellow
+        <div style="background-color:rgba(255, 215, 0, 0.8); color:black; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            35-65%<br>Yellow
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
-        <div style='background-color:rgba(144, 238, 144, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        65-80%<br>Light Green
+        <div style="background-color:rgba(144, 238, 144, 0.8); color:black; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            65-80%<br>Green
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col5:
-        st.markdown("""
-        <div style='background-color:rgba(0, 128, 0, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
-        80-95%<br>Dark Green
+        <div style="background-color:rgba(0, 128, 0, 0.8); color:white; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            80-95%<br>DkGreen
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col6:
-        st.markdown("""
-        <div style='background-color:#389ae4;color:white;padding:5px;border-radius:3px;text-align:center;'>
-        >95%<br>Blue
+        <div style="background-color:#389ae4; color:white; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            >95%<br>Blue
         </div>
-        """, unsafe_allow_html=True)
-    
-    st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Click on an opening to explore variations</i></p>", unsafe_allow_html=True)
+    </div>
+    <p style='text-align:center;font-size:0.7em;margin-top:0;'><i>Tap segments to explore opening variations</i></p>
+    """, unsafe_allow_html=True)
     
     # Check if we have data
     if len(opening_df) == 0:
@@ -567,12 +528,18 @@ def create_single_treemap(opening_df, side_filter):
         ),
         text=hover_texts,
         hovertemplate='<b>%{label}</b><br>%{text}<extra></extra>',
-        branchvalues="total"  # Use total so children add up to parent
+        branchvalues="total",  # Use total so children add up to parent
+        textposition='middle center'
     ))
     
+    # Use a responsive height calculation
+    # Desktop: 700px, Mobile: 450px (optimized for iPhone 16)
     fig.update_layout(
-        margin=dict(t=30, l=10, r=10, b=10),
-        height=700
+        margin=dict(t=10, l=5, r=5, b=10),
+        height=450,
+        autosize=True,
+        uniformtext=dict(minsize=10, mode='hide'),  # Hide text that's too small
+        font=dict(size=10)  # Smaller font size for better mobile view
     )
     
     st.plotly_chart(fig, use_container_width=True)
@@ -616,51 +583,30 @@ def create_treemap_visualization(opening_df, side_filter):
 def create_sankey_diagram(opening_df, side_filter):
     """Create Sankey diagrams showing flow from main openings to results"""
     
-    # Display color legend
-    st.markdown("<p style='text-align:center;font-size:0.9em;'><b>Opening Flow Diagram</b></p>", unsafe_allow_html=True)
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    
-    with col1:
-        st.markdown("""
-        <div style='background-color:#f23628;color:white;padding:5px;border-radius:3px;text-align:center;'>
-        ≤20%<br>Deep Red
+    # Display color legend - mobile optimized
+    st.markdown("<p style='text-align:center;font-size:0.8em;margin-bottom:4px;'><b>Opening Flow Diagram</b></p>", unsafe_allow_html=True)
+    st.markdown("""
+    <div style="display:flex; justify-content:space-between; margin-bottom:5px; flex-wrap:wrap; font-size:0.7rem;">
+        <div style="background-color:#f23628; color:white; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            ≤20%<br>Red
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div style='background-color:#f2cbdc;color:black;padding:5px;border-radius:3px;text-align:center;'>
-        20-35%<br>Pink
+        <div style="background-color:#f2cbdc; color:black; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            20-35%<br>Pink
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col3:
-        st.markdown("""
-        <div style='background-color:rgba(255, 215, 0, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        35-65%<br>Yellow
+        <div style="background-color:rgba(255, 215, 0, 0.8); color:black; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            35-65%<br>Yellow
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col4:
-        st.markdown("""
-        <div style='background-color:rgba(144, 238, 144, 0.8);color:black;padding:5px;border-radius:3px;text-align:center;'>
-        65-80%<br>Light Green
+        <div style="background-color:rgba(144, 238, 144, 0.8); color:black; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            65-80%<br>Green
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col5:
-        st.markdown("""
-        <div style='background-color:rgba(0, 128, 0, 0.8);color:white;padding:5px;border-radius:3px;text-align:center;'>
-        80-95%<br>Dark Green
+        <div style="background-color:rgba(0, 128, 0, 0.8); color:white; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            80-95%<br>DkGreen
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col6:
-        st.markdown("""
-        <div style='background-color:#389ae4;color:white;padding:5px;border-radius:3px;text-align:center;'>
-        >95%<br>Blue
+        <div style="background-color:#389ae4; color:white; padding:4px; border-radius:3px; text-align:center; flex:1; margin:1px; min-width:40px;">
+            >95%<br>Blue
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
     
     # Ensure we have data
     if len(opening_df) == 0:
@@ -768,11 +714,11 @@ def create_sankey_diagram(opening_df, side_filter):
             else:
                 link_colors.append("rgba(120, 120, 200, 0.6)")
     
-    # Create Sankey diagram
+    # Create Sankey diagram - mobile optimized
     fig = go.Figure(data=[go.Sankey(
         node = dict(
-            pad = 15,
-            thickness = 20,
+            pad = 8,  # Reduced padding for mobile
+            thickness = 15,  # Thinner nodes for mobile view
             line = dict(color = "black", width = 0.5),
             label = nodes,
             color = node_colors
@@ -787,8 +733,10 @@ def create_sankey_diagram(opening_df, side_filter):
     
     fig.update_layout(
         title_text=f"Opening Flow ({side_filter})",
-        font_size=12,
-        height=700
+        font_size=10,  # Smaller font for mobile
+        height=450,  # Optimized height for iPhone 16
+        margin=dict(t=25, l=5, r=5, b=10),  # Tighter margins
+        autosize=True  # Better responsive behavior
     )
     
     st.plotly_chart(fig, use_container_width=True)

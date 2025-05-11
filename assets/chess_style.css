@@ -118,11 +118,37 @@
         max-width: 100%;
     }
     
+    /* Compact the color legend for mobile */
+    .row-widget.stHorizontal [data-testid="column"] {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Make column layout more compact */
+    [data-testid="column"] {
+        padding-left: 0.2rem !important;
+        padding-right: 0.2rem !important;
+    }
+    
+    /* Optimize visualization tabs */
+    .stTabs [data-baseweb="tab-panel"] {
+        padding: 0.1rem !important;
+    }
+    
+    /* Reduce padding on containers */
+    .block-container {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+        max-width: 100% !important;
+    }
+    
     /* Optimize for iPhone specifically */
     @media only screen and (device-width: 375px), 
            only screen and (device-width: 414px),
            only screen and (device-width: 390px), 
-           only screen and (device-width: 428px) {
+           only screen and (device-width: 428px),
+           only screen and (device-width: 393px),
+           only screen and (device-width: 430px) {
         .main {
             padding: 0.2rem;
         }
@@ -132,9 +158,48 @@
             font-size: 0.7rem;
         }
         
-        /* Further reduce chart height for iPhone */
+        /* Adjust chart height for iPhone */
         .js-plotly-plot, .plotly {
-            height: 250px !important;
+            height: 400px !important;
+        }
+        
+        /* Reduce text size in markdown cells for iPhone */
+        p, div {
+            font-size: 0.9rem !important;
+        }
+        
+        /* Make subheaders more compact */
+        h2, h3, .stMarkdown h2, .stMarkdown h3 {
+            font-size: 1.1rem !important;
+            margin-top: 0.5rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+    }
+    
+    /* Specific optimization for iPhone 16 */
+    @media only screen and (device-width: 430px), only screen and (device-width: 428px) {
+        /* Adjust plotly visualizations */
+        .js-plotly-plot, .plotly {
+            height: 450px !important; /* Taller for iPhone 16 screen */
+            width: 100% !important;
+            margin: 0 !important;
+        }
+        
+        /* Make color legend more compact */
+        [data-testid="column"] > div {
+            padding: 2px !important;
+        }
+        
+        /* Reduce size of color legend boxes */
+        [data-testid="column"] div div[style*="padding:5px"] {
+            padding: 3px !important;
+            margin-bottom: 0 !important;
+            font-size: 0.7rem !important;
+        }
+        
+        /* Make streamlit margins tighter */
+        .element-container {
+            margin: 0.1rem 0 !important;
         }
     }
 }
