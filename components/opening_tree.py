@@ -233,7 +233,7 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
     custom_text = []
     for i, label in enumerate(labels):
         if i == 0:  # Root node
-            custom_text.append("<b>All Openings</b>")
+            custom_text.append("All Openings")
             continue
         
         # Format longer labels to wrap on multiple lines
@@ -254,8 +254,7 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
             win_count = main_openings.loc[label, "wins"]
             total_count = main_openings.loc[label, "count"]
             win_pct = round(win_count / total_count * 100) if total_count > 0 else 0
-            # Add (ML) for mainline and make it bold
-            custom_text.append(f"<b>{formatted_label} (ML)</b><br>{win_pct}% Win")
+            custom_text.append(f"{formatted_label}<br>{win_pct}% Win")
         else:
             # Check if this is a variation (full opening)
             if label in opening_df["OpeningFull"].values:
@@ -263,10 +262,10 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
                 total_count = len(games)
                 win_count = len(games[games["Result"] == "win"])
                 win_pct = round(win_count / total_count * 100) if total_count > 0 else 0
-                custom_text.append(f"<b>{formatted_label}</b><br>{win_pct}% Win")
+                custom_text.append(f"{formatted_label}<br>{win_pct}% Win")
             else:
                 # Catch-all for any other nodes
-                custom_text.append(f"<b>{formatted_label}</b>")
+                custom_text.append(f"{formatted_label}")
     
     # Create the sunburst chart
     fig = go.Figure(go.Sunburst(
@@ -281,31 +280,22 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
         # Hover template shows games played and win percentage
         hovertemplate='<b>%{label}</b><br>Games: %{value}<br>',
         # Ensure we see labels for most segments
-        insidetextorientation='auto',  # Let Plotly decide the best orientation
+        insidetextorientation='radial',
         text=custom_text,
         textinfo="text",
         maxdepth=3,  # Limit depth for better readability
-        # Improve text presentation
-        leaf=dict(opacity=0.9),  # Make leaf nodes slightly more visible
+        # Improved text size for better readability
         textfont=dict(
-            size=11,  # Increase base font size
-            family="Arial, sans-serif"
+            size=11  # Slightly larger font
         )
     ))
     
     fig.update_layout(
         title="Opening Repertoire Breakdown",
-        width=850,
-        height=850,  # Slightly larger for better visibility
+        width=800,
+        height=800,
         margin=dict(t=30, l=0, r=0, b=0),
-        uniformtext=dict(minsize=10, mode='show'),  # Show more labels with larger minimum size
-        # Make chart more readable
-        paper_bgcolor='rgba(255,255,255,0.9)',
-        plot_bgcolor='rgba(255,255,255,0.9)',
-        font=dict(
-            family="Arial, sans-serif",
-            size=12  # Larger font size for chart elements
-        )
+        uniformtext=dict(minsize=10, mode='show')  # Show as many labels as possible with slightly larger font
     )
     
     st.plotly_chart(fig, use_container_width=True)
