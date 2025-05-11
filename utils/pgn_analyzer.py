@@ -287,10 +287,23 @@ def get_opening_performance(df):
             side = 'Black'
         
         opening_info = extract_opening_info(pgn)
-        opening_full.append(opening_info['opening_full'])
+        
+        # If main and full opening are the same, add "Main Line" to the full opening
+        if opening_info['opening_main'] == opening_info['opening_full'] and opening_info['opening_main'] != "":
+            modified_full = f"{opening_info['opening_main']}: Main Line"
+            opening_full.append(modified_full)
+        else:
+            opening_full.append(opening_info['opening_full'])
+            
         opening_main.append(opening_info['opening_main'])
         opening_sub.append(opening_info['opening_sub'])
-        opening_variation.append(opening_info['opening_variation'])
+        
+        # If there's no variation, set it to "Main Line"
+        if not opening_info['opening_variation'] and opening_info['opening_main'] != "":
+            opening_variation.append("Main Line")
+        else:
+            opening_variation.append(opening_info['opening_variation'])
+            
         eco_codes.append(opening_info['eco'])
         results.append(result)
         sides.append(side)
