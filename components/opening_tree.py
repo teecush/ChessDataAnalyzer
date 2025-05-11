@@ -669,7 +669,8 @@ def create_single_treemap(opening_df, side_filter):
     """Create a single treemap visualization for the given data and side filter"""
     st.subheader(f"Opening Treemap ({side_filter})")
     
-    # No need to display instructions again if they're already shown in the parent function
+    # Display instructions and color legend
+    display_treemap_instructions()
     
     # Ensure DataFrame is a copy to avoid modification warnings
     opening_df = opening_df.copy()
