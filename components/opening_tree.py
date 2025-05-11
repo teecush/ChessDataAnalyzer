@@ -378,7 +378,7 @@ def display_treemap_instructions():
     st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Color represents win percentage</i></p>", unsafe_allow_html=True)
 
 def create_single_treemap(opening_df, side_filter):
-    """Create a simple treemap visualization for the given data and side filter"""
+    """Create a simple treemap visualization for the given data and side filter with right-click YouTube search"""
     st.subheader(f"Opening Treemap ({side_filter})")
     
     # We'll display the legend at the bottom, after the visualization
