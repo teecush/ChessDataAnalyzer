@@ -277,7 +277,7 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
     with cols[0]:
         st.markdown("""
         <div style='background-color:#f23628;color:white;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
-        <=20%
+        ≤20%
         </div>
         """, unsafe_allow_html=True)
     
@@ -315,6 +315,13 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
         >95%
         </div>
         """, unsafe_allow_html=True)
+        
+    # Add a note about Main Line at the end
+        st.markdown("""
+        <div style='padding:2px;text-align:center;font-size:0.7em;'>
+        <i>Note: <strong>Main Line</strong> indicates the primary variation of an opening</i>
+        </div>
+        """, unsafe_allow_html=True)
 
 def display_treemap_instructions():
     """Display common instructions for the treemaps"""
@@ -330,7 +337,7 @@ def display_treemap_instructions():
     with col1:
         st.markdown("""
         <div style='background-color:#f23628;color:white;padding:5px;border-radius:3px;text-align:center;'>
-        &lt;=20%<br>Deep Red
+        ≤20%<br>Deep Red
         </div>
         """, unsafe_allow_html=True)
     
@@ -540,7 +547,7 @@ def create_single_treemap(opening_df, side_filter):
     with cols[0]:
         st.markdown("""
         <div style='background-color:#f23628;color:white;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
-        <=20%
+        ≤20%
         </div>
         """, unsafe_allow_html=True)
     
@@ -579,6 +586,13 @@ def create_single_treemap(opening_df, side_filter):
         </div>
         """, unsafe_allow_html=True)
         
+    # Add a note about Main Line at the end
+        st.markdown("""
+        <div style='padding:2px;text-align:center;font-size:0.7em;'>
+        <i>Note: <strong>Main Line</strong> indicates the primary variation of an opening</i>
+        </div>
+        """, unsafe_allow_html=True)
+
 def create_treemap_visualization(opening_df, side_filter):
     """Create a treemap visualization of opening performance"""
     # If we're filtering by a single side, show only one treemap
@@ -760,7 +774,7 @@ def create_sankey_diagram(opening_df, side_filter):
     with cols[0]:
         st.markdown("""
         <div style='background-color:#f23628;color:white;padding:2px;border-radius:3px;text-align:center;font-size:0.6em;'>
-        <=20%
+        ≤20%
         </div>
         """, unsafe_allow_html=True)
     
@@ -801,6 +815,11 @@ def create_sankey_diagram(opening_df, side_filter):
         
     # Add a note about Main Line at the end
         st.markdown("""
+        <div style='padding:2px;text-align:center;font-size:0.7em;'>
+        <i>Note: <strong>Main Line</strong> indicates the primary variation of an opening</i>
+        </div>
+        """, unsafe_allow_html=True)
+
 def create_opening_stats_table(main_stats, full_stats):
     """Create a detailed table with opening statistics"""
     # Handle empty data
