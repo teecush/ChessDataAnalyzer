@@ -378,6 +378,169 @@ def display_treemap_instructions():
     
     st.markdown("<p style='text-align:center;font-size:0.8em;'><i>Color represents win percentage</i></p>", unsafe_allow_html=True)
 
+def create_single_treemap(opening_df, side_filter):
+    """Create a single treemap visualization for the given data and side filter"""
+    st.subheader(f"Opening Treemap ({side_filter})")
+    
+    # Display instructions and color legend
+    display_treemap_instructions()
+    
+    # Ensure DataFrame is a copy to avoid modification warnings
+    opening_df = opening_df.copy()
+    
+    # Debug info kept in comments for future reference
+    # Creating treemap with opening_df games
+    if len(opening_df) == 0:
+        st.warning("No data available for this filter")
+        return
+        
+    # Ensure we have OpeningMain values
+    if opening_df['OpeningMain'].isnull().sum() > 0:
+        # Fill NaN values with "Unknown"
+        opening_df['OpeningMain'] = opening_df['OpeningMain'].fillna("Unknown")
+    
+    # Group by main openings to get stats
+    main_openings = opening_df.groupby(["OpeningMain"]).agg(
+        count=("OpeningMain", "count"),
+        wins=("Result", lambda x: (x == "win").sum()),
+        losses=("Result", lambda x: (x == "loss").sum()),
+        draws=("Result", lambda x: (x == "draw").sum())
+    ).reset_index()
+    
+    # Initialize treemap data
+    treemap_labels = ["Tony's Openings"]  # Root node
+    treemap_parents = [""]
+    
+    # Set root node color based on side
+    if side_filter == "White Pieces":
+        root_color = "rgba(255, 255, 255, 0.9)"  # White for white pieces
+    elif side_filter == "Black Pieces":
+        root_color = "rgba(128, 128, 128, 0.9)"  # Light gray for black pieces
+    else:
+        root_color = "rgba(180, 180, 220, 0.9)"  # Light purple for all games
+        
+    treemap_values = [len(opening_df)]
+    treemap_colors = [root_color]
+    treemap_text = [f"Total Games: {len(opening_df)}"]
+    
+    # Add main openings
+    for _, main in main_openings.iterrows():
+        # Skip unknown openings
+        if main["OpeningMain"] in ["Unknown", "", None] or pd.isna(main["OpeningMain"]):
+            continue
+            
+        # Get win percentage
+        win_pct = round(main["wins"] / main["count"] * 100, 1) if main["count"] > 0 else 0
+        
+        # Add to treemap with win percentage in brackets
+        win_pct_display = int(round(win_pct, 0))
+        treemap_labels.append(f"{main['OpeningMain']} ({win_pct_display}%)")
+        treemap_parents.append("Tony's Openings")
+        treemap_values.append(main["count"])
+        
+        # Color based on win rate with updated color scheme
+        if win_pct <= 20:
+            color = "rgba(128, 0, 32, 0.8)"  # Deep red
+        elif win_pct <= 35:
+            color = "rgba(255, 105, 180, 0.8)"  # Pink
+        elif win_pct <= 65:
+            color = "rgba(255, 215, 0, 0.8)"  # Yellow
+        elif win_pct <= 80:
+            color = "rgba(144, 238, 144, 0.8)"  # Light green
+        elif win_pct <= 95:
+            color = "rgba(0, 128, 0, 0.8)"  # Dark green
+        else:
+            color = "rgba(0, 206, 209, 0.8)"  # Turquoise/blue
+            
+        treemap_colors.append(color)
+        treemap_text.append(f"Games: {main['count']}<br>Win: {main['wins']} ({win_pct}%)<br>Loss: {main['losses']}<br>Draw: {main['draws']}")
+    
+    # Process sub-openings data (variations)
+    for _, row in opening_df.iterrows():
+        main_opening = row["OpeningMain"]
+        full_opening = row["OpeningFull"]
+        
+        # Skip if equal (no sub-variation) or if missing data
+        if pd.isna(main_opening) or pd.isna(full_opening) or main_opening == full_opening:
+            continue
+        
+        # Skip duplicates
+        variation_name = full_opening.replace(f"{main_opening} ", "").strip()
+        if not variation_name:
+            variation_name = "Main Line"
+        
+        # Skip if we've already processed this variation
+        full_label = f"{variation_name} "
+        if full_label in treemap_labels:
+            continue
+            
+        # Count games with this variation
+        variation_df = opening_df[opening_df["OpeningFull"] == full_opening]
+        games_count = len(variation_df)
+        
+        if games_count > 0:
+            # Get win rate
+            wins_count = len(variation_df[variation_df["Result"] == "win"])
+            win_pct = round(wins_count / games_count * 100, 1) if games_count > 0 else 0
+            win_pct_display = int(round(win_pct, 0))
+            
+            # Find parent main opening in treemap labels
+            parent_idx = -1
+            for i, label in enumerate(treemap_labels):
+                if label.startswith(main_opening) and treemap_parents[i] == "Tony's Openings":
+                    parent_idx = i
+                    break
+                    
+            if parent_idx >= 0:
+                # Add to treemap
+                treemap_labels.append(f"{variation_name} ({win_pct_display}%)")
+                treemap_parents.append(treemap_labels[parent_idx])
+                treemap_values.append(games_count)
+                
+                # Set color using the same scheme as main openings
+                if win_pct <= 20:
+                    color = "rgba(128, 0, 32, 0.8)"  # Deep red
+                elif win_pct <= 35:
+                    color = "rgba(255, 105, 180, 0.8)"  # Pink
+                elif win_pct <= 65:
+                    color = "rgba(255, 215, 0, 0.8)"  # Yellow
+                elif win_pct <= 80:
+                    color = "rgba(144, 238, 144, 0.8)"  # Light green
+                elif win_pct <= 95:
+                    color = "rgba(0, 128, 0, 0.8)"  # Dark green
+                else:
+                    color = "rgba(0, 206, 209, 0.8)"  # Turquoise/blue
+                    
+                treemap_colors.append(color)
+                treemap_text.append(f"Games: {games_count}<br>Wins: {wins_count} ({win_pct}%)")
+    
+    # Create the treemap visualization
+    fig = go.Figure(go.Treemap(
+        labels=treemap_labels,
+        parents=treemap_parents,
+        values=treemap_values,
+        marker=dict(
+            colors=treemap_colors,
+            # Create custom line widths - thicker for main openings
+            line=dict(color="rgba(150, 150, 150, 0.8)"),
+            line_width=[2.5 if parent == "Tony's Openings" and label != "Tony's Openings" else 0.8 
+                       for label, parent in zip(treemap_labels, treemap_parents)]
+        ),
+        text=treemap_text,
+        hovertemplate='<b>%{label}</b><br>%{text}<extra></extra>',
+        maxdepth=3,  # Allow deeper zoom levels
+        # Start with just main pieces, reveal segments on first click, zoom on second
+        visible=True,
+        level=0  # Only show the root level initially
+    ))
+    
+    fig.update_layout(
+        margin=dict(t=30, l=10, r=10, b=10),
+        height=700
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+
 def create_treemap_visualization(opening_df, side_filter):
     """Create a treemap visualization of opening performance"""
     # If we're filtering by a single side, show only one treemap
