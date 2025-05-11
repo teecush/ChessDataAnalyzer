@@ -325,45 +325,162 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
 
 def create_treemap_visualization(opening_df, side_filter):
     """Create a treemap visualization of opening performance"""
-    # Similar approach to the sunburst, check if we need to split by side
+    # If we're filtering by a single side, show only one treemap
     if side_filter in ["White Pieces", "Black Pieces"]:
-        # Just create one treemap with the filtered data
         create_single_treemap(opening_df, side_filter)
-    else:
-        # Create tabs for All, White, and Black
-        st.subheader("Opening Treemaps (By Color)")
-        treemap_tabs = st.tabs(["All Games", "White Pieces", "Black Pieces"])
+        return
+    
+    # Otherwise, split into three tabs - All, White, and Black
+    st.subheader("Opening Treemaps (By Color)")
+    treemap_tabs = st.tabs(["All Games", "White Pieces", "Black Pieces"])
+    
+    with treemap_tabs[0]:
+        # All games
+        create_single_treemap(opening_df, "All Games")
         
-        with treemap_tabs[0]:
-            create_single_treemap(opening_df, "All Games")
+    with treemap_tabs[1]:
+        # White pieces
+        white_df = opening_df[opening_df['Side'].str.lower().isin(['w', 'white'])]
+        
+        if len(white_df) > 0:
+            # Direct implementation instead of calling create_single_treemap
+            st.subheader("White Pieces Openings")
             
-        with treemap_tabs[1]:
-            # Add debugging information
-            st.write(f"Full dataset has {len(opening_df)} games")
-            st.write(f"Columns available: {opening_df.columns.tolist()}")
+            # Group by hierarchy
+            main_openings = white_df.groupby(["OpeningMain"]).agg(
+                count=("OpeningMain", "count"),
+                wins=("Result", lambda x: (x == "win").sum()),
+                losses=("Result", lambda x: (x == "loss").sum()),
+                draws=("Result", lambda x: (x == "draw").sum())
+            ).reset_index()
             
-            # Try with a different approach to filter White games
-            if 'Side' in opening_df.columns:
-                white_df = opening_df[opening_df['Side'].str.lower().isin(['w', 'white'])]
-                st.write(f"Found {len(white_df)} games with White pieces")
-                if len(white_df) > 0:
-                    create_single_treemap(white_df, "White Pieces")
-                else:
-                    st.info("No games found where you played White.")
-            else:
-                st.error("The 'Side' column is missing from the dataset")
+            # Prepare data
+            treemap_labels = ["White Openings"]  # Root node
+            treemap_parents = [""]
+            treemap_values = [len(white_df)]
+            treemap_colors = ["rgba(255, 255, 255, 0.8)"]  # White for root
+            treemap_text = [f"Total White Games: {len(white_df)}"]
+            
+            # Add main openings
+            for _, main in main_openings.iterrows():
+                if main["OpeningMain"] in ["Unknown", "", None] or pd.isna(main["OpeningMain"]):
+                    continue
                 
-        with treemap_tabs[2]:
-            # Add debugging information 
-            if 'Side' in opening_df.columns:
-                black_df = opening_df[opening_df['Side'].str.lower().isin(['b', 'black'])]
-                st.write(f"Found {len(black_df)} games with Black pieces")
-                if len(black_df) > 0:
-                    create_single_treemap(black_df, "Black Pieces")
+                win_pct = round(main["wins"] / main["count"] * 100, 1) if main["count"] > 0 else 0
+                
+                treemap_labels.append(main["OpeningMain"])
+                treemap_parents.append("White Openings")
+                treemap_values.append(main["count"])
+                
+                # Color based on win rate
+                if win_pct < 33:
+                    color = f"rgba(255, {int(255 * win_pct / 33)}, 0, 0.8)"
+                elif win_pct < 67:
+                    color = f"rgba({int(255 * (2 - win_pct/33))}, 255, 0, 0.8)"
                 else:
-                    st.info("No games found where you played Black.")
-            else:
-                st.error("The 'Side' column is missing from the dataset")
+                    color = f"rgba(0, 255, {int(255 * (win_pct - 67) / 33)}, 0.8)"
+                
+                treemap_colors.append(color)
+                treemap_text.append(f"Games: {main['count']}<br>Win: {main['wins']} ({win_pct}%)<br>Loss: {main['losses']}<br>Draw: {main['draws']}")
+            
+            # Create and display the white pieces treemap
+            fig = go.Figure(go.Treemap(
+                labels=treemap_labels,
+                parents=treemap_parents,
+                values=treemap_values,
+                branchvalues="total",
+                marker=dict(
+                    colors=treemap_colors,
+                    line=dict(width=0.5, color="rgba(200, 200, 200, 0.8)")
+                ),
+                text=treemap_text,
+                hovertemplate='<b>%{label}</b><br>%{text}<br>',
+                textinfo="label+value",
+                maxdepth=2
+            ))
+            
+            fig.update_layout(
+                title="White Pieces Opening Repertoire",
+                width=900,
+                height=700,
+                margin=dict(t=30, l=0, r=0, b=0)
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No games found where you played White.")
+    
+    with treemap_tabs[2]:
+        # Black pieces
+        black_df = opening_df[opening_df['Side'].str.lower().isin(['b', 'black'])]
+        
+        if len(black_df) > 0:
+            # Direct implementation instead of calling create_single_treemap
+            st.subheader("Black Pieces Openings")
+            
+            # Group by hierarchy
+            main_openings = black_df.groupby(["OpeningMain"]).agg(
+                count=("OpeningMain", "count"),
+                wins=("Result", lambda x: (x == "win").sum()),
+                losses=("Result", lambda x: (x == "loss").sum()),
+                draws=("Result", lambda x: (x == "draw").sum())
+            ).reset_index()
+            
+            # Prepare data
+            treemap_labels = ["Black Openings"]  # Root node
+            treemap_parents = [""]
+            treemap_values = [len(black_df)]
+            treemap_colors = ["rgba(128, 128, 128, 0.8)"]  # Gray for root
+            treemap_text = [f"Total Black Games: {len(black_df)}"]
+            
+            # Add main openings
+            for _, main in main_openings.iterrows():
+                if main["OpeningMain"] in ["Unknown", "", None] or pd.isna(main["OpeningMain"]):
+                    continue
+                
+                win_pct = round(main["wins"] / main["count"] * 100, 1) if main["count"] > 0 else 0
+                
+                treemap_labels.append(main["OpeningMain"])
+                treemap_parents.append("Black Openings")
+                treemap_values.append(main["count"])
+                
+                # Color based on win rate
+                if win_pct < 33:
+                    color = f"rgba(255, {int(255 * win_pct / 33)}, 0, 0.8)"
+                elif win_pct < 67:
+                    color = f"rgba({int(255 * (2 - win_pct/33))}, 255, 0, 0.8)"
+                else:
+                    color = f"rgba(0, 255, {int(255 * (win_pct - 67) / 33)}, 0.8)"
+                
+                treemap_colors.append(color)
+                treemap_text.append(f"Games: {main['count']}<br>Win: {main['wins']} ({win_pct}%)<br>Loss: {main['losses']}<br>Draw: {main['draws']}")
+            
+            # Create and display the black pieces treemap
+            fig = go.Figure(go.Treemap(
+                labels=treemap_labels,
+                parents=treemap_parents,
+                values=treemap_values,
+                branchvalues="total",
+                marker=dict(
+                    colors=treemap_colors,
+                    line=dict(width=0.5, color="rgba(100, 100, 100, 0.8)")
+                ),
+                text=treemap_text,
+                hovertemplate='<b>%{label}</b><br>%{text}<br>',
+                textinfo="label+value",
+                maxdepth=2
+            ))
+            
+            fig.update_layout(
+                title="Black Pieces Opening Repertoire",
+                width=900,
+                height=700,
+                margin=dict(t=30, l=0, r=0, b=0)
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("No games found where you played Black.")
 
 def create_single_treemap(opening_df, side_filter):
     """Create a single treemap visualization for the given data and side filter"""
