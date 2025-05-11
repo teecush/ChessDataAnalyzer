@@ -76,14 +76,45 @@ def create_opening_tree_visualization(df):
         # Create a Sankey diagram showing opening flow
         create_sankey_diagram(opening_df, side_filter)
     
-    # Show opening stats table with win rates
-    with st.expander("Opening Statistics Table", expanded=False):
-        # Create a more detailed table with all stats
-        create_opening_stats_table(opening_stats_main, opening_stats_full)
+    # Show opening stats table with win rates directly (not in nested expander)
+    st.subheader("Opening Statistics Table")
+    # Create a more detailed table with all stats
+    create_opening_stats_table(opening_stats_main, opening_stats_full)
 
 def create_sunburst_chart(opening_df, side_filter):
-    """Create a sunburst chart showing opening hierarchy and performance"""
-    st.subheader(f"Opening Sunburst Chart ({side_filter})")
+    """Create sunburst charts showing opening hierarchy and performance for both White and Black"""
+    
+    # If we're filtering by a single side, show only one sunburst
+    if side_filter in ["White Pieces", "Black Pieces"]:
+        create_single_sunburst(opening_df, side_filter)
+        return
+    
+    # Otherwise, split into two charts - White and Black
+    st.subheader("Opening Sunburst Charts (By Color)")
+    
+    # Create two columns
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.write("### White Pieces")
+        white_df = opening_df[opening_df['Side'].str.lower().isin(['w', 'white'])]
+        if len(white_df) > 0:
+            create_single_sunburst(white_df, "White Pieces", show_title=False)
+        else:
+            st.info("No games found playing White.")
+    
+    with col2:
+        st.write("### Black Pieces")
+        black_df = opening_df[opening_df['Side'].str.lower().isin(['b', 'black'])]
+        if len(black_df) > 0:
+            create_single_sunburst(black_df, "Black Pieces", show_title=False)
+        else:
+            st.info("No games found playing Black.")
+            
+def create_single_sunburst(opening_df, side_filter, show_title=True):
+    """Create a single sunburst chart showing opening hierarchy and performance"""
+    if show_title:
+        st.subheader(f"Opening Sunburst Chart ({side_filter})")
     
     # Prepare data for the sunburst chart
     # We need: labels (all hierarchy levels), parents (parent of each node), and values (size)
@@ -351,8 +382,22 @@ def create_treemap_visualization(opening_df, side_filter):
     """, unsafe_allow_html=True)
 
 def create_sankey_diagram(opening_df, side_filter):
-    """Create a Sankey diagram showing flow from main openings to results"""
-    st.subheader(f"Opening Flow Diagram ({side_filter})")
+    """Create Sankey diagrams showing flow from main openings to results"""
+    st.subheader(f"Opening Flow Diagrams ({side_filter})")
+    
+    # Create tabs for the two different flow diagrams
+    basic_tab, detailed_tab = st.tabs(["Basic Flow", "Detailed Flow with Variations"])
+    
+    with basic_tab:
+        st.write("### Basic Side → Opening → Result Flow")
+        create_basic_sankey(opening_df, side_filter)
+        
+    with detailed_tab:
+        st.write("### Detailed Flow with Opening Variations")
+        create_detailed_sankey(opening_df, side_filter)
+        
+def create_basic_sankey(opening_df, side_filter):
+    """Create a basic Sankey diagram showing flow from side to main openings to results"""
     
     # Create a flow from: Side (White/Black) → Main Opening → Result
     sides = sorted(opening_df["Side"].unique())
@@ -493,6 +538,208 @@ def create_sankey_diagram(opening_df, side_filter):
     st.markdown("""
     This diagram shows how your games flow from playing White or Black, through different opening types, 
     to your game results (win/loss/draw). Thicker lines indicate more games played.
+    
+    **Note:** If there's a flow that doesn't show as white or black, it's because the side information
+    is missing or in a non-standard format in the original data.
+    """)
+    
+def create_detailed_sankey(opening_df, side_filter):
+    """Create a detailed Sankey diagram showing flow through variations and to results"""
+    
+    # Create a flow: Side → Main Opening → Full Opening → Result
+    sides = sorted(opening_df["Side"].unique())
+    
+    # Filter main openings (exclude unknown/empty)
+    main_openings = sorted([m for m in opening_df["OpeningMain"].unique() 
+                          if m not in ["Unknown", "", None] and not pd.isna(m)])
+    
+    # Get full openings that aren't the same as their main opening
+    full_openings = []
+    for _, row in opening_df.iterrows():
+        main = row["OpeningMain"]
+        full = row["OpeningFull"]
+        if (full != main and 
+            full not in ["Unknown", "", None] and not pd.isna(full) and
+            full not in full_openings):
+            full_openings.append(full)
+    full_openings.sort()
+    
+    # Results
+    results = ["win", "loss", "draw"]
+    
+    # Prepare Sankey data
+    # All node labels
+    labels = sides + main_openings + full_openings + results
+    
+    # For tracking nodes and connections
+    sources = []
+    targets = []
+    values = []
+    link_colors = []
+    
+    # 1. Side to Main Opening links
+    side_to_main_idx = {}  # Track indices for faster lookup
+    for i, side in enumerate(sides):
+        for j, main in enumerate(main_openings):
+            # Calculate actual index in the diagram
+            main_idx = len(sides) + j
+            
+            # Check if this combination exists
+            games = len(opening_df[(opening_df["Side"] == side) & 
+                                 (opening_df["OpeningMain"] == main)])
+            if games > 0:
+                sources.append(i)
+                targets.append(main_idx)
+                values.append(games)
+                
+                # Store this connection for lookup
+                if side not in side_to_main_idx:
+                    side_to_main_idx[side] = {}
+                side_to_main_idx[side][main] = len(sources) - 1
+                
+                # Color based on side
+                if side.lower() in ["white", "w"]:
+                    link_colors.append("rgba(173, 216, 230, 0.4)")  # Light blue for White
+                else:
+                    link_colors.append("rgba(128, 128, 128, 0.4)")  # Gray for Black
+    
+    # 2. Main Opening to Full Opening links
+    main_to_full_idx = {}  # Track indices
+    for i, main in enumerate(main_openings):
+        main_idx = len(sides) + i
+        
+        for j, full in enumerate(full_openings):
+            full_idx = len(sides) + len(main_openings) + j
+            
+            # Check if this combination exists
+            games = len(opening_df[(opening_df["OpeningMain"] == main) & 
+                                 (opening_df["OpeningFull"] == full)])
+            if games > 0:
+                sources.append(main_idx)
+                targets.append(full_idx)
+                values.append(games)
+                
+                # Store this connection
+                if main not in main_to_full_idx:
+                    main_to_full_idx[main] = {}
+                main_to_full_idx[main][full] = len(sources) - 1
+                
+                # Use a neutral color with some transparency
+                link_colors.append("rgba(150, 150, 150, 0.3)")
+    
+    # 3. Main Opening directly to Result links (for openings without variations)
+    for i, main in enumerate(main_openings):
+        main_idx = len(sides) + i
+        
+        # Get all games with this main opening
+        main_games = opening_df[opening_df["OpeningMain"] == main]
+        
+        # Count games that go directly to results (not through variations)
+        direct_games = main_games[main_games["OpeningMain"] == main_games["OpeningFull"]]
+        
+        for j, result in enumerate(results):
+            result_idx = len(sides) + len(main_openings) + len(full_openings) + j
+            
+            # Count games with this result
+            games = len(direct_games[direct_games["Result"] == result])
+            if games > 0:
+                sources.append(main_idx)
+                targets.append(result_idx)
+                values.append(games)
+                
+                # Color based on result
+                if result == "win":
+                    link_colors.append("rgba(0, 255, 0, 0.4)")      # Green for wins
+                elif result == "loss":
+                    link_colors.append("rgba(255, 0, 0, 0.4)")      # Red for losses
+                else:
+                    link_colors.append("rgba(0, 0, 255, 0.4)")      # Blue for draws
+    
+    # 4. Full Opening to Result links
+    for i, full in enumerate(full_openings):
+        full_idx = len(sides) + len(main_openings) + i
+        
+        for j, result in enumerate(results):
+            result_idx = len(sides) + len(main_openings) + len(full_openings) + j
+            
+            # Count games with this combination
+            games = len(opening_df[(opening_df["OpeningFull"] == full) & 
+                                 (opening_df["Result"] == result)])
+            if games > 0:
+                sources.append(full_idx)
+                targets.append(result_idx)
+                values.append(games)
+                
+                # Color based on result
+                if result == "win":
+                    link_colors.append("rgba(0, 255, 0, 0.4)")      # Green for wins
+                elif result == "loss":
+                    link_colors.append("rgba(255, 0, 0, 0.4)")      # Red for losses
+                else:
+                    link_colors.append("rgba(0, 0, 255, 0.4)")      # Blue for draws
+    
+    # Node colors
+    node_colors = []
+    
+    # Colors for sides
+    for side in sides:
+        if side.lower() in ["white", "w"]:
+            node_colors.append("rgba(173, 216, 230, 1)")  # Light blue for White
+        elif side.lower() in ["black", "b"]:
+            node_colors.append("rgba(128, 128, 128, 1)")  # Gray for Black
+        else:
+            node_colors.append("rgba(200, 150, 100, 1)")  # Tan for unknown/other
+    
+    # Colors for main openings (light purple)
+    for _ in main_openings:
+        node_colors.append("rgba(180, 180, 220, 1)")
+    
+    # Colors for full openings (light green)
+    for _ in full_openings:
+        node_colors.append("rgba(180, 220, 180, 1)")
+    
+    # Colors for results
+    node_colors.append("rgba(0, 200, 0, 1)")    # Green for win
+    node_colors.append("rgba(200, 0, 0, 1)")    # Red for loss
+    node_colors.append("rgba(0, 0, 200, 1)")    # Blue for draw
+    
+    # Create the Sankey diagram
+    fig = go.Figure(go.Sankey(
+        node=dict(
+            pad=15,
+            thickness=20,
+            line=dict(color="black", width=0.5),
+            label=labels,
+            color=node_colors
+        ),
+        link=dict(
+            source=sources,
+            target=targets,
+            value=values,
+            color=link_colors
+        )
+    ))
+    
+    fig.update_layout(
+        title="Detailed Opening Flow with Variations",
+        font=dict(size=10),  # Smaller font for more detailed diagram
+        height=1000,  # Taller for more detailed diagram
+        width=1000
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Add a detailed description
+    st.markdown("""
+    This more detailed diagram shows the complete flow of your games:
+    
+    **Side (White/Black)** → **Main Opening Type** → **Specific Opening Variation** → **Result (Win/Loss/Draw)**
+    
+    Thicker lines indicate more games played along that path. Some games go directly from main opening to result
+    when they don't have specific variations identified.
+    
+    **Note:** If there's a flow that doesn't show as white or black, it's because the side information
+    is missing or in a non-standard format in the original data.
     """)
 
 def create_opening_stats_table(main_stats, full_stats):
