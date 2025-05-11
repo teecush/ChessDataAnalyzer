@@ -469,6 +469,13 @@ def create_treemap_visualization(opening_df, side_filter):
                 textinfo="label+value",
                 maxdepth=3,  # Allow deeper zoom levels
                 root_color="rgba(255, 255, 255, 0.9)",  # Consistent root color
+                # Make main opening titles bold with larger font
+                textfont=dict(
+                    family=["Arial Bold, sans-serif" if parent == "White Openings" and label != "White Openings" 
+                            else "Arial, sans-serif" for label, parent in zip(treemap_labels, treemap_parents)],
+                    size=[14 if parent == "White Openings" and label != "White Openings" 
+                          else 11 for label, parent in zip(treemap_labels, treemap_parents)]
+                ),
                 # Start with only one level visible (hide variations until clicked)
                 visible=True,
                 level=1  # Only show the first level initially
@@ -600,6 +607,13 @@ def create_treemap_visualization(opening_df, side_filter):
                 textinfo="label+value",
                 maxdepth=3,  # Allow deeper zoom levels
                 root_color="rgba(128, 128, 128, 0.9)",  # Consistent root color for Black
+                # Make main opening titles bold with larger font
+                textfont=dict(
+                    family=["Arial Bold, sans-serif" if parent == "Black Openings" and label != "Black Openings" 
+                            else "Arial, sans-serif" for label, parent in zip(treemap_labels, treemap_parents)],
+                    size=[14 if parent == "Black Openings" and label != "Black Openings" 
+                          else 11 for label, parent in zip(treemap_labels, treemap_parents)]
+                ),
                 # Start with only one level visible (hide variations until clicked)
                 visible=True,
                 level=1  # Only show the first level initially
