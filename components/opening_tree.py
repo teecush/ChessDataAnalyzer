@@ -185,7 +185,7 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
             color = "#389ae4"  # Blue
             
         colors.append(color)
-        hover_texts.append(f"Games: {row['count']}<br>Wins: {row['wins']}<br>Draws: {row['draws']}<br>Losses: {row['losses']}<br>Score: {win_pct:.1f}% (draws count as ½ point)")
+        hover_texts.append(f"Games: {row['count']}<br>Wins: {row['wins']}<br>Draws: {row['draws']}<br>Losses: {row['losses']}")
     
     # Add variations for each main opening
     # Get unique full openings that aren't the same as main openings
@@ -248,7 +248,7 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
             color = "#389ae4"  # Blue
             
         colors.append(color)
-        hover_texts.append(f"Games: {row['count']}<br>Wins: {row['wins']}<br>Draws: {row['draws']}<br>Losses: {row['losses']}<br>Score: {win_pct:.1f}% (draws count as ½ point)")
+        hover_texts.append(f"Games: {row['count']}<br>Wins: {row['wins']}<br>Draws: {row['draws']}<br>Losses: {row['losses']}")
     
     # Create simple sunburst visualization
     fig = go.Figure(go.Sunburst(
@@ -455,7 +455,7 @@ def create_single_treemap(opening_df, side_filter):
             color = "#389ae4"  # Blue
             
         colors.append(color)
-        hover_texts.append(f"Games: {row['count']}<br>Wins: {row['wins']}<br>Draws: {row['draws']}<br>Losses: {row['losses']}<br>Score: {win_pct:.1f}% (draws count as ½ point)")
+        hover_texts.append(f"Games: {row['count']}<br>Wins: {row['wins']}<br>Draws: {row['draws']}<br>Losses: {row['losses']}")
     
     # Add variations for each main opening
     # Get unique full openings that aren't the same as main openings
@@ -517,7 +517,7 @@ def create_single_treemap(opening_df, side_filter):
             color = "#389ae4"  # Blue
             
         colors.append(color)
-        hover_texts.append(f"Games: {row['count']}<br>Wins: {row['wins']}<br>Draws: {row['draws']}<br>Losses: {row['losses']}<br>Score: {win_pct:.1f}% (draws count as ½ point)")
+        hover_texts.append(f"Games: {row['count']}<br>Wins: {row['wins']}<br>Draws: {row['draws']}<br>Losses: {row['losses']}")
     
     # Create simple treemap visualization
     fig = go.Figure(go.Treemap(
