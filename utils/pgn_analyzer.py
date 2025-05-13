@@ -80,8 +80,18 @@ def extract_opening_info(pgn_text):
     
     # Only process if we have a real opening name
     if opening_full != "Unknown":
+        # Special case for "Queen's Pawn Game" - ensure it stays together
+        if "Queen's Pawn Game" in opening_full:
+            opening_main = "Queen's Pawn Game"
+            if opening_full != "Queen's Pawn Game" and len(opening_full) > len(opening_main):
+                # Extract any subtype/variation after removing the main opening name
+                remaining = opening_full.replace(opening_main, "", 1).strip()
+                if remaining.startswith(":"):
+                    remaining = remaining[1:].strip()
+                if remaining:
+                    opening_sub = remaining
         # Check for special patterns with colons or commas
-        if ":" in opening_full:
+        elif ":" in opening_full:
             # Format: "Main Opening: Subtype"
             main_part, sub_part = opening_full.split(":", 1)
             opening_main = main_part.strip()
