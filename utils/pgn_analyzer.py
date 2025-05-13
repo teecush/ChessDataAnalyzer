@@ -339,8 +339,8 @@ def get_opening_performance(df):
         black=('Side', lambda x: (x.str.lower() == 'black').sum())   # Case-insensitive comparison
     ).reset_index()
     
-    # Calculate win percentage
-    opening_stats_main['win_pct'] = round(opening_stats_main['wins'] / opening_stats_main['total'] * 100, 1)
+    # Calculate win percentage (counting draws as 0.5 wins)
+    opening_stats_main['win_pct'] = round((opening_stats_main['wins'] + 0.5 * opening_stats_main['draws']) / opening_stats_main['total'] * 100, 1)
     
     # Sort by most played
     opening_stats_main = opening_stats_main.sort_values('total', ascending=False)
@@ -355,8 +355,8 @@ def get_opening_performance(df):
         black=('Side', lambda x: (x.str.lower() == 'black').sum())   # Case-insensitive comparison
     ).reset_index()
     
-    # Calculate win percentage
-    opening_stats_full['win_pct'] = round(opening_stats_full['wins'] / opening_stats_full['total'] * 100, 1)
+    # Calculate win percentage (counting draws as 0.5 wins)
+    opening_stats_full['win_pct'] = round((opening_stats_full['wins'] + 0.5 * opening_stats_full['draws']) / opening_stats_full['total'] * 100, 1)
     
     # Sort by most played
     opening_stats_full = opening_stats_full.sort_values('total', ascending=False)
