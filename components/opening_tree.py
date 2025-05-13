@@ -493,8 +493,8 @@ def create_single_treemap(opening_df, side_filter):
         if parent_idx < 0:
             continue  # Skip if parent not found
             
-        # Calculate win percentage
-        win_pct = (row['wins'] / row['count'] * 100) if row['count'] > 0 else 0
+        # Calculate win percentage, counting draws as 0.5 wins
+        win_pct = ((row['wins'] + 0.5 * row['draws']) / row['count'] * 100) if row['count'] > 0 else 0
         win_pct_display = int(round(win_pct, 0))
         
         # Add to treemap
