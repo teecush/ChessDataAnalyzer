@@ -224,7 +224,8 @@ def create_single_sunburst(opening_df, side_filter, show_title=True):
             continue  # Skip if parent not found
             
         # Calculate win percentage
-        win_pct = (row['wins'] / row['count'] * 100) if row['count'] > 0 else 0
+        # Calculate win percentage, counting draws as 0.5 wins
+        win_pct = ((row['wins'] + 0.5 * row['draws']) / row['count'] * 100) if row['count'] > 0 else 0
         win_pct_display = int(round(win_pct, 0))
         
         # Add to sunburst
@@ -673,8 +674,10 @@ def create_sankey_diagram(opening_df, side_filter):
         # Get win rate for this opening
         opening_games = opening_df[opening_df['OpeningMain'] == opening]
         win_count = len(opening_games[opening_games['Result'] == 'win'])
+        draw_count = len(opening_games[opening_games['Result'] == 'draw'])
         total_count = len(opening_games)
-        win_pct = (win_count / total_count * 100) if total_count > 0 else 0
+        # Calculate win percentage, counting draws as 0.5 wins
+        win_pct = ((win_count + 0.5 * draw_count) / total_count * 100) if total_count > 0 else 0
         
         # Determine color based on win rate
         if win_pct <= 20:
