@@ -673,8 +673,8 @@ def create_sankey_diagram(opening_df, side_filter):
             
         # Get win rate for this opening
         opening_games = opening_df[opening_df['OpeningMain'] == opening]
-        win_count = len(opening_games[opening_games['Result'] == 'win'])
-        draw_count = len(opening_games[opening_games['Result'] == 'draw'])
+        win_count = len(opening_games[opening_games['Result'].str.lower() == 'win'])
+        draw_count = len(opening_games[opening_games['Result'].str.lower() == 'draw'])
         total_count = len(opening_games)
         # Calculate win percentage, counting draws as 0.5 wins
         win_pct = ((win_count + 0.5 * draw_count) / total_count * 100) if total_count > 0 else 0

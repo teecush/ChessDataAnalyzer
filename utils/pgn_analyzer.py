@@ -287,7 +287,8 @@ def get_opening_performance(df):
     
     for i, row in df.iterrows():
         pgn = row['PGN']
-        result = row['RESULT'].lower() if not pd.isna(row['RESULT']) else 'unknown'
+        # Handle both 'RESULT' and 'Result' column names for compatibility
+        result = row['Result'].lower() if 'Result' in row and not pd.isna(row['Result']) else 'unknown'
         
         # Fix side format: Convert 'W' to 'White' and 'B' to 'Black' for consistency
         side = row['Side'] if not pd.isna(row['Side']) else 'unknown'
