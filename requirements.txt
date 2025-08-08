@@ -1,0 +1,10 @@
+streamlit>=1.42.2
+pandas>=2.2.3
+plotly>=6.0.0
+requests>=2.32.3
+scikit-learn>=1.6.1
+python-chess>=1.999
+google-api-python-client>=2.162.0
+google-auth>=2.38.0
+trafilatura>=2.0.0
+twilio>=9.4.6
