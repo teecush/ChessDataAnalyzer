@@ -38,5 +38,9 @@ waitForPort = 5000
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 8501
+externalPort = 3000
+
 [agent]
 integrations = ["twilio_send_message==1.0.0", "web_scraper==1.0.0"]

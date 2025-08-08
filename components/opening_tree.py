@@ -867,10 +867,10 @@ def create_opening_stats_table(main_stats, full_stats):
                 return ''
         
         # Sort by total games descending
-        display_main = display_main.sort_values('Games', ascending=False)
+        display_main = display_main.sort_values(by='Games', ascending=False)
         
         # Style the dataframe
-        styled_main = display_main.style.applymap(
+        styled_main = display_main.style.map(
             style_win_rate, 
             subset=['Win %']
         )
@@ -893,10 +893,10 @@ def create_opening_stats_table(main_stats, full_stats):
         display_full.columns = ['Opening', 'Games', 'Wins', 'Losses', 'Draws', 'Win %', 'White', 'Black']
         
         # Sort by total games descending
-        display_full = display_full.sort_values('Games', ascending=False)
+        display_full = display_full.sort_values(by='Games', ascending=False)
         
         # Style the dataframe
-        styled_full = display_full.style.applymap(
+        styled_full = display_full.style.map(
             style_win_rate, 
             subset=['Win %']
         )

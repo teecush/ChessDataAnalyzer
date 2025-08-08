@@ -37,7 +37,7 @@ def get_google_sheets_data():
             header_match = True
             for i in range(min(len(expected_core_headers), len(df.columns))):
                 if i < len(df.columns) and i < len(expected_core_headers):
-                    header_val = str(df.iloc[0][i]).strip().lower()
+                    header_val = str(df.iloc[0].iloc[i]).strip().lower()
                     expected_val = str(expected_core_headers[i]).strip().lower()
                     if header_val != expected_val:
                         header_match = False

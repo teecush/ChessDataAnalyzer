@@ -19,8 +19,49 @@ st.set_page_config(
 )
 
 # Load custom CSS
-with open('assets/chess_style.css') as f:
-    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+try:
+    with open('assets/chess_style.css', 'r') as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+except FileNotFoundError:
+    # Fallback inline CSS for deployment compatibility
+    st.markdown("""
+    <style>
+    .chess-header {
+        text-align: center;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .chess-header h1 {
+        margin: 0;
+        font-size: 2.5em;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .chess-links {
+        text-align: center;
+        margin: 20px 0;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    .chess-links a {
+        color: #007bff;
+        text-decoration: none;
+        margin: 0 10px;
+        font-weight: 500;
+    }
+    .metric-card {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 4px solid #007bff;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 # App header
 st.markdown("""
