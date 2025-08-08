@@ -66,6 +66,9 @@ logs/
 .env.test.local
 .env.production.local
 
+# Local machine state
+.local/
+
 # Replit specific files (optional - you may want to keep these)
 .replit
 replit.nix
