@@ -19,10 +19,6 @@ def get_google_sheets_data():
 
         # Read CSV data with all columns as string type
         df = pd.read_csv(io.StringIO(response.text), dtype=str)
-        
-        # Debug: Show what we received
-        st.write(f"Debug: Received {len(df)} rows and {len(df.columns)} columns")
-        st.write(f"Debug: Column names: {list(df.columns)}")
 
         # Check if the dataframe contains columns we need
         if len(df.columns) >= 13:  # Now checking for 13 columns including PGN
@@ -74,10 +70,8 @@ def get_google_sheets_data():
 
     except requests.exceptions.RequestException as e:
         st.error(f"Error fetching data from Google Sheets: {str(e)}")
-        st.info("Please check if the Google Sheet is published to the web and publicly accessible.")
         return None
     except Exception as e:
         st.error(f"Error processing the chess data: {str(e)}")
         st.write("Error details:", str(e))
-        st.info("This might be due to incorrect column format or missing data.")
         return None

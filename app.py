@@ -84,22 +84,10 @@ st.markdown("""
 # Load and process data
 @st.cache_data(ttl=600)  # Cache data for 10 minutes
 def load_data():
-    try:
-        df = get_google_sheets_data()
-        if df is not None and not df.empty:
-            processed_df = process_chess_data(df)
-            if processed_df is not None and not processed_df.empty:
-                return processed_df
-            else:
-                st.error("Data processing failed - empty dataframe after processing")
-                return None
-        else:
-            st.error("Failed to fetch data from Google Sheets - received empty dataframe")
-            return None
-    except Exception as e:
-        st.error(f"Error loading data: {str(e)}")
-        st.exception(e)
-        return None
+    df = get_google_sheets_data()
+    if df is not None:
+        return process_chess_data(df)
+    return None
 
 # Main app
 def main():
@@ -107,9 +95,8 @@ def main():
     with st.spinner('Fetching chess data...'):
         df = load_data()
 
-    if df is None or df.empty:
+    if df is None:
         st.error("Failed to load chess data. Please check the connection and try again.")
-        st.info("Debug info: Check if the Google Sheet is publicly accessible and has the correct format.")
         return
 
     # Create filters
