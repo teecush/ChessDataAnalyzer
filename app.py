@@ -84,10 +84,14 @@ st.markdown("""
 # Load and process data
 @st.cache_data(ttl=600)  # Cache data for 10 minutes
 def load_data():
-    df = get_google_sheets_data()
-    if df is not None:
-        return process_chess_data(df)
-    return None
+    try:
+        df = get_google_sheets_data()
+        if df is not None and not df.empty:
+            return process_chess_data(df)
+        return None
+    except Exception as e:
+        st.error(f"Error loading data: {str(e)}")
+        return None
 
 # Main app
 def main():
@@ -95,8 +99,17 @@ def main():
     with st.spinner('Fetching chess data...'):
         df = load_data()
 
-    if df is None:
+    if df is None or df.empty:
         st.error("Failed to load chess data. Please check the connection and try again.")
+        st.info("Make sure the Google Sheet is published to the web and publicly accessible.")
+        
+        # Show some basic info even if data fails
+        st.subheader("About This Dashboard")
+        st.write("This dashboard analyzes chess performance data from Google Sheets.")
+        st.write("To fix the connection issue:")
+        st.write("1. Ensure the Google Sheet is published to the web")
+        st.write("2. Check that the sheet has the correct column format")
+        st.write("3. Verify the sheet ID is correct")
         return
 
     # Create filters
